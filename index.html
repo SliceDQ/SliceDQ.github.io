@@ -177,12 +177,13 @@
   }
   
   .hero h1 .accent {
-    background: #1e69ff; 
+    background: var(--accent); 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    transition: background .3s var(--ease);
     filter: 
-      drop-shadow(0 1px 0 #0055ff)
-      drop-shadow(0 2px 0 #0033aa)
+      drop-shadow(0 1px 0 color-mix(in srgb, var(--accent) 70%, white))
+      drop-shadow(0 2px 0 color-mix(in srgb, var(--accent) 60%, black))
       drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
   }
   
@@ -243,7 +244,7 @@
     backdrop-filter: blur(26px);
     box-shadow: var(--shadow-3d);
   }
-  .showcase-tabs{ display:flex; gap:0; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .showcase-tabs{ display:flex; gap:0; border-bottom:1px solid var(--border); overflow-x:auto; overflow-y:hidden; }
   .showcase-tabs button{
     padding:20px 28px 20px 0; margin-right:34px; text-align:left; white-space:nowrap;
     display:flex; flex-direction:column; gap:6px; opacity:.4; transition: all 0.25s;
@@ -510,6 +511,10 @@
   @keyframes floatyBig{ 0%,100%{ transform: translateY(0) rotate(-1deg); } 50%{ transform: translateY(-14px) rotate(1deg); } }
   @keyframes bgPan{ 0%{ transform: scale(1.06) translate(0,0); } 50%{ transform: scale(1.14) translate(-1.5%,-1%); } 100%{ transform: scale(1.06) translate(0,0); } }
   @keyframes pulseDot{ 0%,100%{ box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); } 50%{ box-shadow: 0 0 0 2px var(--bg), 0 0 0 8px var(--accent); } }
+  @keyframes floatyPulse{
+    0%,100%{ transform: translateY(0); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+    50%{ transform: translateY(-6px); box-shadow: 0 0 0 2px var(--bg), 0 0 0 8px var(--accent); }
+  }
   @keyframes idleWiggle{ 0%,88%,100%{ transform: rotate(0deg); } 91%{ transform: rotate(-10deg); } 94%{ transform: rotate(10deg); } 97%{ transform: rotate(-6deg); } }
   @keyframes btnWobble{ 0%{ transform: translateY(0) rotate(0); } 30%{ transform: translateY(-7px) rotate(-3deg); } 60%{ transform: translateY(-9px) rotate(3deg); } 100%{ transform: translateY(-6px) rotate(0); } }
   @keyframes wiggleArrow{ 0%,100%{ transform: translateX(0) rotate(0); } 50%{ transform: translateX(7px) rotate(20deg); } }
@@ -523,11 +528,8 @@
   .hero-eyebrow{ display:inline-block; }
   .hero-eyebrow::before{ content:"● "; display:inline-block; animation: floaty 1.6s ease-in-out infinite; }
 
-  .dot-btn{ animation: floaty 2.4s ease-in-out infinite; }
-  .dot-btn:nth-child(2){ animation-delay:.25s; }
-  .dot-btn:nth-child(3){ animation-delay:.5s; }
   .dot-btn:hover{ transform: scale(1.4) rotate(20deg) !important; }
-  .dot-btn.active{ animation: pulseDot 1.8s ease-in-out infinite; }
+  .dot-btn.active{ animation: floatyPulse 2.4s ease-in-out infinite; }
 
   .burger:not(.is-open){ animation: idleWiggle 5s ease-in-out infinite; }
 
@@ -571,7 +573,7 @@
     <div class="logo">KSTYLE</div>
     <div class="header-actions">
       <div class="color-dots" role="group" aria-label="Выбор акцентного цвета">
-        <button class="dot-btn" data-color="#6495ED" style="background-color: #6495ED;" aria-label="Васильковый"></button>
+        <button class="dot-btn" data-color="#8B5CF6" style="background-color: #8B5CF6;" aria-label="Фиолетовый"></button>
         <button class="dot-btn" data-color="#ff6b2b" style="background-color: #ff6b2b;" aria-label="Оранжевый"></button>
         <button class="dot-btn active" data-color="#1E69FF" style="background-color: #1E69FF;" aria-label="Синий"></button>
       </div>
@@ -930,12 +932,24 @@ function togglePhones(event) {
 
   var html = document.documentElement;
 
+  var ACCENT_KEY = "kstyle-accent-color";
+  var savedAccent = localStorage.getItem(ACCENT_KEY);
+  if (savedAccent) {
+    html.style.setProperty("--accent", savedAccent);
+  }
+
   var dots = document.querySelectorAll(".dot-btn");
   dots.forEach(function(dot) {
+    if (savedAccent && dot.getAttribute("data-color").toLowerCase() === savedAccent.toLowerCase()) {
+      dots.forEach(function(d) { d.classList.remove("active"); });
+      dot.classList.add("active");
+    }
     dot.addEventListener("click", function() {
       dots.forEach(function(d) { d.classList.remove("active"); });
       dot.classList.add("active");
-      html.style.setProperty("--accent", dot.getAttribute("data-color"));
+      var color = dot.getAttribute("data-color");
+      html.style.setProperty("--accent", color);
+      localStorage.setItem(ACCENT_KEY, color);
     });
   });
 

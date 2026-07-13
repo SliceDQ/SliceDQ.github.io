@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KSTYLE — Админка объявлений</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --accent:#1E69FF;
+    --bg:#050507;
+    --card:rgba(255,255,255,0.05);
+    --border:rgba(255,255,255,0.15);
+    --text:#fff;
+    --muted:#8e8e93;
+    --danger:#ff4d4f;
+    --radius:14px;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  html{ overflow-x:hidden; }
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px; overflow-x:hidden;
+  }
+  .wrap{ width:100%; max-width:640px; }
+  h1{ font-size:22px; font-weight:800; margin-bottom:4px; letter-spacing:-.02em; }
+  .sub{ color:var(--muted); font-size:14px; margin-bottom:28px; }
+
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:28px; backdrop-filter:blur(20px);
+  }
+
+  label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  input[type=email], input[type=password], input[type=text], textarea, select{
+    width:100%; min-width:0; background:rgba(255,255,255,0.09); border:1.5px solid rgba(255,255,255,0.3);
+    border-radius:10px; padding:12px 14px; color:var(--text); font-family:inherit;
+    font-size:15px; margin-bottom:16px; outline:none; transition:border-color .2s, background .2s;
+  }
+  input::placeholder, textarea::placeholder{ color:rgba(255,255,255,0.4); }
+  input:focus, textarea:focus, select:focus{ border-color:var(--accent); background:rgba(255,255,255,0.13); }
+  textarea{ min-height:90px; resize:vertical; }
+
+  button{
+    font-family:inherit; cursor:pointer; border:none; border-radius:10px;
+    padding:12px 20px; font-weight:700; font-size:14px; transition:all .2s var(--ease);
+  }
+  .btn-primary{ background:var(--accent); color:#fff; width:100%; }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 25px -5px rgba(30,105,255,0.5); }
+  .btn-danger{ background:rgba(255,77,79,0.15); color:var(--danger); border:1px solid rgba(255,77,79,0.3); }
+  .btn-danger:hover{ background:rgba(255,77,79,0.25); }
+  .btn-ghost{ background:transparent; color:var(--muted); border:1px solid var(--border); }
+  .btn-ghost:hover{ color:var(--text); border-color:var(--accent); }
+
+  .error{ color:var(--danger); font-size:13.5px; margin-top:-8px; margin-bottom:14px; min-height:16px; }
+
+  #adminPanel{ display:none; }
+  .top-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+  .top-row button{ padding:9px 16px; font-size:13px; }
+
+  .tabs{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+  .tabs button{
+    background:rgba(255,255,255,0.04); color:var(--muted); border:1px solid var(--border);
+    font-size:13px; font-weight:600; padding:9px 14px;
+  }
+  .tabs button.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .add-form{
+    background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px;
+    padding:18px; margin-bottom:24px;
+  }
+  .add-form textarea{ min-height:130px; }
+  .photo-input-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .photo-input-row .file-btn{ background:rgba(255,255,255,0.08); color:var(--text); border:1px solid var(--border); }
+  .photo-input-row .file-btn:hover{ border-color:var(--accent); }
+  .photo-hint{ color:var(--muted); font-size:12px; }
+  .photo-previews{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .photo-previews:empty{ margin-bottom:0; }
+  .photo-thumb{ position:relative; width:72px; height:72px; border-radius:8px; overflow:hidden; border:1px solid var(--border); flex-shrink:0; }
+  .photo-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-thumb .rm{
+    position:absolute; top:2px; right:2px; width:20px; height:20px; border-radius:50%;
+    background:rgba(0,0,0,0.7); color:#fff; font-size:12px; line-height:1; display:flex;
+    align-items:center; justify-content:center; padding:0;
+  }
+  .add-form-actions{ display:flex; gap:10px; align-items:center; }
+  .add-form-actions button{ width:auto; }
+  .compress-note{ color:var(--muted); font-size:12px; margin-top:2px; }
+
+  .item{
+    background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px;
+    padding:16px; margin-bottom:12px; display:flex; gap:12px; align-items:flex-start;
+  }
+  .item .body{ flex:1; min-width:0; }
+  .item .title-line{ font-weight:700; font-size:15px; margin-bottom:4px; overflow-wrap:anywhere; word-break:break-word; }
+  .item p{ font-size:14px; line-height:1.5; overflow-wrap:anywhere; word-break:break-word; min-width:0; color:var(--muted); white-space:pre-wrap; }
+  .item .date{ color:var(--muted); font-size:12px; margin-top:6px; display:block; }
+  .item .photo-count{ display:inline-block; margin-top:6px; font-size:12px; color:var(--accent); font-weight:600; }
+  .item .actions{ display:flex; gap:8px; flex-shrink:0; }
+  .item .actions button{ padding:8px 12px; font-size:13px; }
+  .item .body input[type=text], .item .body textarea{ width:100%; }
+
+  .mode-switch{ display:flex; gap:8px; margin-bottom:20px; }
+  .mode-switch button{
+    background:rgba(255,255,255,0.04); color:var(--muted); border:1px solid var(--border);
+    font-size:13px; font-weight:700; padding:9px 16px;
+  }
+  .mode-switch button.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .links-block{
+    background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px;
+    padding:18px; margin-bottom:24px;
+  }
+  .links-block h2{ font-size:15px; font-weight:700; margin-bottom:4px; }
+  .links-block .sub{ margin-bottom:14px; font-size:12.5px; }
+  .link-add-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .link-add-row input{ flex:1 1 160px; margin-bottom:0; }
+  .link-add-row button{ width:auto; align-self:stretch; flex-shrink:0; }
+  .link-item{
+    display:flex; align-items:center; gap:10px; justify-content:space-between;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px;
+    padding:10px 14px; margin-bottom:8px;
+  }
+  .link-item .li-label{ font-weight:700; font-size:14px; }
+  .link-item .li-url{ color:var(--muted); font-size:12.5px; overflow-wrap:anywhere; word-break:break-word; }
+  .link-item .actions{ display:flex; gap:6px; flex-shrink:0; }
+  .link-item .actions button{ padding:6px 10px; font-size:12px; }
+  .link-item input{ margin-bottom:0; }
+
+  #contactsPanel{ display:none; }
+  #homepagePanel{ display:none; }
+  .contacts-form .group{ margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--border); }
+  .contacts-form .group:last-of-type{ border-bottom:none; }
+  .contacts-form .group h3{ font-size:14px; margin-bottom:12px; color:var(--accent); }
+  .save-bar{ display:flex; align-items:center; gap:14px; }
+  .save-bar button{ width:auto; }
+  .save-note{ color:var(--muted); font-size:13px; }
+
+  .empty{ color:var(--muted); font-size:14px; text-align:center; padding:30px 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div id="loginScreen">
+    <h1>KSTYLE — Админка</h1>
+    <div class="sub">Вход для публикации объявлений на сайте</div>
+    <div class="card">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="your@email.com" autocomplete="username">
+      <label for="password">Пароль</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+      <div class="error" id="loginError"></div>
+      <button class="btn-primary" id="loginBtn">Войти</button>
+    </div>
+  </div>
+
+  <div id="adminPanel">
+    <div class="top-row">
+      <div>
+        <h1 id="panelTitle">Объявления</h1>
+        <div class="sub">Изменения сразу видны всем на сайте</div>
+      </div>
+      <button class="btn-ghost" id="logoutBtn">Выйти</button>
+    </div>
+
+    <div class="mode-switch">
+      <button class="active" id="modeAnnouncementsBtn">Объявления и ссылки</button>
+      <button id="modeContactsBtn">Контакты</button>
+      <button id="modeHomepageBtn">Главная страница</button>
+    </div>
+
+    <div id="announcementsPanel">
+      <div class="tabs" id="tabs"></div>
+
+      <div class="add-form">
+        <label for="newTitle">Заголовок (видно в списке на сайте)</label>
+        <input type="text" id="newTitle" placeholder="Например: Новая группа хип-хопа" maxlength="120">
+        <label for="newText">Полный текст (без ограничения символов, откроется на полном экране)</label>
+        <textarea id="newText" placeholder="Подробный текст объявления..."></textarea>
+        <label>Фотографии</label>
+        <div class="photo-input-row">
+          <input type="file" id="newPhotos" accept="image/*" multiple style="display:none;">
+          <button type="button" class="file-btn" id="newPhotosBtn">Добавить фото</button>
+          <span class="photo-hint">Фото автоматически сжимаются, чтобы всё бесплатно хранилось в базе</span>
+        </div>
+        <div class="photo-previews" id="newPhotoPreviews"></div>
+        <label for="newLinkLabel">Кнопка-ссылка внутри поста (необязательно, видео/отзыв/и т.д.)</label>
+        <div class="link-add-row">
+          <input type="text" id="newLinkLabel" placeholder="Надпись, например: Видео с занятия" maxlength="60">
+          <input type="text" id="newLinkUrl" placeholder="https://...">
+        </div>
+        <div class="add-form-actions">
+          <button class="btn-primary" id="addBtn">Опубликовать</button>
+        </div>
+        <div class="error" id="addError"></div>
+      </div>
+
+      <div id="list"></div>
+    </div>
+
+    <div id="contactsPanel">
+      <div class="contacts-form">
+        <div class="group">
+          <h3>Чат (первая иконка контактов)</h3>
+          <label for="cChatLabel">Название</label>
+          <input type="text" id="cChatLabel" placeholder="Макс">
+          <label for="cChatDesc">Подпись</label>
+          <input type="text" id="cChatDesc" placeholder="Corporate Chat">
+          <label for="cChatUrl">Ссылка</label>
+          <input type="text" id="cChatUrl" placeholder="https://...">
+        </div>
+        <div class="group">
+          <h3>WhatsApp</h3>
+          <label for="cWhatsapp">Ссылка (https://wa.me/79250452166)</label>
+          <input type="text" id="cWhatsapp" placeholder="https://wa.me/79250452166">
+        </div>
+        <div class="group">
+          <h3>Telegram</h3>
+          <label for="cTelegram">Ссылка</label>
+          <input type="text" id="cTelegram" placeholder="https://t.me/your_studio">
+        </div>
+        <div class="group">
+          <h3>ВКонтакте</h3>
+          <label for="cVk">Ссылка</label>
+          <input type="text" id="cVk" placeholder="https://vk.com/your_studio">
+        </div>
+        <div class="group">
+          <h3>Телефоны</h3>
+          <label for="cPhone1">Телефон 1</label>
+          <input type="text" id="cPhone1" placeholder="+7 (925) 045-21-66">
+          <label for="cPhone2">Телефон 2 (можно оставить пустым)</label>
+          <input type="text" id="cPhone2" placeholder="+7 (916) 903-55-30">
+        </div>
+        <div class="save-bar">
+          <button class="btn-primary" id="saveContactsBtn">Сохранить контакты</button>
+          <span class="save-note" id="contactsSaveNote"></span>
+        </div>
+        <div class="error" id="contactsError"></div>
+      </div>
+    </div>
+
+    <div id="homepagePanel">
+      <div class="contacts-form">
+        <div class="group">
+          <h3>Верхняя надпись и заголовок</h3>
+          <label for="hEyebrow">Надпись над заголовком</label>
+          <input type="text" id="hEyebrow" placeholder="Школа танца · открыты новые группы">
+          <label for="hTitleLine1">Заголовок, строка 1</label>
+          <input type="text" id="hTitleLine1" placeholder="Танцуй">
+          <label for="hTitleLine2">Заголовок, строка 2 (обычный цвет)</label>
+          <input type="text" id="hTitleLine2" placeholder="без">
+          <label for="hTitleAccent">Заголовок, строка 2 (синее слово)</label>
+          <input type="text" id="hTitleAccent" placeholder="границ">
+          <label for="hLead">Текст под заголовком</label>
+          <textarea id="hLead" placeholder="KSTYLE — студия для тех..."></textarea>
+        </div>
+        <div class="group">
+          <h3>Кнопки на главной</h3>
+          <label for="hSignupBtn">Кнопка «Записаться» (синяя, первая)</label>
+          <input type="text" id="hSignupBtn" placeholder="Записаться">
+          <label for="hBtn1">Вторая кнопка</label>
+          <input type="text" id="hBtn1" placeholder="Смотреть расписание">
+          <label for="hBtn2">Третья кнопка</label>
+          <input type="text" id="hBtn2" placeholder="Все направления">
+        </div>
+        <div class="group">
+          <h3>Цифры-статистика (4 плашки)</h3>
+          <label for="hStat1n">Цифра 1</label>
+          <input type="text" id="hStat1n" placeholder="2019">
+          <label for="hStat1cap">Подпись 1</label>
+          <input type="text" id="hStat1cap" placeholder="Работаем с">
+          <label for="hStat2n">Цифра 2</label>
+          <input type="text" id="hStat2n" placeholder="6">
+          <label for="hStat2cap">Подпись 2</label>
+          <input type="text" id="hStat2cap" placeholder="Направлений">
+          <label for="hStat3n">Цифра 3</label>
+          <input type="text" id="hStat3n" placeholder="12">
+          <label for="hStat3cap">Подпись 3</label>
+          <input type="text" id="hStat3cap" placeholder="Педагогов">
+          <label for="hStat4n">Цифра 4</label>
+          <input type="text" id="hStat4n" placeholder="150+">
+          <label for="hStat4cap">Подпись 4</label>
+          <input type="text" id="hStat4cap" placeholder="Учеников">
+        </div>
+        <div class="group">
+          <h3>Блок с вкладками (01 Направления / 02 Педагоги / 03 Расписание)</h3>
+          <label for="hShow1Title">Вкладка «Направления» — заголовок</label>
+          <input type="text" id="hShow1Title" placeholder="Выбирайте свой стиль">
+          <label for="hShow1Text">Вкладка «Направления» — текст</label>
+          <textarea id="hShow1Text" placeholder="Хип-хоп, k-pop, вог, хилсы — можно пробовать разные направления."></textarea>
+          <label for="hShow1Cta">Вкладка «Направления» — кнопка</label>
+          <input type="text" id="hShow1Cta" placeholder="Смотреть направления">
+
+          <label for="hShow2Title">Вкладка «Педагоги» — заголовок</label>
+          <input type="text" id="hShow2Title" placeholder="Учат те, кто сам выступает">
+          <label for="hShow2Text">Вкладка «Педагоги» — текст</label>
+          <textarea id="hShow2Text" placeholder="Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки."></textarea>
+          <label for="hShow2Cta">Вкладка «Педагоги» — кнопка</label>
+          <input type="text" id="hShow2Cta" placeholder="Познакомиться">
+
+          <label for="hShow3Title">Вкладка «Расписание» — заголовок</label>
+          <input type="text" id="hShow3Title" placeholder="Занятия под ваш ритм">
+          <label for="hShow3Text">Вкладка «Расписание» — текст</label>
+          <textarea id="hShow3Text" placeholder="Утренние и вечерние группы всю неделю. Найдите своё время."></textarea>
+          <label for="hShow3Cta">Вкладка «Расписание» — кнопка</label>
+          <input type="text" id="hShow3Cta" placeholder="Открыть расписание">
+        </div>
+        <div class="group">
+          <h3>Блок «Почему выбирают KSTYLE»</h3>
+          <label for="hFeaturesTitle">Заголовок блока</label>
+          <input type="text" id="hFeaturesTitle" placeholder="Почему выбирают KSTYLE">
+          <label for="hFeature1Title">Карточка 1 — заголовок</label>
+          <input type="text" id="hFeature1Title" placeholder="Педагоги-практики">
+          <label for="hFeature1Text">Карточка 1 — текст</label>
+          <textarea id="hFeature1Text" placeholder="Преподают те, кто сам выступает..."></textarea>
+          <label for="hFeature2Title">Карточка 2 — заголовок</label>
+          <input type="text" id="hFeature2Title" placeholder="Группы для любого уровня">
+          <label for="hFeature2Text">Карточка 2 — текст</label>
+          <textarea id="hFeature2Text" placeholder="От первого занятия до подготовки..."></textarea>
+          <label for="hFeature3Title">Карточка 3 — заголовок</label>
+          <input type="text" id="hFeature3Title" placeholder="Зал в аренду">
+          <label for="hFeature3Text">Карточка 3 — текст</label>
+          <textarea id="hFeature3Text" placeholder="Свободные слоты можно забронировать..."></textarea>
+        </div>
+        <div class="group">
+          <h3>Блок «Всё о студии — в одном месте»</h3>
+          <label for="hCatStripTitle">Заголовок блока</label>
+          <input type="text" id="hCatStripTitle" placeholder="Всё о студии — в одном месте">
+          <label for="hCatStripText">Текст блока</label>
+          <textarea id="hCatStripText" placeholder="Направления, педагоги, расписание..."></textarea>
+        </div>
+        <div class="group">
+          <h3>Блок контактов</h3>
+          <label for="hContactsTitle">Заголовок блока</label>
+          <input type="text" id="hContactsTitle" placeholder="Связаться с нами">
+        </div>
+        <div class="save-bar">
+          <button class="btn-primary" id="saveHomepageBtn">Сохранить главную</button>
+          <span class="save-note" id="homepageSaveNote"></span>
+        </div>
+        <div class="error" id="homepageError"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var db = firebase.firestore();
+
+  var CATEGORIES = [
+    { key:"news",       label:"Новости" },
+    { key:"directions", label:"Направления" },
+    { key:"teachers",   label:"Педагоги" },
+    { key:"schedule",   label:"Расписание" },
+    { key:"reviews",    label:"Отзывы" },
+    { key:"prices",     label:"Цены" },
+    { key:"discounts",  label:"Скидки" },
+    { key:"rental",     label:"Аренда зала" }
+  ];
+
+  var activeCat = CATEGORIES[0].key;
+  var unsubscribe = null;
+
+  var loginScreen = document.getElementById("loginScreen");
+  var adminPanel = document.getElementById("adminPanel");
+  var loginError = document.getElementById("loginError");
+  var tabsEl = document.getElementById("tabs");
+  var listEl = document.getElementById("list");
+  var newTitleEl = document.getElementById("newTitle");
+  var newTextEl = document.getElementById("newText");
+  var newPhotosInput = document.getElementById("newPhotos");
+  var newPhotosBtn = document.getElementById("newPhotosBtn");
+  var newPhotoPreviews = document.getElementById("newPhotoPreviews");
+
+  var announcementsPanel = document.getElementById("announcementsPanel");
+  var contactsPanel = document.getElementById("contactsPanel");
+  var homepagePanel = document.getElementById("homepagePanel");
+  var modeAnnouncementsBtn = document.getElementById("modeAnnouncementsBtn");
+  var modeContactsBtn = document.getElementById("modeContactsBtn");
+  var modeHomepageBtn = document.getElementById("modeHomepageBtn");
+  var panelTitle = document.getElementById("panelTitle");
+
+  function showPanel(which){
+    announcementsPanel.style.display = which === "announcements" ? "block" : "none";
+    contactsPanel.style.display = which === "contacts" ? "block" : "none";
+    homepagePanel.style.display = which === "homepage" ? "block" : "none";
+    modeAnnouncementsBtn.classList.toggle("active", which === "announcements");
+    modeContactsBtn.classList.toggle("active", which === "contacts");
+    modeHomepageBtn.classList.toggle("active", which === "homepage");
+  }
+  modeAnnouncementsBtn.addEventListener("click", function(){
+    showPanel("announcements");
+    panelTitle.textContent = "Объявления";
+  });
+  modeContactsBtn.addEventListener("click", function(){
+    showPanel("contacts");
+    panelTitle.textContent = "Контакты";
+    loadContacts();
+  });
+  modeHomepageBtn.addEventListener("click", function(){
+    showPanel("homepage");
+    panelTitle.textContent = "Главная страница";
+    loadHomepageText();
+  });
+
+  var MAX_PHOTOS = 6;
+  var MAX_DIM = 900;        // макс. сторона фото в пикселях после сжатия
+  var JPEG_QUALITY = 0.7;
+
+  var newPhotos = []; // массив base64-строк для формы добавления
+
+  // --- Сжатие фото в base64 через canvas, чтобы уместиться в лимит Firestore (1 МБ на документ) ---
+  function compressImage(file){
+    return new Promise(function(resolve, reject){
+      var img = new Image();
+      var reader = new FileReader();
+      reader.onload = function(e){
+        img.onload = function(){
+          var w = img.width, h = img.height;
+          if(w > h && w > MAX_DIM){ h = Math.round(h * (MAX_DIM / w)); w = MAX_DIM; }
+          else if(h > MAX_DIM){ w = Math.round(w * (MAX_DIM / h)); h = MAX_DIM; }
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderPhotoPreviews(containerEl, photosArr, onRemove){
+    containerEl.innerHTML = "";
+    photosArr.forEach(function(src, idx){
+      var thumb = document.createElement("div");
+      thumb.className = "photo-thumb";
+      var img = document.createElement("img");
+      img.src = src;
+      var rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "rm";
+      rm.textContent = "×";
+      rm.addEventListener("click", function(){ onRemove(idx); });
+      thumb.appendChild(img);
+      thumb.appendChild(rm);
+      containerEl.appendChild(thumb);
+    });
+  }
+
+  newPhotosBtn.addEventListener("click", function(){ newPhotosInput.click(); });
+  newPhotosInput.addEventListener("change", function(){
+    var addError = document.getElementById("addError");
+    var files = Array.prototype.slice.call(newPhotosInput.files || []);
+    newPhotosInput.value = "";
+    if(files.length === 0) return;
+    if(newPhotos.length + files.length > MAX_PHOTOS){
+      addError.textContent = "Максимум " + MAX_PHOTOS + " фото на одно объявление.";
+      return;
+    }
+    Promise.all(files.map(compressImage)).then(function(results){
+      newPhotos = newPhotos.concat(results);
+      renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
+    }).catch(function(e){
+      addError.textContent = "Не удалось обработать одно из фото.";
+      console.error(e);
+    });
+  });
+
+  function removeNewPhoto(idx){
+    newPhotos.splice(idx, 1);
+    renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
+  }
+
+  document.getElementById("loginBtn").addEventListener("click", function(){
+    var email = document.getElementById("email").value.trim();
+    var pass = document.getElementById("password").value;
+    loginError.textContent = "";
+    if(!email || !pass){ loginError.textContent = "Заполните email и пароль."; return; }
+    auth.signInWithEmailAndPassword(email, pass).catch(function(err){
+      loginError.textContent = "Не удалось войти: проверьте email и пароль.";
+      console.error(err);
+    });
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", function(){
+    auth.signOut();
+  });
+
+  auth.onAuthStateChanged(function(user){
+    if(user){
+      loginScreen.style.display = "none";
+      adminPanel.style.display = "block";
+      renderTabs();
+      watchCategory(activeCat);
+    } else {
+      loginScreen.style.display = "block";
+      adminPanel.style.display = "none";
+      if(unsubscribe){ unsubscribe(); unsubscribe = null; }
+    }
+  });
+
+  function renderTabs(){
+    tabsEl.innerHTML = "";
+    CATEGORIES.forEach(function(c){
+      var b = document.createElement("button");
+      b.textContent = c.label;
+      b.className = c.key === activeCat ? "active" : "";
+      b.addEventListener("click", function(){
+        activeCat = c.key;
+        renderTabs();
+        watchCategory(activeCat);
+      });
+      tabsEl.appendChild(b);
+    });
+  }
+
+  function watchCategory(catKey){
+    if(unsubscribe){ unsubscribe(); }
+    listEl.innerHTML = "<div class='empty'>Загрузка...</div>";
+    unsubscribe = db.collection("announcements")
+      .where("category", "==", catKey)
+      .onSnapshot(function(snap){
+        var docs = snap.docs.slice().sort(function(a, b){
+          var ta = (a.data().createdAt && a.data().createdAt.toMillis) ? a.data().createdAt.toMillis() : 0;
+          var tb = (b.data().createdAt && b.data().createdAt.toMillis) ? b.data().createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        renderList(docs);
+      }, function(err){
+        console.error(err);
+        listEl.innerHTML = "<div class='empty'>Ошибка загрузки. Проверьте настройки Firebase.</div>";
+      });
+  }
+
+  // ============ 🔗 ССЫЛКА ВНУТРИ ПОСТА ============
+  var newLinkLabelEl = document.getElementById("newLinkLabel");
+  var newLinkUrlEl = document.getElementById("newLinkUrl");
+
+  function normalizeUrl(url){
+    url = url.trim();
+    if(!url) return url;
+    if(!/^https?:\/\//i.test(url)){ url = "https://" + url; }
+    return url;
+  }
+
+  // ============ ☎️ КОНТАКТЫ ============
+  var contactsLoaded = false;
+  function loadContacts(){
+    if(contactsLoaded) return;
+    contactsLoaded = true;
+    db.collection("settings").doc("contacts").get().then(function(doc){
+      var data = doc.exists ? doc.data() : {};
+      document.getElementById("cChatLabel").value = data.chatLabel || "";
+      document.getElementById("cChatDesc").value = data.chatDesc || "";
+      document.getElementById("cChatUrl").value = data.chatUrl || "";
+      document.getElementById("cWhatsapp").value = data.whatsapp || "";
+      document.getElementById("cTelegram").value = data.telegram || "";
+      document.getElementById("cVk").value = data.vk || "";
+      document.getElementById("cPhone1").value = data.phone1 || "";
+      document.getElementById("cPhone2").value = data.phone2 || "";
+    }).catch(function(e){
+      document.getElementById("contactsError").textContent = "Не удалось загрузить контакты.";
+      console.error(e);
+    });
+  }
+
+  document.getElementById("saveContactsBtn").addEventListener("click", function(){
+    var errEl = document.getElementById("contactsError");
+    var noteEl = document.getElementById("contactsSaveNote");
+    errEl.textContent = "";
+    noteEl.textContent = "";
+    var payload = {
+      chatLabel: document.getElementById("cChatLabel").value.trim(),
+      chatDesc: document.getElementById("cChatDesc").value.trim(),
+      chatUrl: normalizeUrl(document.getElementById("cChatUrl").value),
+      whatsapp: normalizeUrl(document.getElementById("cWhatsapp").value),
+      telegram: normalizeUrl(document.getElementById("cTelegram").value),
+      vk: normalizeUrl(document.getElementById("cVk").value),
+      phone1: document.getElementById("cPhone1").value.trim(),
+      phone2: document.getElementById("cPhone2").value.trim()
+    };
+    db.collection("settings").doc("contacts").set(payload, { merge: true }).then(function(){
+      noteEl.textContent = "Сохранено ✓";
+      setTimeout(function(){ noteEl.textContent = ""; }, 3000);
+    }).catch(function(e){
+      errEl.textContent = "Не удалось сохранить контакты.";
+      console.error(e);
+    });
+  });
+
+  // ============ 🏠 ТЕКСТ ГЛАВНОЙ СТРАНИЦЫ ============
+  var HOMEPAGE_FIELDS = {
+    heroEyebrow: "hEyebrow",
+    heroTitleLine1: "hTitleLine1",
+    heroTitleLine2: "hTitleLine2",
+    heroTitleAccent: "hTitleAccent",
+    heroLead: "hLead",
+    heroSignupBtn: "hSignupBtn",
+    heroBtn1: "hBtn1",
+    heroBtn2: "hBtn2",
+    stat1Number: "hStat1n", stat1Caption: "hStat1cap",
+    stat2Number: "hStat2n", stat2Caption: "hStat2cap",
+    stat3Number: "hStat3n", stat3Caption: "hStat3cap",
+    stat4Number: "hStat4n", stat4Caption: "hStat4cap",
+    show1Title: "hShow1Title", show1Text: "hShow1Text", show1Cta: "hShow1Cta",
+    show2Title: "hShow2Title", show2Text: "hShow2Text", show2Cta: "hShow2Cta",
+    show3Title: "hShow3Title", show3Text: "hShow3Text", show3Cta: "hShow3Cta",
+    featuresTitle: "hFeaturesTitle",
+    feature1Title: "hFeature1Title", feature1Text: "hFeature1Text",
+    feature2Title: "hFeature2Title", feature2Text: "hFeature2Text",
+    feature3Title: "hFeature3Title", feature3Text: "hFeature3Text",
+    catStripTitle: "hCatStripTitle",
+    catStripText: "hCatStripText",
+    contactsTitle: "hContactsTitle"
+  };
+
+  var homepageLoaded = false;
+  function loadHomepageText(){
+    if(homepageLoaded) return;
+    homepageLoaded = true;
+    db.collection("settings").doc("homepage").get().then(function(doc){
+      var data = doc.exists ? doc.data() : {};
+      Object.keys(HOMEPAGE_FIELDS).forEach(function(key){
+        document.getElementById(HOMEPAGE_FIELDS[key]).value = data[key] || "";
+      });
+    }).catch(function(e){
+      document.getElementById("homepageError").textContent = "Не удалось загрузить текст главной.";
+      console.error(e);
+    });
+  }
+
+  document.getElementById("saveHomepageBtn").addEventListener("click", function(){
+    var errEl = document.getElementById("homepageError");
+    var noteEl = document.getElementById("homepageSaveNote");
+    errEl.textContent = "";
+    noteEl.textContent = "";
+    var payload = {};
+    Object.keys(HOMEPAGE_FIELDS).forEach(function(key){
+      payload[key] = document.getElementById(HOMEPAGE_FIELDS[key]).value.trim();
+    });
+    db.collection("settings").doc("homepage").set(payload, { merge: true }).then(function(){
+      noteEl.textContent = "Сохранено ✓";
+      setTimeout(function(){ noteEl.textContent = ""; }, 3000);
+    }).catch(function(e){
+      errEl.textContent = "Не удалось сохранить текст главной.";
+      console.error(e);
+    });
+  });
+
+  function renderList(docs){
+    listEl.innerHTML = "";
+    if(docs.length === 0){
+      listEl.innerHTML = "<div class='empty'>Пока нет объявлений в этой категории.</div>";
+      return;
+    }
+    docs.forEach(function(doc){
+      var data = doc.data();
+      var item = document.createElement("div");
+      item.className = "item";
+
+      var body = document.createElement("div");
+      body.className = "body";
+
+      var titleLine = document.createElement("div");
+      titleLine.className = "title-line";
+      titleLine.textContent = data.title || (data.text || "").split("\n")[0];
+      body.appendChild(titleLine);
+
+      var p = document.createElement("p");
+      p.textContent = data.text || "";
+      body.appendChild(p);
+
+      if(data.photos && data.photos.length){
+        var photoCount = document.createElement("span");
+        photoCount.className = "photo-count";
+        photoCount.textContent = "📷 " + data.photos.length + " фото";
+        body.appendChild(photoCount);
+      }
+
+      if(data.linkUrl){
+        var linkBadge = document.createElement("span");
+        linkBadge.className = "photo-count";
+        linkBadge.textContent = "🔗 " + (data.linkLabel || "ссылка");
+        body.appendChild(linkBadge);
+      }
+
+      var dateSpan = document.createElement("span");
+      dateSpan.className = "date";
+      if(data.createdAt && data.createdAt.toDate){
+        dateSpan.textContent = data.createdAt.toDate().toLocaleDateString("ru-RU");
+      }
+      body.appendChild(dateSpan);
+
+      var actions = document.createElement("div");
+      actions.className = "actions";
+
+      var editBtn = document.createElement("button");
+      editBtn.className = "btn-ghost";
+      editBtn.textContent = "Изменить";
+      editBtn.addEventListener("click", function(){ startEdit(item, doc.id, data); });
+
+      var delBtn = document.createElement("button");
+      delBtn.className = "btn-danger";
+      delBtn.textContent = "Удалить";
+      delBtn.addEventListener("click", function(){
+        if(confirm("Удалить это объявление?")){
+          db.collection("announcements").doc(doc.id).delete().catch(function(e){ alert("Ошибка удаления"); console.error(e); });
+        }
+      });
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      item.appendChild(body);
+      item.appendChild(actions);
+      listEl.appendChild(item);
+    });
+  }
+
+  function startEdit(itemEl, docId, data){
+    itemEl.innerHTML = "";
+    var body = document.createElement("div");
+    body.className = "body";
+
+    var titleInput = document.createElement("input");
+    titleInput.type = "text";
+    titleInput.maxLength = 120;
+    titleInput.value = data.title || (data.text || "").split("\n")[0];
+    titleInput.placeholder = "Заголовок";
+    titleInput.style.marginBottom = "10px";
+
+    var ta = document.createElement("textarea");
+    ta.value = data.text || "";
+    ta.style.marginBottom = "10px";
+
+    var editPhotos = (data.photos || []).slice();
+    var previewsEl = document.createElement("div");
+    previewsEl.className = "photo-previews";
+
+    var filePicker = document.createElement("input");
+    filePicker.type = "file";
+    filePicker.accept = "image/*";
+    filePicker.multiple = true;
+    filePicker.style.display = "none";
+
+    var addPhotoBtn = document.createElement("button");
+    addPhotoBtn.type = "button";
+    addPhotoBtn.className = "file-btn";
+    addPhotoBtn.textContent = "Добавить фото";
+    addPhotoBtn.style.marginBottom = "10px";
+    addPhotoBtn.addEventListener("click", function(){ filePicker.click(); });
+
+    function refreshEditPreviews(){
+      renderPhotoPreviews(previewsEl, editPhotos, function(idx){
+        editPhotos.splice(idx, 1);
+        refreshEditPreviews();
+      });
+    }
+    refreshEditPreviews();
+
+    filePicker.addEventListener("change", function(){
+      var files = Array.prototype.slice.call(filePicker.files || []);
+      filePicker.value = "";
+      if(files.length === 0) return;
+      if(editPhotos.length + files.length > MAX_PHOTOS){
+        alert("Максимум " + MAX_PHOTOS + " фото на одно объявление.");
+        return;
+      }
+      Promise.all(files.map(compressImage)).then(function(results){
+        editPhotos = editPhotos.concat(results);
+        refreshEditPreviews();
+      }).catch(function(e){ alert("Не удалось обработать одно из фото."); console.error(e); });
+    });
+
+    var linkLabelInput = document.createElement("input");
+    linkLabelInput.type = "text";
+    linkLabelInput.maxLength = 60;
+    linkLabelInput.placeholder = "Надпись кнопки-ссылки, например: Видео с занятия";
+    linkLabelInput.value = data.linkLabel || "";
+    linkLabelInput.style.marginBottom = "6px";
+
+    var linkUrlInput = document.createElement("input");
+    linkUrlInput.type = "text";
+    linkUrlInput.placeholder = "https://... (оставьте пустым, чтобы убрать кнопку)";
+    linkUrlInput.value = data.linkUrl || "";
+    linkUrlInput.style.marginBottom = "10px";
+
+    var row = document.createElement("div");
+    row.className = "actions";
+
+    var saveBtn = document.createElement("button");
+    saveBtn.className = "btn-primary";
+    saveBtn.textContent = "Сохранить";
+    saveBtn.addEventListener("click", function(){
+      var titleVal = titleInput.value.trim();
+      var textVal = ta.value.trim();
+      if(!titleVal || !textVal) return;
+      var linkLabelVal = linkLabelInput.value.trim();
+      var linkUrlVal = normalizeUrl(linkUrlInput.value);
+      db.collection("announcements").doc(docId).update({
+        title: titleVal,
+        text: textVal,
+        photos: editPhotos,
+        linkLabel: (linkLabelVal && linkUrlVal) ? linkLabelVal : "",
+        linkUrl: (linkLabelVal && linkUrlVal) ? linkUrlVal : ""
+      }).catch(function(e){ alert("Ошибка сохранения"); console.error(e); });
+    });
+
+    var cancelBtn = document.createElement("button");
+    cancelBtn.className = "btn-ghost";
+    cancelBtn.textContent = "Отмена";
+    cancelBtn.addEventListener("click", function(){ watchCategory(activeCat); });
+
+    row.appendChild(saveBtn);
+    row.appendChild(cancelBtn);
+
+    body.appendChild(titleInput);
+    body.appendChild(ta);
+    body.appendChild(addPhotoBtn);
+    body.appendChild(filePicker);
+    body.appendChild(previewsEl);
+    body.appendChild(linkLabelInput);
+    body.appendChild(linkUrlInput);
+    body.appendChild(row);
+    itemEl.appendChild(body);
+  }
+
+  document.getElementById("addBtn").addEventListener("click", function(){
+    var addError = document.getElementById("addError");
+    var title = newTitleEl.value.trim();
+    var text = newTextEl.value.trim();
+    addError.textContent = "";
+    if(!title){
+      addError.textContent = "Напишите заголовок — он будет виден в списке на сайте.";
+      newTitleEl.focus();
+      return;
+    }
+    if(!text){
+      addError.textContent = "Сначала напишите текст объявления.";
+      newTextEl.focus();
+      return;
+    }
+    var linkLabel = newLinkLabelEl.value.trim();
+    var linkUrl = normalizeUrl(newLinkUrlEl.value);
+    db.collection("announcements").add({
+      category: activeCat,
+      title: title,
+      text: text,
+      photos: newPhotos,
+      linkLabel: (linkLabel && linkUrl) ? linkLabel : "",
+      linkUrl: (linkLabel && linkUrl) ? linkUrl : "",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      newTitleEl.value = "";
+      newTextEl.value = "";
+      newLinkLabelEl.value = "";
+      newLinkUrlEl.value = "";
+      newPhotos = [];
+      renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
+    }).catch(function(e){
+      addError.textContent = "Не удалось опубликовать (возможно, слишком много/большие фото — попробуйте меньше фото).";
+      console.error(e);
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ru" data-mode="night">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KSTYLE — школа танцев</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ 🛠 RESET & BASE ============ */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.004);
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  img{max-width:100%;display:block;}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+  ul{list-style:none;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ============ 🎨 ЦВЕТОВАЯ СИСТЕМА ============ */
+  html[data-mode="night"] {
+    --ease: cubic-bezier(.22, 1, .36, 1);
+    --radius: 14px;
+    --accent: #1E69FF; 
+    --bg: #050507;          
+    --card-glass: rgba(14, 14, 18, 0.6); 
+    --header-glass: rgba(8, 8, 10, 0.7);
+    --border: rgba(255, 255, 255, 0.15); 
+    --text: #ffffff;        
+    --muted: #8e8e93;       
+    --shadow-3d: 
+      0 30px 70px -10px rgba(0,0,0,0.9), 
+      0 15px 30px -15px rgba(0,0,0,0.8),
+      inset 0 1px 1px rgba(255,255,255,0.2);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    position: relative;
+    letter-spacing: -0.01em;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background-image: url('https://i.pinimg.com/originals/07/80/5a/07805a2fbd76362d6705d7ef628a6009.jpg?nii=t');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.75; /* Проявили фон намного сильнее, чтобы камни были чётко видны */
+    z-index: -1;
+    pointer-events: none;
+    filter: grayscale(0.3) brightness(1.4); /* Подняли яркость текстуры камней и снизили серость */
+  }
+
+  /* ============ 📐 LAYOUT HELPERS ============ */
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px; position:relative; z-index:1;}
+  section{padding:100px 0; position:relative; z-index:1;}
+  @media(max-width:720px){ section{padding:64px 0;} .wrap{padding:0 20px;} }
+
+  /* ============ 🧱 NAVIGATION ============ */
+  header {
+    position: sticky; top: 0; z-index: 40;
+    background: var(--header-glass);
+    backdrop-filter: blur(30px) saturate(210%);
+    -webkit-backdrop-filter: blur(30px) saturate(210%);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15);
+  }
+  @media(max-width:720px){
+    header{ backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
+  }
+  .header-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 28px; max-width:1180px; margin:0 auto;
+  }
+  .logo{ 
+    font-family: 'Space Grotesk', sans-serif;
+    font-size:26px; 
+    font-weight:700; 
+    letter-spacing:-.04em;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  
+  .header-actions{ display:flex; align-items:center; gap:20px; }
+  .color-dots { display: flex; gap: 10px; align-items: center; }
+  .dot-btn {
+    width: 14px; height: 14px; border-radius: 50%;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .dot-btn:hover { transform: scale(1.3); }
+  .dot-btn.active { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+
+  .icon-btn{
+    width:42px; height:42px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border);
+    background: rgba(255,255,255, 0.05);
+    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.25s var(--ease);
+  }
+  .icon-btn:hover{ border-color:var(--accent); transform:translateY(-2px); background: rgba(255,255,255, 0.12); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+  .icon-btn svg{ width:18px; height:18px; stroke:var(--text); fill:none; }
+
+  .burger{
+    width:42px; height:42px; border-radius:50%;
+    border:1px solid var(--border);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    background: rgba(255,255,255, 0.05);
+    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.25s var(--ease);
+  }
+  .burger span{ width:18px; height:2px; background:var(--text); display:block; transition:.3s; }
+  .burger:hover{ border-color:var(--accent); background: rgba(255,255,255, 0.12); transform:translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+
+  /* ============ ✅ КНОПКА "ЗАПИСАТЬСЯ" ============ */
+  .signup-fab{
+    position: fixed; right: 24px; bottom: 24px; z-index: 50;
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 22px; border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 92%, transparent);
+    color: #fff; font-weight: 700; font-size: 15px;
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 15px 35px -8px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.3);
+    backdrop-filter: blur(12px);
+    transition: all 0.25s var(--ease);
+  }
+  .signup-fab:hover{ transform: translateY(-3px); box-shadow: 0 20px 40px -8px color-mix(in srgb, var(--accent) 60%, transparent); }
+  .signup-fab svg{ width:20px; height:20px; fill:#fff; flex-shrink:0; }
+  @media(max-width:720px){
+    .signup-fab{ right:16px; bottom:16px; padding:14px 18px; font-size:14px; }
+    .signup-fab .label{ display:none; }
+  }
+
+  /* ============ ⚡️ HERO ============ */
+  .hero{ padding-top:100px; padding-bottom:140px; position:relative; }
+  .hero-eyebrow{
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent);
+    margin-bottom:24px; font-weight:700; text-shadow: 0 2px 8px rgba(30,105,255,0.3);
+  }
+  
+  .hero h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: clamp(46px, 9vw, 102px);
+    line-height: 0.95; 
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: #ffffff;
+    filter: 
+      drop-shadow(0 1px 0 #adadad)
+      drop-shadow(0 2px 0 #7a7a7f)
+      drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
+    -webkit-box-reflect: below 2px linear-gradient(transparent 30%, rgba(255, 255, 255, 0.35));
+  }
+  
+  .hero h1 .accent {
+    background: #1e69ff; 
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: 
+      drop-shadow(0 1px 0 #0055ff)
+      drop-shadow(0 2px 0 #0033aa)
+      drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
+  }
+  
+  .hero p.lead{ max-width:540px; margin-top:38px; color:var(--text); opacity:0.9; font-size:17.5px; line-height:1.65; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .hero-cta{ display:flex; gap:14px; margin-top:42px; flex-wrap:wrap; }
+  
+  .btn{
+    padding:16px 32px; border-radius:var(--radius); font-weight:600; font-size:14px;
+    letter-spacing:.03em; display:inline-flex; align-items:center; gap:8px;
+    transition: all 0.25s var(--ease);
+  }
+  .btn-primary{ 
+    background: color-mix(in srgb, var(--accent) 90%, transparent); 
+    color: #fff; font-weight: 700; 
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 10px 25px -5px rgba(0,0,0,0.5);
+  }
+  .btn-primary:hover{ 
+    transform:translateY(-3px); 
+    box-shadow: 0 20px 35px -5px color-mix(in srgb, var(--accent) 50%, transparent), inset 0 1px 1px rgba(255,255,255,0.4);
+    background: var(--accent);
+  }
+  
+  .btn-ghost{ 
+    border:1px solid var(--border); 
+    background: rgba(255,255,255, 0.04);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-3d);
+  }
+  .btn-ghost:hover{ border-color:rgba(255,255,255,0.3); background: rgba(255,255,255, 0.1); transform: translateY(-3px); box-shadow: 0 40px 80px -5px rgba(0,0,0,0.95); }
+
+  .rule-signature{ 
+    display:flex; margin-top:80px; 
+    border: 1px solid var(--border); 
+    border-radius: var(--radius);
+    background: var(--card-glass);
+    backdrop-filter: blur(24px);
+    box-shadow: var(--shadow-3d);
+  }
+  .rule-signature .stat{ flex:1; padding:24px; text-align: center; min-width:0; }
+  .rule-signature .stat + .stat{ border-left:1px solid var(--border); }
+  .rule-signature .stat .n{ font-size:34px; font-weight:800; color:var(--accent); letter-spacing:-.02em; text-shadow: 0 2px 10px rgba(30,105,255,0.2); }
+  .rule-signature .stat .cap{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:6px; display:block; font-weight:600; }
+  @media(max-width:640px){
+    .rule-signature{ flex-wrap: wrap; }
+    .rule-signature .stat{ flex:1 1 50%; padding:18px 12px; }
+    .rule-signature .stat:nth-child(3){ border-left:none; }
+    .rule-signature .stat:nth-child(1), .rule-signature .stat:nth-child(2){ border-bottom:1px solid var(--border); }
+    .rule-signature .stat .n{ font-size:26px; }
+  }
+
+  /* ============ 💎 SHOWCASE ============ */
+  .showcase{ 
+    border-top:1px solid var(--border); 
+    border-bottom:1px solid var(--border);
+    background: var(--card-glass); 
+    backdrop-filter: blur(26px);
+    box-shadow: var(--shadow-3d);
+  }
+  .showcase-tabs{ display:flex; gap:0; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .showcase-tabs button{
+    padding:20px 28px 20px 0; margin-right:34px; text-align:left; white-space:nowrap;
+    display:flex; flex-direction:column; gap:6px; opacity:.4; transition: all 0.25s;
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .showcase-tabs button:hover:not(.active) { opacity: 0.8; transform: translateY(-2px); }
+  .showcase-tabs button.active{ opacity:1; }
+  .showcase-tabs button .tab-num{ font-size:12px; letter-spacing:.08em; color:var(--accent); font-weight:700; }
+  .showcase-tabs button .tab-label{ font-weight:800; letter-spacing:-.02em; font-size:16px; }
+
+  .showcase-progress{ height:2px; background:var(--border); position:relative; margin-top:-1px; }
+  .showcase-progress-bar{ position:absolute; top:0; left:0; height:100%; background:var(--accent); transition:left .35s var(--ease), width .35s var(--ease); }
+  .showcase-content{ padding:60px 0 70px; display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:end; }
+  @media(max-width:800px){ .showcase-content{ grid-template-columns:1fr; gap:24px; } }
+  
+  .showcase-content h3{ 
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size:clamp(30px,4.5vw,46px); 
+    line-height:1.1; 
+    margin-bottom:20px; 
+    letter-spacing:-.02em; 
+    text-transform: uppercase;
+  }
+  .showcase-content p{ color:var(--text); opacity:0.85; font-size:16px; line-height:1.7; max-width:520px; }
+  .showcase-content .btn{ margin-top:26px; border-radius:999px; }
+
+  /* ============ ✨ FEATURES ============ */
+  .features{ border-top:1px solid var(--border); }
+  .features h2{ font-family: 'Montserrat', sans-serif; font-weight: 900; font-size:clamp(28px,4vw,40px); margin-bottom:48px; letter-spacing:-.02em; text-transform: uppercase;}
+  .feature-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  @media(max-width:820px){ .feature-grid{ grid-template-columns:1fr; } }
+  
+  .feature-card{
+    background: var(--card-glass); 
+    border: 1px solid var(--border); 
+    border-radius:var(--radius);
+    padding:36px; 
+    transition: all 0.35s var(--ease); 
+    backdrop-filter: blur(26px);
+    box-shadow: var(--shadow-3d);
+  }
+  .feature-card:hover{ 
+    transform: translateY(-10px) scale(1.02);
+    border-color: rgba(255,255,255,0.25);
+    background: color-mix(in srgb, var(--card-glass) 80%, rgba(255,255,255,0.04));
+    box-shadow: 0 50px 90px -10px rgba(0,0,0,0.95), 0 20px 40px -20px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.3);
+  }
+  .feature-card .num{ font-size:14px; color:var(--accent); margin-bottom:20px; letter-spacing:.06em; font-weight:800; }
+  .feature-card h3{ font-size:20px; margin-bottom:12px; font-weight:700; letter-spacing:-.02em; }
+  .feature-card p{ color:var(--text); opacity:0.8; font-size:15px; line-height:1.65; }
+
+  /* ============ 🏷 CATEGORY STRIP ============ */
+  .cat-strip{ border-top:1px solid var(--border); }
+  .cat-strip h2{ font-family: 'Montserrat', sans-serif; font-weight: 900; font-size:clamp(26px,3.8vw,36px); margin-bottom:12px; letter-spacing:-.02em; text-transform: uppercase;}
+  .cat-strip > .wrap > p{ color:var(--muted); margin-bottom:40px; max-width:520px; font-size:15.5px; }
+  .cat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
+  @media(max-width:900px){ .cat-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:520px){ .cat-grid{ grid-template-columns:1fr; } }
+  
+  .cat-tile{
+    border:1px solid var(--border); border-radius:var(--radius); padding:24px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background: var(--card-glass); 
+    transition: all 0.3s var(--ease); 
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-3d);
+  }
+  .cat-tile:hover{ 
+    border-color: var(--accent); 
+    transform: translateY(-6px); 
+    box-shadow: 0 45px 80px -10px rgba(0,0,0,0.9), 0 15px 30px -15px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.3); 
+    background: color-mix(in srgb, var(--card-glass) 70%, rgba(255,255,255,0.04));
+  }
+  .cat-tile span.name{ font-weight:600; font-size:15.5px; }
+  .cat-tile span.arrow{ color:var(--accent); font-weight:800; }
+
+  /* ============ 📞 CONTACTS ============ */
+  .contacts-section { border-top: 1px solid var(--border); }
+  .contacts-section h2 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: clamp(26px, 3.8vw, 36px); margin-bottom: 28px; letter-spacing: -.02em; text-transform: uppercase;}
+  .contacts-grid { display: flex; flex-wrap: wrap; gap: 18px; }
+  
+  .contact-tile { justify-content: flex-start; gap: 16px; text-align: left; cursor: pointer; position: relative; flex: 1 1 220px; min-width: 260px; }
+  .contact-tile svg { width: 24px; height: 24px; fill: var(--accent); flex-shrink: 0; transition: transform 0.3s; }
+  .contact-tile:hover svg { transform: scale(1.1); }
+  
+  .contact-info { display: flex; flex-direction: column; flex: 1; }
+  .contact-info .title { font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; }
+  .contact-info .desc { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+  .phone-dropdown-wrapper { width: 100%; display: flex; flex-direction: column; }
+  .phone-trigger-area { display: flex; align-items: center; gap: 16px; width: 100%; }
+  .phone-options { 
+    max-height: 0; overflow: hidden; width: 100%; 
+    transition: max-height 0.35s var(--ease), margin-top 0.35s; 
+    display: flex; flex-direction: column; gap: 8px; 
+  }
+  .contact-tile.active-dropdown { border-color: var(--accent); }
+  .contact-tile.active-dropdown .phone-options { max-height: 200px; margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; }
+  
+  .phone-link { 
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 11px 14px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.02);
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .phone-link:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
+  .phone-link .call-icon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
+
+  /* ============ 🛹 FOOTER ============ */
+  footer{ border-top:1px solid var(--border); padding:60px 0; position:relative; z-index:1; }
+  .footer-inner{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px; align-items:center; }
+  footer .logo{ font-size:22px; }
+  footer .meta{ color:var(--muted); font-size:13.5px; font-weight:500; }
+
+  /* ============ 📦 DRAWER ============ */
+  .overlay{ 
+    position:fixed; inset:0; 
+    background: rgba(0,0,0,0.6); 
+    opacity:0; pointer-events:none; transition:opacity .35s var(--ease); z-index:50; 
+    backdrop-filter: blur(12px); 
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+  
+  .drawer{ 
+    position:fixed; top:12px; right:12px; bottom:12px; 
+    width:min(410px, 92vw); 
+    background: var(--header-glass); 
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+    border-radius: 20px;
+    transform: translateX(115%); 
+    transition: transform .4s var(--ease); 
+    z-index: 51; display:flex; flex-direction:column; 
+    box-shadow: 0 50px 100px rgba(0,0,0,0.95), inset 0 1px 3px rgba(255,255,255,0.2);
+    backdrop-filter: blur(35px);
+  }
+  .drawer.open{ transform: translateX(0); }
+  
+  .drawer-head{ display:flex; align-items:center; justify-content:space-between; padding:22px 26px; border-bottom:1px solid var(--border); }
+  .drawer-head h3{ font-size:21px; font-weight:700; letter-spacing:-.02em; }
+  
+  .drawer-body{ padding:16px; overflow-y:auto; flex:1; }
+  .drawer-list li button{ 
+    width:100%; text-align:left; padding:18px 16px; border-radius:var(--radius); 
+    display:flex; align-items:center; justify-content:space-between; 
+    transition: all 0.25s var(--ease); 
+    background: transparent;
+  }
+  .drawer-list li button:hover{ background: rgba(255,255,255, 0.1); transform: translateX(6px); }
+  .drawer-list li button span.n{ font-weight:600; font-size:15.5px; }
+  .drawer-list li button span.arrow{ color:var(--accent); font-weight:800; }
+  .drawer-list li + li{ border-top:1px solid var(--border); }
+  
+  .drawer-back{ display:flex; align-items:center; gap:8px; padding:10px 16px; color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.03em; margin-bottom:12px;}
+  .drawer-back:hover{ transform: translateX(-3px); }
+  
+  .empty-state{ text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty-state .mark{ font-size:15px; color:var(--accent); margin-bottom:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
+  .empty-state p{ font-size:14px; line-height:1.6; }
+
+  /* ============ 🔗 ССЫЛКИ ВНУТРИ РАЗДЕЛА ============ */
+  .links-grid{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+  .link-tile{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    background: var(--card-glass); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; backdrop-filter:blur(20px); transition: all 0.25s var(--ease);
+  }
+  .link-tile:hover{ border-color:var(--accent); transform:translateX(4px); }
+  .link-tile .link-icon{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .link-tile .link-icon svg{ width:16px; height:16px; stroke:var(--accent); fill:none; }
+  .link-tile span.lbl{ font-weight:700; font-size:14.5px; flex:1; overflow-wrap:anywhere; word-break:break-word; }
+  .link-tile .arrow{ color:var(--accent); font-weight:800; flex-shrink:0; }
+
+  /* ============ 📣 ОБЪЯВЛЕНИЯ ============ */
+  .announcement-list{ display:flex; flex-direction:column; gap:12px; }
+  .announcement-item{
+    background: var(--card-glass); border:1px solid var(--border); border-radius:12px;
+    padding:16px 18px; backdrop-filter:blur(20px);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    width:100%; text-align:left; cursor:pointer; transition: all 0.25s var(--ease);
+  }
+  .announcement-item:hover{ border-color:var(--accent); transform:translateX(4px); background: color-mix(in srgb, var(--card-glass) 70%, rgba(255,255,255,0.04)); }
+  .announcement-item .info{ min-width:0; }
+  .announcement-item .title-line{ font-size:14.5px; line-height:1.5; color:var(--text); overflow-wrap:anywhere; word-break:break-word; font-weight:700; }
+  .announcement-item .date{ display:block; color:var(--muted); font-size:12px; margin-top:6px; }
+  .announcement-item .photo-badge{ color:var(--accent); font-size:12px; font-weight:600; margin-top:6px; display:inline-block; }
+  .announcement-item .arrow{ color:var(--accent); font-weight:800; flex-shrink:0; }
+
+  /* ============ 🔎 ПОЛНОЭКРАННЫЙ ПРОСМОТР ОБЪЯВЛЕНИЯ ============ */
+  .announce-view-overlay{
+    position:fixed; inset:0; background: rgba(0,0,0,0.75);
+    opacity:0; pointer-events:none; transition:opacity .35s var(--ease); z-index:60;
+    backdrop-filter: blur(14px);
+  }
+  .announce-view-overlay.open{ opacity:1; pointer-events:auto; }
+  .announce-view{
+    position:fixed; inset:0; z-index:61; overflow-y:auto;
+    background: var(--bg);
+    transform: translateY(24px); opacity:0; pointer-events:none;
+    transition: transform .4s var(--ease), opacity .35s var(--ease);
+  }
+  .announce-view.open{ transform:translateY(0); opacity:1; pointer-events:auto; }
+  .announce-view-inner{ max-width:760px; margin:0 auto; padding:90px 24px 80px; }
+  @media(max-width:720px){ .announce-view-inner{ padding:80px 18px 60px; } }
+  .announce-view-head{
+    position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between;
+    padding:18px 24px; background: var(--header-glass); backdrop-filter: blur(30px) saturate(210%);
+    border-bottom:1px solid var(--border);
+  }
+  .announce-view-head .cat-name{ font-weight:700; font-size:15px; color:var(--muted); }
+  .announce-title{
+    font-family:'Montserrat', sans-serif; font-weight:900; font-size:clamp(24px,4vw,36px);
+    line-height:1.15; letter-spacing:-.02em; margin-bottom:16px; text-transform:uppercase;
+  }
+  .announce-date{ color:var(--muted); font-size:13px; margin-bottom:28px; display:block; }
+  .announce-text{ font-size:16.5px; line-height:1.8; color:var(--text); opacity:0.92; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
+  .announce-photos{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; margin-top:32px; }
+  .announce-photos img{
+    width:100%; height:220px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border);
+    cursor:zoom-in; box-shadow: var(--shadow-3d);
+  }
+  .lightbox{
+    position:fixed; inset:0; z-index:70; background:rgba(0,0,0,0.92);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    opacity:0; pointer-events:none; transition:opacity .25s var(--ease);
+  }
+  .lightbox.open{ opacity:1; pointer-events:auto; }
+  .lightbox img{ max-width:100%; max-height:100%; border-radius:10px; object-fit:contain; }
+
+  /* ============ 🌊 SCROLL REVEAL (усиленный) ============ */
+  .reveal{
+    opacity:0;
+    transform: translateY(70px) scale(.88) rotate(-3deg);
+    transition: opacity .9s cubic-bezier(.34,1.56,.64,1), transform .9s cubic-bezier(.34,1.56,.64,1);
+    transition-delay: var(--rd, 0ms);
+    will-change: opacity, transform;
+  }
+  .reveal.visible{ opacity:1; transform: translateY(0) scale(1) rotate(0deg); }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+  }
+
+  /* плавная смена контента вкладок showcase */
+  .showcase-content{ transition: opacity .35s var(--ease), transform .35s var(--ease); }
+  .showcase-content.fade-out{ opacity:0; transform: translateY(8px) rotate(-1deg); }
+
+  /* бургер превращается в крестик при открытом меню */
+  .burger span{ transform-origin:center; }
+  .burger.is-open span:nth-child(1){ transform: translateY(6px) rotate(45deg); }
+  .burger.is-open span:nth-child(2){ opacity:0; }
+  .burger.is-open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
+
+  /* мягкое появление шапки при загрузке */
+  header{ animation: headerIn .6s var(--ease) both; }
+  @keyframes headerIn{ from{ opacity:0; transform: translateY(-12px); } to{ opacity:1; transform: translateY(0); } }
+
+  /* ============ 🎈 ПОСТОЯННЫЕ ПОКАЧИВАНИЯ (везде и заметно) ============ */
+  @keyframes sway{ 0%,100%{ transform: rotate(-4deg); } 50%{ transform: rotate(4deg); } }
+  @keyframes floaty{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-10px); } }
+  @keyframes floatyBig{ 0%,100%{ transform: translateY(0) rotate(-1deg); } 50%{ transform: translateY(-14px) rotate(1deg); } }
+  @keyframes bgPan{ 0%{ transform: scale(1.06) translate(0,0); } 50%{ transform: scale(1.14) translate(-1.5%,-1%); } 100%{ transform: scale(1.06) translate(0,0); } }
+  @keyframes pulseDot{ 0%,100%{ box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); } 50%{ box-shadow: 0 0 0 2px var(--bg), 0 0 0 8px var(--accent); } }
+  @keyframes idleWiggle{ 0%,88%,100%{ transform: rotate(0deg); } 91%{ transform: rotate(-10deg); } 94%{ transform: rotate(10deg); } 97%{ transform: rotate(-6deg); } }
+  @keyframes btnWobble{ 0%{ transform: translateY(0) rotate(0); } 30%{ transform: translateY(-7px) rotate(-3deg); } 60%{ transform: translateY(-9px) rotate(3deg); } 100%{ transform: translateY(-6px) rotate(0); } }
+  @keyframes wiggleArrow{ 0%,100%{ transform: translateX(0) rotate(0); } 50%{ transform: translateX(7px) rotate(20deg); } }
+
+  body::before{ animation: bgPan 20s ease-in-out infinite; }
+
+  .logo{ display:inline-block; animation: sway 4s ease-in-out infinite; transform-origin: center bottom; }
+
+  .hero h1 .accent{ display:inline-block; animation: sway 3.2s ease-in-out infinite; transform-origin: center bottom; }
+
+  .hero-eyebrow{ display:inline-block; }
+  .hero-eyebrow::before{ content:"● "; display:inline-block; animation: floaty 1.6s ease-in-out infinite; }
+
+  .dot-btn{ animation: floaty 2.4s ease-in-out infinite; }
+  .dot-btn:nth-child(2){ animation-delay:.25s; }
+  .dot-btn:nth-child(3){ animation-delay:.5s; }
+  .dot-btn:hover{ transform: scale(1.4) rotate(20deg) !important; }
+  .dot-btn.active{ animation: pulseDot 1.8s ease-in-out infinite; }
+
+  .burger:not(.is-open){ animation: idleWiggle 5s ease-in-out infinite; }
+
+  .icon-btn:hover, .burger:hover{ transform: translateY(-3px) rotate(-10deg); }
+
+  .btn:hover{ animation: btnWobble .55s var(--ease) forwards; }
+
+  .feature-card{ transform-origin: center bottom; }
+  .feature-card:hover{ transform: translateY(-14px) scale(1.03) rotate(-1.5deg) !important; }
+  .feature-card .num{ display:inline-block; animation: floaty 3s ease-in-out infinite; }
+  .feature-card:nth-child(1) .num{ animation-delay:0s; }
+  .feature-card:nth-child(2) .num{ animation-delay:.3s; }
+  .feature-card:nth-child(3) .num{ animation-delay:.6s; }
+
+  .cat-tile{ transform-origin: center bottom; }
+  .cat-tile:hover{ transform: translateY(-8px) rotate(-1.5deg) !important; }
+  .cat-tile .arrow, .contact-tile .arrow{ display:inline-block; }
+  .cat-tile:hover .arrow{ animation: wiggleArrow .5s ease; }
+
+  .contact-tile svg{ transition: transform .3s var(--ease); }
+  .contact-tile:hover svg{ transform: scale(1.25) rotate(-10deg) !important; }
+
+  .rule-signature .stat .n{ display:inline-block; animation: floatyBig 3.6s ease-in-out infinite; }
+  .rule-signature .stat:nth-child(2) .n{ animation-delay:.2s; }
+  .rule-signature .stat:nth-child(3) .n{ animation-delay:.4s; }
+  .rule-signature .stat:nth-child(4) .n{ animation-delay:.6s; }
+
+  @media (prefers-reduced-motion: reduce){
+    .logo, .hero h1 .accent, .hero-eyebrow::before, .dot-btn, .burger, .feature-card .num, .rule-signature .stat .n, body::before{ animation:none !important; }
+  }  @media (max-width: 720px){
+    body::before{ animation: none; }
+    .icon-btn, .burger, .btn-primary, .btn-ghost, .overlay{ backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
+    .rule-signature, .showcase, .feature-card, .cat-tile, .announcement-item, .drawer{ backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">KSTYLE</div>
+    <div class="header-actions">
+      <div class="color-dots" role="group" aria-label="Выбор акцентного цвета">
+        <button class="dot-btn" data-color="#6495ED" style="background-color: #6495ED;" aria-label="Васильковый"></button>
+        <button class="dot-btn" data-color="#ff6b2b" style="background-color: #ff6b2b;" aria-label="Оранжевый"></button>
+        <button class="dot-btn active" data-color="#1E69FF" style="background-color: #1E69FF;" aria-label="Синий"></button>
+      </div>
+      <button class="burger" id="drawerOpenBtn" aria-label="Открыть меню разделов">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-eyebrow reveal" style="--rd:0ms" id="hpEyebrow">Школа танца · открыты новые группы</div>
+      <h1 class="reveal" style="--rd:80ms"><span id="hpTitleLine1">Танцуй</span><br><span id="hpTitleLine2">без</span> <span class="accent" id="hpTitleAccent">границ</span></h1>
+      <p class="lead reveal" style="--rd:160ms" id="hpLead">KSTYLE — студия для тех, кто хочет двигаться иначе. Группы для новичков и профи, авторские направления и педагоги, готовые делиться сценическим опытом.</p>
+      <div class="hero-cta reveal" style="--rd:240ms">
+        <button class="btn btn-primary" id="signupBtnHero">Записаться</button>
+        <button class="btn btn-ghost" data-open-category="schedule" id="hpBtn1">Смотреть расписание</button>
+        <button class="btn btn-ghost" data-open-category="directions" id="hpBtn2">Все направления</button>
+      </div>
+      <div class="rule-signature reveal" style="--rd:320ms">
+        <div class="stat"><span class="n" id="hpStat1n">2019</span><span class="cap" id="hpStat1cap">Работаем с</span></div>
+        <div class="stat"><span class="n" id="hpStat2n">6</span><span class="cap" id="hpStat2cap">Направлений</span></div>
+        <div class="stat"><span class="n" id="hpStat3n">12</span><span class="cap" id="hpStat3cap">Педагогов</span></div>
+        <div class="stat"><span class="n" id="hpStat4n">150+</span><span class="cap" id="hpStat4cap">Учеников</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase">
+    <div class="wrap reveal">
+      <div class="showcase-tabs" id="showcaseTabs" role="tablist" aria-label="Разделы студии"></div>
+      <div class="showcase-progress"><div class="showcase-progress-bar" id="showcaseProgressBar"></div></div>
+      <div class="showcase-content" id="showcaseContent"></div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="wrap">
+      <h2 class="reveal" id="hpFeaturesTitle">Почему выбирают KSTYLE</h2>
+      <div class="feature-grid">
+        <div class="feature-card reveal" style="--rd:0ms">
+          <div class="num">01</div>
+          <h3 id="hpFeature1Title">Педагоги-практики</h3>
+          <p id="hpFeature1Text">Преподают те, кто сам выступает и ставит номера — никакой теории без сцены.</p>
+        </div>
+        <div class="feature-card reveal" style="--rd:100ms">
+          <div class="num">02</div>
+          <h3 id="hpFeature2Title">Группы для любого уровня</h3>
+          <p id="hpFeature2Text">От первого занятия до подготовки к баттлам и сценическим выступлениям.</p>
+        </div>
+        <div class="feature-card reveal" style="--rd:200ms">
+          <div class="num">03</div>
+          <h3 id="hpFeature3Title">Зал в аренду</h3>
+          <p id="hpFeature3Text">Свободные слоты можно забронировать под съёмку, репетицию или мастер-класс.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cat-strip">
+    <div class="wrap">
+      <h2 class="reveal" id="hpCatStripTitle">Всё о студии — в одном месте</h2>
+      <p class="reveal" id="hpCatStripText">Направления, педагоги, расписание, отзывы, цены, скидки и аренда зала. Откройте меню, чтобы посмотреть раздел.</p>
+      <div class="cat-grid" id="catGridHome"></div>
+    </div>
+  </section>
+
+
+  <section class="contacts-section">
+    <div class="wrap">
+      <h2 class="reveal" id="hpContactsTitle">Связаться с нами</h2>
+      <div class="contacts-grid">
+        
+        <a href="#" target="_blank" class="cat-tile contact-tile reveal" style="--rd:0ms" id="contactChat">
+          <svg viewBox="0 0 24 24" fill-rule="evenodd" clip-rule="evenodd">
+            <path d="M12 2C6.48 2 2 6.48 2 12c0 2.5 0.9 4.8 2.4 6.6l-1.3 2.9c-.2 0.5 0.3 1 0.8 0.8l2.9-1.3c1.5 0.6 3.3 1 5.2 1 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 5c2.76 0 5 2.24 5 5s-2.24 5-5 5c-1.2 0-2.3-.4-3.2-1.1l-1.3 0.6 0.4-1.3C7.3 14.3 7 13.2 7 12c0-2.76 2.24-5 5-5z"/>
+          </svg>
+          <div class="contact-info">
+            <span class="title" id="contactChatTitle">Макс</span>
+            <span class="desc" id="contactChatDesc">Corporate Chat</span>
+          </div>
+        </a>
+
+        <a href="https://wa.me/79250452166" target="_blank" class="cat-tile contact-tile reveal" style="--rd:60ms" id="contactWhatsapp">
+          <svg viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.002-2.633-1.019-5.101-2.875-6.959-1.856-1.857-4.321-2.879-6.961-2.88-5.441 0-9.866 4.412-9.87 9.849-.002 1.698.443 3.356 1.29 4.828l-.995 3.635 3.718-.977zm11.447-6.17c-.328-.164-1.94-.957-2.242-1.068-.301-.11-.522-.164-.743.164-.221.328-.855 1.068-1.047 1.287-.193.219-.386.246-.714.082-.328-.164-1.386-.51-2.64-1.627-.977-.872-1.637-1.95-1.829-2.278-.193-.328-.021-.506.143-.669.148-.147.328-.382.492-.574.164-.192.219-.328.328-.547.11-.219.055-.411-.027-.574-.082-.164-.743-1.792-1.019-2.459-.27-.65-.542-.56-.743-.57l-.633-.01c-.221 0-.58.082-.884.411-.304.328-1.161 1.135-1.161 2.767 0 1.632 1.189 3.203 1.354 3.422.165.219 2.34 3.574 5.67 5.014.792.341 1.41.546 1.893.7.796.253 1.52.217 2.092.131.638-.096 1.94-.793 2.214-1.559.273-.766.273-1.422.192-1.559-.081-.137-.301-.219-.629-.383z"/>
+          </svg>
+          <div class="contact-info">
+            <span class="title">WhatsApp</span>
+            <span class="desc">Написать в чат</span>
+          </div>
+        </a>
+
+        <a href="https://t.me/your_studio" target="_blank" class="cat-tile contact-tile reveal" style="--rd:120ms" id="contactTelegram">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.87 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.46c.536-.196 1.006.128.832.941z"/>
+          </svg>
+          <div class="contact-info">
+            <span class="title">Telegram</span>
+            <span class="desc">Чат и новости</span>
+          </div>
+        </a>
+
+        <a href="https://vk.com/your_studio" target="_blank" class="cat-tile contact-tile reveal" style="--rd:180ms" id="contactVk">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.626 12.435c.484.473.996.916 1.443 1.417.472.53.916 1.084 1.282 1.696.194.323.357.665.342 1.056-.02.502-.303.829-.769.896-.282.041-.564.02-.846.02h-2.618c-.628-.016-1.118-.242-1.493-.761-.39-.536-.75-.1-.115-1.597-.133-.314-.287-.618-.466-.906-.284-.457-.655-.572-1.146-.353-.332.148-.48.423-.526.772-.094.695-.125 1.396-.242 2.086-.076.442-.36.721-.806.753-.523.037-1.049.043-1.569-.033-2.18-.322-3.95-1.396-5.462-2.984-1.28-1.343-2.247-2.946-2.997-4.686-.178-.412-.047-.733.402-.743h2.641c.367.004.64.196.772.543.518 1.353 1.222 2.594 2.163 3.692.228.266.452.53.754.673.308.146.516.059.625-.262.08-.235.116-.48.134-.727.067-.923.061-1.844-.131-2.75-.078-.364-.284-.576-.639-.636-.201-.034-.16-.098-.067-.21.147-.178.368-.266.602-.266h4.155c.441.048.539.261.574.697.086 1.062.039 2.12-.132 3.174-.034.213-.01.458.106.634.156.236.4.218.574.053.642-.614 1.127-1.357 1.517-2.176.284-.596.502-1.218.667-1.853.07-.27.234-.439.521-.442h2.783c.063 0 .126.002.189.009.522.06.697.311.545.811-.318 1.043-.889 1.956-1.575 2.782-.362.437-.775.828-1.148 1.255-.38.435-.355.666.06.1.1.z"/>
+          </svg>
+          <div class="contact-info">
+            <span class="title">ВКонтакте</span>
+            <span class="desc">Группа и медиа</span>
+          </div>
+        </a>
+
+        <div class="cat-tile contact-tile reveal" style="--rd:240ms" id="phoneTile" onclick="togglePhones(event)">
+          <div class="phone-dropdown-wrapper">
+            <div class="phone-trigger-area">
+              <svg viewBox="0 0 24 24">
+                <path d="M21.384 17.791c-1.423-1.423-3.342-1.843-4.993-1.03 l-1.814 1.814c-3.078-1.504-5.634-4.06-7.138-7.138l1.814-1.814c.813-1.65.393-3.569-1.03-4.993l-4.707-4.708c-.751-.751-1.982-.751-2.733 0l-2.696 2.697c-.818.818-1.108 2.012-.738 3.107 1.972 5.858 6.558 10.443 12.415 12.415 1.096.37 2.29.079 3.107-.738l2.697-2.697c.751-.752.751-1.983 0-2.733l-4.707-4.707z"/>
+              </svg>
+              <div class="contact-info">
+                <span class="title">Позвонить нам</span>
+                <span class="desc">Выбрать номер телефона</span>
+              </div>
+            </div>
+            
+            <div class="phone-options" id="phoneOptions">
+              <a href="tel:+79250452166" class="phone-link" id="phoneLink1" onclick="event.stopPropagation();">
+                <span id="phoneLink1Text">+7 (925) 045-21-66</span>
+                <span class="call-icon">Вызов</span>
+              </a>
+              <a href="tel:+79169035530" class="phone-link" id="phoneLink2" onclick="event.stopPropagation();">
+                <span id="phoneLink2Text">+7 (916) 903-55-30</span>
+                <span class="call-icon">Вызов</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div>
+      <div class="logo">KSTYLE</div>
+      <div class="meta" style="margin-top: 4px;">© 2026 KSTYLE. Студия танца.</div>
+    </div>
+  </div>
+</footer>
+
+<a href="#" target="_blank" rel="noopener" class="signup-fab" id="signupFab">
+  <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.002-2.633-1.019-5.101-2.875-6.959-1.856-1.857-4.321-2.879-6.961-2.88-5.441 0-9.866 4.412-9.87 9.849-.002 1.698.443 3.356 1.29 4.828l-.995 3.635 3.718-.977z"/></svg>
+  <span class="label">Записаться</span>
+</a>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <h3 id="drawerTitle">Разделы</h3>
+    <button class="icon-btn" id="drawerCloseBtn" aria-label="Закрыть меню">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<div class="announce-view-overlay" id="announceOverlay"></div>
+<div class="announce-view" id="announceView" aria-hidden="true">
+  <div class="announce-view-head">
+    <span class="cat-name" id="announceCatName"></span>
+    <button class="icon-btn" id="announceCloseBtn" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
+  </div>
+  <div class="announce-view-inner" id="announceViewInner"></div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
+
+  var whatsappBaseUrl = "https://wa.me/79250452166"; // запасной номер, обновится ниже из настроек
+
+  (function loadContactsIntoPage(){
+    db.collection("settings").doc("contacts").get().then(function(doc){
+      if(!doc.exists) return;
+      var data = doc.data();
+
+      if(data.chatUrl){ document.getElementById("contactChat").href = data.chatUrl; }
+      if(data.chatLabel){ document.getElementById("contactChatTitle").textContent = data.chatLabel; }
+      if(data.chatDesc){ document.getElementById("contactChatDesc").textContent = data.chatDesc; }
+
+      if(data.whatsapp){
+        document.getElementById("contactWhatsapp").href = data.whatsapp;
+        whatsappBaseUrl = data.whatsapp;
+        updateSignupLinks();
+      }
+      if(data.telegram){ document.getElementById("contactTelegram").href = data.telegram; }
+      if(data.vk){ document.getElementById("contactVk").href = data.vk; }
+
+      if(data.phone1){
+        document.getElementById("phoneLink1").href = "tel:" + data.phone1.replace(/[^\d+]/g, "");
+        document.getElementById("phoneLink1Text").textContent = data.phone1;
+      }
+      var phoneLink2El = document.getElementById("phoneLink2");
+      if(data.phone2){
+        phoneLink2El.href = "tel:" + data.phone2.replace(/[^\d+]/g, "");
+        document.getElementById("phoneLink2Text").textContent = data.phone2;
+        phoneLink2El.style.display = "";
+      } else if(data.phone2 === ""){
+        phoneLink2El.style.display = "none";
+      }
+    }).catch(function(e){ console.error("Ошибка загрузки контактов:", e); });
+  })();
+
+  // ============ ✅ КНОПКА "ЗАПИСАТЬСЯ" ============
+  function buildSignupUrl(){
+    var message = "Здравствуйте! Хочу записаться на занятия в KSTYLE.";
+    var sep = whatsappBaseUrl.indexOf("?") === -1 ? "?" : "&";
+    return whatsappBaseUrl + sep + "text=" + encodeURIComponent(message);
+  }
+  function updateSignupLinks(){
+    var url = buildSignupUrl();
+    var fab = document.getElementById("signupFab");
+    if(fab) fab.href = url;
+  }
+  updateSignupLinks();
+  var signupBtnHero = document.getElementById("signupBtnHero");
+  if(signupBtnHero){
+    signupBtnHero.addEventListener("click", function(){
+      window.open(buildSignupUrl(), "_blank", "noopener");
+    });
+  }
+
+  (function loadHomepageTextIntoPage(){
+    var textMap = {
+      heroEyebrow: "hpEyebrow",
+      heroTitleLine1: "hpTitleLine1",
+      heroTitleLine2: "hpTitleLine2",
+      heroTitleAccent: "hpTitleAccent",
+      heroLead: "hpLead",
+      heroSignupBtn: "signupBtnHero",
+      heroBtn1: "hpBtn1",
+      heroBtn2: "hpBtn2",
+      stat1Number: "hpStat1n", stat1Caption: "hpStat1cap",
+      stat2Number: "hpStat2n", stat2Caption: "hpStat2cap",
+      stat3Number: "hpStat3n", stat3Caption: "hpStat3cap",
+      stat4Number: "hpStat4n", stat4Caption: "hpStat4cap",
+      featuresTitle: "hpFeaturesTitle",
+      feature1Title: "hpFeature1Title", feature1Text: "hpFeature1Text",
+      feature2Title: "hpFeature2Title", feature2Text: "hpFeature2Text",
+      feature3Title: "hpFeature3Title", feature3Text: "hpFeature3Text",
+      catStripTitle: "hpCatStripTitle",
+      catStripText: "hpCatStripText",
+      contactsTitle: "hpContactsTitle"
+    };
+    db.collection("settings").doc("homepage").get().then(function(doc){
+      var data = doc.exists ? doc.data() : {};
+      window.__homepageData = data;
+      Object.keys(textMap).forEach(function(key){
+        if(data[key]){
+          var el = document.getElementById(textMap[key]);
+          if(el) el.textContent = data[key];
+        }
+      });
+      if(window.__applyShowcaseOverrides) window.__applyShowcaseOverrides(data);
+    }).catch(function(e){ console.error("Ошибка загрузки текста главной:", e); });
+  })();
+</script>
+<script>
+function togglePhones(event) {
+  var tile = document.getElementById("phoneTile");
+  tile.classList.toggle("active-dropdown");
+}
+
+(function(){
+  "use strict";
+
+  var CATEGORIES = [
+    { key:"news",       label:"Новости" },
+    { key:"directions", label:"Направления" },
+    { key:"teachers",   label:"Педагоги" },
+    { key:"schedule",   label:"Расписание" },
+    { key:"reviews",    label:"Отзывы" },
+    { key:"prices",     label:"Цены" },
+    { key:"discounts",  label:"Скидки" },
+    { key:"rental",     label:"Аренда зала" }
+  ];
+
+  var itemsCache = {}; // кэш уже загруженных разделов, чтобы повторное открытие было мгновенным
+
+  async function getItems(catKey){
+    if(itemsCache[catKey]){
+      return itemsCache[catKey];
+    }
+    try{
+      var snap = await db.collection("announcements")
+        .where("category", "==", catKey)
+        .get();
+      var docs = snap.docs.slice().sort(function(a, b){
+        var ta = (a.data().createdAt && a.data().createdAt.toMillis) ? a.data().createdAt.toMillis() : 0;
+        var tb = (b.data().createdAt && b.data().createdAt.toMillis) ? b.data().createdAt.toMillis() : 0;
+        return tb - ta;
+      });
+      var result = docs.map(function(d){
+        var data = d.data();
+        return {
+          id: d.id,
+          title: data.title || (data.text || "").split("\n")[0],
+          text: data.text || "",
+          photos: data.photos || [],
+          linkLabel: data.linkLabel || "",
+          linkUrl: data.linkUrl || "",
+          date: (data.createdAt && data.createdAt.toDate) ? data.createdAt.toDate().toLocaleDateString("ru-RU") : ""
+        };
+      });
+      itemsCache[catKey] = result; // сохраняем в кэш, чтобы не грузить повторно
+      return result;
+    } catch(e){
+      console.error("Ошибка загрузки объявлений:", e);
+      return [];
+    }
+  }
+
+  var revealObserver = ("IntersectionObserver" in window)
+    ? new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            entry.target.classList.add("visible");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -60px 0px" })
+    : null;
+
+  function bindReveal(){
+    var els = document.querySelectorAll(".reveal:not(.reveal-bound)");
+    els.forEach(function(el){
+      el.classList.add("reveal-bound");
+      if(revealObserver){ revealObserver.observe(el); }
+      else { el.classList.add("visible"); }
+    });
+  }
+  bindReveal();
+
+  var html = document.documentElement;
+
+  var dots = document.querySelectorAll(".dot-btn");
+  dots.forEach(function(dot) {
+    dot.addEventListener("click", function() {
+      dots.forEach(function(d) { d.classList.remove("active"); });
+      dot.classList.add("active");
+      html.style.setProperty("--accent", dot.getAttribute("data-color"));
+    });
+  });
+
+  var SHOWCASE = [
+    { key: "directions", num: "01", label: "Направления", title: "Выбирайте свой стиль", text: "Хип-хоп, k-pop, вог, хилсы — можно пробовать разные направления.", cta: "Смотреть направления" },
+    { key: "teachers", num: "02", label: "Педагоги", title: "Учат те, кто сам выступает", text: "Нашие педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },
+    { key: "schedule", num: "03", label: "Расписание", title: "Занятия под ваш ритм", text: "Утренние и вечерние группы всю неделю. Найдите своё время.", cta: "Открыть расписание" }
+  ];
+
+  var showcaseTabsEl = document.getElementById("showcaseTabs");
+  var showcaseContentEl = document.getElementById("showcaseContent");
+  var showcaseProgressBar = document.getElementById("showcaseProgressBar");
+  var showcaseActive = 0;
+  var showcaseTimer = null;
+
+  SHOWCASE.forEach(function(item, i){
+    var b = document.createElement("button");
+    b.setAttribute("role", "tab");
+    b.innerHTML = '<span class="tab-num">' + item.num + '</span><span class="tab-label">' + item.label + '</span>';
+    b.addEventListener("click", function(){ setShowcaseTab(i, true); });
+    showcaseTabsEl.appendChild(b);
+  });
+
+  function renderShowcaseContent(item){
+    showcaseContentEl.classList.add("fade-out");
+    setTimeout(function(){
+      showcaseContentEl.innerHTML = '';
+      var left = document.createElement("div");
+      left.innerHTML = '<h3></h3><p></p>';
+      left.querySelector("h3").textContent = item.title;
+      left.querySelector("p").textContent = item.text;
+      var right = document.createElement("div");
+      var btn = document.createElement("button");
+      btn.className = "btn btn-primary";
+      btn.textContent = item.cta;
+      btn.addEventListener("click", function(){ openDrawer(); openCategory(item.key); });
+      right.appendChild(btn);
+      showcaseContentEl.appendChild(left);
+      showcaseContentEl.appendChild(right);
+      showcaseContentEl.classList.remove("fade-out");
+    }, 220);
+  }
+
+  function setShowcaseTab(i, userTriggered){
+    showcaseActive = i;
+    var tabs = showcaseTabsEl.querySelectorAll("button");
+    tabs.forEach(function(t, idx){ t.classList.toggle("active", idx === i); });
+    var activeTab = tabs[i];
+    if(activeTab){
+      showcaseProgressBar.style.left = activeTab.offsetLeft + "px";
+      showcaseProgressBar.style.width = activeTab.offsetWidth + "px";
+    }
+    renderShowcaseContent(SHOWCASE[i]);
+    if(userTriggered){
+      clearInterval(showcaseTimer);
+      showcaseTimer = setInterval(advanceShowcase, 6000);
+    }
+  }
+
+  function advanceShowcase(){ setShowcaseTab((showcaseActive + 1) % SHOWCASE.length, false); }
+  setShowcaseTab(0, false);
+  showcaseTimer = setInterval(advanceShowcase, 6000);
+  window.addEventListener("resize", function(){ setShowcaseTab(showcaseActive, false); });
+
+  function applyShowcaseOverrides(data){
+    if(!data) return;
+    var keyMap = { 0: ["show1Title","show1Text","show1Cta"], 1: ["show2Title","show2Text","show2Cta"], 2: ["show3Title","show3Text","show3Cta"] };
+    Object.keys(keyMap).forEach(function(idx){
+      var i = Number(idx);
+      var item = SHOWCASE[i];
+      if(!item) return;
+      var keys = keyMap[idx];
+      if(data[keys[0]]) item.title = data[keys[0]];
+      if(data[keys[1]]) item.text = data[keys[1]];
+      if(data[keys[2]]) item.cta = data[keys[2]];
+    });
+    renderShowcaseContent(SHOWCASE[showcaseActive]);
+  }
+  window.__applyShowcaseOverrides = applyShowcaseOverrides;
+  if(window.__homepageData) applyShowcaseOverrides(window.__homepageData);
+
+  var catGridHome = document.getElementById("catGridHome");
+  CATEGORIES.forEach(function(c, i){
+    var el = document.createElement("button");
+    el.className = "cat-tile reveal";
+    el.style.setProperty("--rd", (i * 60) + "ms");
+    el.innerHTML = '<span class="name">' + c.label + '</span><span class="arrow">/</span>';
+    el.addEventListener("click", function(){ openDrawer(); openCategory(c.key); });
+    catGridHome.appendChild(el);
+  });
+  bindReveal();
+
+  document.querySelectorAll("[data-open-category]").forEach(function(btn){
+    btn.addEventListener("click", function(){ openDrawer(); openCategory(btn.getAttribute("data-open-category")); });
+  });
+
+  var overlay = document.getElementById("overlay");
+  var drawer = document.getElementById("drawer");
+  var drawerBody = document.getElementById("drawerBody");
+  var drawerTitle = document.getElementById("drawerTitle");
+
+  var burgerBtn = document.getElementById("drawerOpenBtn");
+
+  function openDrawer(){
+    overlay.classList.add("open");
+    drawer.classList.add("open");
+    drawer.setAttribute("aria-hidden", "false");
+    burgerBtn.classList.add("is-open");
+    renderCategoryList();
+  }
+  function closeDrawer(){
+    overlay.classList.remove("open");
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+    burgerBtn.classList.remove("is-open");
+  }
+  document.getElementById("drawerOpenBtn").addEventListener("click", openDrawer);
+  document.getElementById("drawerCloseBtn").addEventListener("click", closeDrawer);
+  overlay.addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeDrawer(); });
+
+  function renderCategoryList(){
+    drawerTitle.textContent = "Разделы";
+    var list = document.createElement("ul");
+    list.className = "drawer-list";
+    CATEGORIES.forEach(function(c){
+      var li = document.createElement("li");
+      var btn = document.createElement("button");
+      btn.innerHTML = '<span class="n">' + c.label + '</span><span class="arrow">/</span>';
+      btn.addEventListener("click", function(){ openCategory(c.key); });
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+    drawerBody.innerHTML = "";
+    drawerBody.appendChild(list);
+  }
+
+  async function openCategory(catKey){
+    var cat = CATEGORIES.find(function(c){ return c.key === catKey; });
+    if(!cat) return;
+    drawerTitle.textContent = cat.label;
+
+    drawerBody.innerHTML = "";
+    var back = document.createElement("button");
+    back.className = "drawer-back";
+    back.innerHTML = "← Все разделы";
+    back.addEventListener("click", renderCategoryList);
+    drawerBody.appendChild(back);
+
+    var loadingEl = document.createElement("div");
+    loadingEl.className = "empty-state";
+    loadingEl.innerHTML = '<div class="mark">Загрузка…</div>';
+    drawerBody.appendChild(loadingEl);
+
+    var items = await getItems(catKey);
+    if(loadingEl.parentNode) loadingEl.remove();
+    if(items.length === 0){
+      var empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.innerHTML = '<div class="mark">Скоро здесь появится информация</div><p>Раздел «' + cat.label + '» пока пуст.</p>';
+      drawerBody.appendChild(empty);
+      bindReveal();
+      return;
+    }
+
+    var list = document.createElement("div");
+    list.className = "announcement-list";
+    items.forEach(function(item){
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "announcement-item reveal";
+
+      var info = document.createElement("div");
+      info.className = "info";
+      var titleEl = document.createElement("span");
+      titleEl.className = "title-line";
+      titleEl.textContent = item.title;
+      info.appendChild(titleEl);
+      if(item.date){
+        var d = document.createElement("span");
+        d.className = "date";
+        d.textContent = item.date;
+        info.appendChild(d);
+      }
+      if(item.photos && item.photos.length){
+        var pb = document.createElement("span");
+        pb.className = "photo-badge";
+        pb.textContent = "📷 " + item.photos.length;
+        info.appendChild(pb);
+      }
+
+      var arrow = document.createElement("span");
+      arrow.className = "arrow";
+      arrow.textContent = "/";
+
+      card.appendChild(info);
+      card.appendChild(arrow);
+      card.addEventListener("click", function(){ openAnnouncement(item, cat.label); });
+      list.appendChild(card);
+    });
+    drawerBody.appendChild(list);
+    bindReveal();
+  }
+
+  // ============ 🔎 ПОЛНОЭКРАННЫЙ ПРОСМОТР ОБЪЯВЛЕНИЯ ============
+  var announceOverlay = document.getElementById("announceOverlay");
+  var announceView = document.getElementById("announceView");
+  var announceViewInner = document.getElementById("announceViewInner");
+  var announceCatName = document.getElementById("announceCatName");
+  var announceCloseBtn = document.getElementById("announceCloseBtn");
+  var lightbox = document.getElementById("lightbox");
+  var lightboxImg = document.getElementById("lightboxImg");
+
+  function openAnnouncement(item, catLabel){
+    announceCatName.textContent = catLabel;
+    announceViewInner.innerHTML = "";
+
+    var titleEl = document.createElement("h1");
+    titleEl.className = "announce-title";
+    titleEl.textContent = item.title;
+    announceViewInner.appendChild(titleEl);
+
+    if(item.date){
+      var dateEl = document.createElement("span");
+      dateEl.className = "announce-date";
+      dateEl.textContent = item.date;
+      announceViewInner.appendChild(dateEl);
+    }
+
+    var textEl = document.createElement("div");
+    textEl.className = "announce-text";
+    textEl.textContent = item.text;
+    announceViewInner.appendChild(textEl);
+
+    if(item.linkUrl){
+      var linkA = document.createElement("a");
+      linkA.className = "link-tile";
+      linkA.style.marginTop = "20px";
+      linkA.href = item.linkUrl;
+      linkA.target = "_blank";
+      linkA.rel = "noopener";
+      linkA.innerHTML =
+        '<span class="link-icon"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"></path><path d="M14 10a5 5 0 0 0-7.07 0L4.1 12.83a5 5 0 0 0 7.07 7.07l1.5-1.5"></path></svg></span>' +
+        '<span class="lbl"></span><span class="arrow">↗</span>';
+      linkA.querySelector(".lbl").textContent = item.linkLabel || "Открыть ссылку";
+      announceViewInner.appendChild(linkA);
+    }
+
+    if(item.photos && item.photos.length){
+      var grid = document.createElement("div");
+      grid.className = "announce-photos";
+      item.photos.forEach(function(src){
+        var img = document.createElement("img");
+        img.src = src;
+        img.loading = "lazy";
+        img.addEventListener("click", function(){ openLightbox(src); });
+        grid.appendChild(img);
+      });
+      announceViewInner.appendChild(grid);
+    }
+
+    announceOverlay.classList.add("open");
+    announceView.classList.add("open");
+    announceView.setAttribute("aria-hidden", "false");
+    announceViewInner.scrollTop = 0;
+    announceView.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeAnnouncement(){
+    announceOverlay.classList.remove("open");
+    announceView.classList.remove("open");
+    announceView.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  announceCloseBtn.addEventListener("click", closeAnnouncement);
+  announceOverlay.addEventListener("click", closeAnnouncement);
+
+  function openLightbox(src){
+    lightboxImg.src = src;
+    lightbox.classList.add("open");
+  }
+  function closeLightbox(){
+    lightbox.classList.remove("open");
+    lightboxImg.src = "";
+  }
+  lightbox.addEventListener("click", closeLightbox);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){
+      if(lightbox.classList.contains("open")) closeLightbox();
+      else if(announceView.classList.contains("open")) closeAnnouncement();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

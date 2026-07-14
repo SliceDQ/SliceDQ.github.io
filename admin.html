@@ -190,6 +190,15 @@
           <span class="photo-hint">Фото автоматически сжимаются, чтобы всё бесплатно хранилось в базе</span>
         </div>
         <div class="photo-previews" id="newPhotoPreviews"></div>
+        <label>Фон объявления (необязательно — показывается только в полноэкранном просмотре)</label>
+        <div class="photo-input-row">
+          <input type="file" id="newBgImage" accept="image/*" style="display:none;">
+          <button type="button" class="file-btn" id="newBgImageBtn">Выбрать фон</button>
+          <span class="photo-hint">Одна картинка на весь экран, тоже сжимается автоматически</span>
+        </div>
+        <div class="photo-previews" id="newBgImagePreview"></div>
+        <label for="newBgDim">Затемнение фона: <span id="newBgDimValue">55%</span></label>
+        <input type="range" id="newBgDim" min="0" max="90" step="5" value="55">
         <label for="newLinkLabel">Кнопка-ссылка внутри поста (необязательно, видео/отзыв/и т.д.)</label>
         <div class="link-add-row">
           <input type="text" id="newLinkLabel" placeholder="Надпись, например: Видео с занятия" maxlength="60">
@@ -327,6 +336,14 @@
           <input type="text" id="hFeature3Title" placeholder="Зал в аренду">
           <label for="hFeature3Text">Карточка 3 — текст</label>
           <textarea id="hFeature3Text" placeholder="Свободные слоты можно забронировать..."></textarea>
+          <label for="hFeature4Title">Карточка 4 — заголовок</label>
+          <input type="text" id="hFeature4Title" placeholder="Гибкое расписание">
+          <label for="hFeature4Text">Карточка 4 — текст</label>
+          <textarea id="hFeature4Text" placeholder="Утренние и вечерние группы всю неделю..."></textarea>
+          <label for="hFeature5Title">Карточка 5 — заголовок</label>
+          <input type="text" id="hFeature5Title" placeholder="Атмосфера сообщества">
+          <label for="hFeature5Text">Карточка 5 — текст</label>
+          <textarea id="hFeature5Text" placeholder="Регулярные баттлы, съёмки и совместные выступления..."></textarea>
         </div>
         <div class="group">
           <h3>Блок «Всё о студии — в одном месте»</h3>
@@ -369,7 +386,7 @@
     { key:"teachers",   label:"Педагоги" },
     { key:"schedule",   label:"Расписание" },
     { key:"reviews",    label:"Отзывы" },
-    { key:"prices",     label:"Цены" },
+    { key:"prices",     label:"Прайс" },
     { key:"discounts",  label:"Скидки" },
     { key:"rental",     label:"Аренда зала" }
   ];
@@ -490,6 +507,66 @@
     newPhotos.splice(idx, 1);
     renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
   }
+
+  // --- Фон объявления: отдельное сжатие (крупнее фото-превью, но всё ещё в пределах лимита Firestore) ---
+  var BG_MAX_DIM = 1600;
+  var BG_JPEG_QUALITY = 0.6;
+  function compressBgImage(file){
+    return new Promise(function(resolve, reject){
+      var img = new Image();
+      var reader = new FileReader();
+      reader.onload = function(e){
+        img.onload = function(){
+          var w = img.width, h = img.height;
+          if(w > h && w > BG_MAX_DIM){ h = Math.round(h * (BG_MAX_DIM / w)); w = BG_MAX_DIM; }
+          else if(h > BG_MAX_DIM){ w = Math.round(w * (BG_MAX_DIM / h)); h = BG_MAX_DIM; }
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", BG_JPEG_QUALITY));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  var newBgImage = "";
+  var newBgImageInput = document.getElementById("newBgImage");
+  var newBgImageBtn = document.getElementById("newBgImageBtn");
+  var newBgImagePreview = document.getElementById("newBgImagePreview");
+  var newBgDimInput = document.getElementById("newBgDim");
+  var newBgDimValue = document.getElementById("newBgDimValue");
+
+  function refreshNewBgPreview(){
+    renderPhotoPreviews(newBgImagePreview, newBgImage ? [newBgImage] : [], function(){
+      newBgImage = "";
+      refreshNewBgPreview();
+    });
+  }
+  refreshNewBgPreview();
+
+  newBgImageBtn.addEventListener("click", function(){ newBgImageInput.click(); });
+  newBgImageInput.addEventListener("change", function(){
+    var addError = document.getElementById("addError");
+    var file = (newBgImageInput.files || [])[0];
+    newBgImageInput.value = "";
+    if(!file) return;
+    compressBgImage(file).then(function(result){
+      newBgImage = result;
+      refreshNewBgPreview();
+    }).catch(function(e){
+      addError.textContent = "Не удалось обработать фон.";
+      console.error(e);
+    });
+  });
+
+  newBgDimInput.addEventListener("input", function(){
+    newBgDimValue.textContent = newBgDimInput.value + "%";
+  });
 
   document.getElementById("loginBtn").addEventListener("click", function(){
     var email = document.getElementById("email").value.trim();
@@ -629,6 +706,8 @@
     feature1Title: "hFeature1Title", feature1Text: "hFeature1Text",
     feature2Title: "hFeature2Title", feature2Text: "hFeature2Text",
     feature3Title: "hFeature3Title", feature3Text: "hFeature3Text",
+    feature4Title: "hFeature4Title", feature4Text: "hFeature4Text",
+    feature5Title: "hFeature5Title", feature5Text: "hFeature5Text",
     catStripTitle: "hCatStripTitle",
     catStripText: "hCatStripText",
     contactsTitle: "hContactsTitle"
@@ -702,6 +781,13 @@
         linkBadge.className = "photo-count";
         linkBadge.textContent = "🔗 " + (data.linkLabel || "ссылка");
         body.appendChild(linkBadge);
+      }
+
+      if(data.bgImage){
+        var bgBadge = document.createElement("span");
+        bgBadge.className = "photo-count";
+        bgBadge.textContent = "🖼 свой фон (" + (typeof data.bgDim === "number" ? data.bgDim : 55) + "% затемнения)";
+        body.appendChild(bgBadge);
       }
 
       var dateSpan = document.createElement("span");
@@ -804,6 +890,59 @@
     linkUrlInput.value = data.linkUrl || "";
     linkUrlInput.style.marginBottom = "10px";
 
+    var bgLabel = document.createElement("label");
+    bgLabel.textContent = "Фон объявления (необязательно — только для полноэкранного просмотра)";
+    bgLabel.style.marginTop = "6px";
+
+    var editBgImage = data.bgImage || "";
+    var bgPreviewsEl = document.createElement("div");
+    bgPreviewsEl.className = "photo-previews";
+
+    var bgFilePicker = document.createElement("input");
+    bgFilePicker.type = "file";
+    bgFilePicker.accept = "image/*";
+    bgFilePicker.style.display = "none";
+
+    var bgBtn = document.createElement("button");
+    bgBtn.type = "button";
+    bgBtn.className = "file-btn";
+    bgBtn.textContent = "Выбрать фон";
+    bgBtn.style.marginBottom = "10px";
+    bgBtn.addEventListener("click", function(){ bgFilePicker.click(); });
+
+    function refreshBgPreview(){
+      renderPhotoPreviews(bgPreviewsEl, editBgImage ? [editBgImage] : [], function(){
+        editBgImage = "";
+        refreshBgPreview();
+      });
+    }
+    refreshBgPreview();
+
+    bgFilePicker.addEventListener("change", function(){
+      var file = (bgFilePicker.files || [])[0];
+      bgFilePicker.value = "";
+      if(!file) return;
+      compressBgImage(file).then(function(result){
+        editBgImage = result;
+        refreshBgPreview();
+      }).catch(function(e){ alert("Не удалось обработать фон."); console.error(e); });
+    });
+
+    var bgDimLabel = document.createElement("label");
+    var bgDimValueSpan = document.createElement("span");
+    bgDimValueSpan.textContent = (typeof data.bgDim === "number" ? data.bgDim : 55) + "%";
+    bgDimLabel.textContent = "Затемнение фона: ";
+    bgDimLabel.appendChild(bgDimValueSpan);
+
+    var bgDimInput = document.createElement("input");
+    bgDimInput.type = "range";
+    bgDimInput.min = "0";
+    bgDimInput.max = "90";
+    bgDimInput.step = "5";
+    bgDimInput.value = typeof data.bgDim === "number" ? data.bgDim : 55;
+    bgDimInput.style.marginBottom = "10px";
+    bgDimInput.addEventListener("input", function(){ bgDimValueSpan.textContent = bgDimInput.value + "%"; });
+
     var row = document.createElement("div");
     row.className = "actions";
 
@@ -820,6 +959,8 @@
         title: titleVal,
         text: textVal,
         photos: editPhotos,
+        bgImage: editBgImage,
+        bgDim: Number(bgDimInput.value),
         linkLabel: (linkLabelVal && linkUrlVal) ? linkLabelVal : "",
         linkUrl: (linkLabelVal && linkUrlVal) ? linkUrlVal : ""
       }).catch(function(e){ alert("Ошибка сохранения"); console.error(e); });
@@ -838,6 +979,12 @@
     body.appendChild(addPhotoBtn);
     body.appendChild(filePicker);
     body.appendChild(previewsEl);
+    body.appendChild(bgLabel);
+    body.appendChild(bgBtn);
+    body.appendChild(bgFilePicker);
+    body.appendChild(bgPreviewsEl);
+    body.appendChild(bgDimLabel);
+    body.appendChild(bgDimInput);
     body.appendChild(linkLabelInput);
     body.appendChild(linkUrlInput);
     body.appendChild(row);
@@ -866,6 +1013,8 @@
       title: title,
       text: text,
       photos: newPhotos,
+      bgImage: newBgImage,
+      bgDim: Number(newBgDimInput.value),
       linkLabel: (linkLabel && linkUrl) ? linkLabel : "",
       linkUrl: (linkLabel && linkUrl) ? linkUrl : "",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -876,6 +1025,10 @@
       newLinkUrlEl.value = "";
       newPhotos = [];
       renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
+      newBgImage = "";
+      refreshNewBgPreview();
+      newBgDimInput.value = 55;
+      newBgDimValue.textContent = "55%";
     }).catch(function(e){
       addError.textContent = "Не удалось опубликовать (возможно, слишком много/большие фото — попробуйте меньше фото).";
       console.error(e);

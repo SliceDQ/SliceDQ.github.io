@@ -68,7 +68,13 @@
     position: fixed;
     top: 0; left: 0; width: 100%;
     height: 100vh;
-    height: 100dvh;
+    height: 100svh;
+    /* svh (small viewport height), а не dvh: dvh пересчитывается каждый раз,
+       когда мобильный браузер прячет/показывает адресную строку при скролле —
+       фиксированный блок меняет высоту "на лету", и background-size:cover
+       из-за этого пересчитывает картинку крупнее/мельче — видно как "скачок
+       масштаба" заднего фото прямо во время скролла. svh всегда одной и той
+       же (наименьшей) величины, поэтому фон больше не дёргается. */
     background-image: url('bg-stones.webp');
     background-size: cover;
     background-position: center;
@@ -1146,12 +1152,43 @@ function togglePhones(event) {
 
   var burgerBtn = document.getElementById("drawerOpenBtn");
 
+  // ============ 🔒 БЛОКИРОВКА СКРОЛЛА СТРАНИЦЫ ============
+  // Просто overflow:hidden на body не гарантированно блокирует прокрутку колесом
+  // мыши на десктопе (в некоторых браузерах scroll-контейнером остаётся html).
+  // Фиксируем body на месте через position:fixed — это блокирует скролл и
+  // мышью, и тачем, на всех устройствах. Счётчик нужен, чтобы шторка и
+  // полноэкранный просмотр объявления могли открываться одна поверх другой.
+  var scrollLockCount = 0;
+  var scrollLockY = 0;
+  function lockPageScroll(){
+    if(scrollLockCount === 0){
+      scrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = "fixed";
+      document.body.style.top = (-scrollLockY) + "px";
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+    }
+    scrollLockCount++;
+  }
+  function unlockPageScroll(){
+    scrollLockCount = Math.max(0, scrollLockCount - 1);
+    if(scrollLockCount === 0){
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollLockY);
+    }
+  }
+
   function openDrawer(){
     overlay.classList.add("open");
     drawer.classList.add("open");
     drawer.setAttribute("aria-hidden", "false");
     burgerBtn.classList.add("is-open");
-    document.body.style.overflow = "hidden";
+    lockPageScroll();
     renderCategoryList();
   }
   function closeDrawer(){
@@ -1159,9 +1196,7 @@ function togglePhones(event) {
     drawer.classList.remove("open");
     drawer.setAttribute("aria-hidden", "true");
     burgerBtn.classList.remove("is-open");
-    if(!announceOverlay.classList.contains("open")){
-      document.body.style.overflow = "";
-    }
+    unlockPageScroll();
   }
   document.getElementById("drawerOpenBtn").addEventListener("click", openDrawer);
   document.getElementById("drawerCloseBtn").addEventListener("click", closeDrawer);
@@ -1334,14 +1369,14 @@ function togglePhones(event) {
     announceView.setAttribute("aria-hidden", "false");
     announceViewInner.scrollTop = 0;
     announceView.scrollTop = 0;
-    document.body.style.overflow = "hidden";
+    lockPageScroll();
   }
 
   function closeAnnouncement(){
     announceOverlay.classList.remove("open");
     announceView.classList.remove("open");
     announceView.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+    unlockPageScroll();
   }
 
   announceCloseBtn.addEventListener("click", closeAnnouncement);

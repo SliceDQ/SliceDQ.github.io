@@ -179,7 +179,10 @@
       drop-shadow(0 1px 0 #adadad)
       drop-shadow(0 2px 0 #7a7a7f)
       drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
-    -webkit-box-reflect: below 2px linear-gradient(transparent 30%, rgba(255, 255, 255, 0.35));
+    /* -webkit-box-reflect убран: нестандартное свойство, в мобильных WebKit
+       (особенно во встроенных браузерах VK/Telegram/Instagram) может некорректно
+       считать реальную ширину/высоту документа и вызывать самопроизвольный зум
+       (скачки масштаба) во время скролла. */
   }
   
   .hero h1 .accent {
@@ -389,7 +392,7 @@
   .drawer-head{ display:flex; align-items:center; justify-content:space-between; padding:22px 26px; border-bottom:1px solid var(--border); }
   .drawer-head h3{ font-size:21px; font-weight:700; letter-spacing:-.02em; }
   
-  .drawer-body{ padding:16px; overflow-y:auto; flex:1; }
+  .drawer-body{ padding:16px; overflow-y:auto; flex:1; overscroll-behavior:contain; }
   .drawer-list li button{ 
     width:100%; text-align:left; padding:18px 16px; border-radius:var(--radius); 
     display:flex; align-items:center; justify-content:space-between; 
@@ -1148,6 +1151,7 @@ function togglePhones(event) {
     drawer.classList.add("open");
     drawer.setAttribute("aria-hidden", "false");
     burgerBtn.classList.add("is-open");
+    document.body.style.overflow = "hidden";
     renderCategoryList();
   }
   function closeDrawer(){
@@ -1155,6 +1159,9 @@ function togglePhones(event) {
     drawer.classList.remove("open");
     drawer.setAttribute("aria-hidden", "true");
     burgerBtn.classList.remove("is-open");
+    if(!announceOverlay.classList.contains("open")){
+      document.body.style.overflow = "";
+    }
   }
   document.getElementById("drawerOpenBtn").addEventListener("click", openDrawer);
   document.getElementById("drawerCloseBtn").addEventListener("click", closeDrawer);

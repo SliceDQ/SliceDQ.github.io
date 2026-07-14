@@ -2,7 +2,7 @@
 <html lang="ru" data-mode="night">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 <title>KSTYLE — школа танцев</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +18,7 @@
     text-rendering: optimizeLegibility;
     font-kerning: normal;
     width: 100%;
+    touch-action: manipulation;
     /* overflow-x:hidden убран отсюда: вместе с тем же свойством на body
        он мог отключать быстрый composited-скролл в реальных браузерах —
        body::before ниже само гасит горизонтальный оverflow. */

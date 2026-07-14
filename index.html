@@ -80,8 +80,8 @@
   header {
     position: sticky; top: 0; z-index: 40;
     background: var(--header-glass);
-    backdrop-filter: blur(30px) saturate(210%);
-    -webkit-backdrop-filter: blur(30px) saturate(210%);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
     border-bottom: 1px solid var(--border);
     box-shadow: 0 15px 40px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15);
   }
@@ -275,7 +275,7 @@
   /* ============ ✨ FEATURES ============ */
   .features{ border-top:1px solid var(--border); }
   .features h2{ font-family: 'Montserrat', sans-serif; font-weight: 900; font-size:clamp(28px,4vw,40px); margin-bottom:48px; letter-spacing:-.02em; text-transform: uppercase;}
-  .feature-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .feature-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:28px; }
   @media(max-width:820px){ .feature-grid{ grid-template-columns:1fr; } }
   
   .feature-card{
@@ -379,7 +379,7 @@
     transition: transform .4s var(--ease); 
     z-index: 51; display:flex; flex-direction:column; 
     box-shadow: 0 50px 100px rgba(0,0,0,0.95), inset 0 1px 3px rgba(255,255,255,0.2);
-    backdrop-filter: blur(35px);
+    backdrop-filter: blur(20px);
   }
   .drawer.open{ transform: translateX(0); }
   
@@ -423,19 +423,58 @@
   .link-tile .arrow{ color:var(--accent); font-weight:800; flex-shrink:0; }
 
   /* ============ 📣 ОБЪЯВЛЕНИЯ ============ */
-  .announcement-list{ display:flex; flex-direction:column; gap:12px; }
+  .announcement-list{ display:flex; flex-direction:column; gap:14px; }
   .announcement-item{
-    background: var(--card-glass); border:1px solid var(--border); border-radius:12px;
-    padding:16px 18px; backdrop-filter:blur(20px);
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    width:100%; text-align:left; cursor:pointer; transition: all 0.25s var(--ease);
+    position:relative;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--card-glass) 100%, rgba(255,255,255,0.05)), var(--card-glass));
+    border:1px solid var(--border); border-radius:16px;
+    padding:18px 18px 18px 22px; backdrop-filter:blur(20px);
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    width:100%; text-align:left; cursor:pointer;
+    transition: transform 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+    box-shadow: 0 10px 24px -12px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.06);
+    overflow:hidden;
   }
-  .announcement-item:hover{ border-color:var(--accent); transform:translateX(4px); background: color-mix(in srgb, var(--card-glass) 70%, rgba(255,255,255,0.04)); }
-  .announcement-item .info{ min-width:0; }
-  .announcement-item .title-line{ font-size:14.5px; line-height:1.5; color:var(--text); overflow-wrap:anywhere; word-break:break-word; font-weight:700; }
-  .announcement-item .date{ display:block; color:var(--muted); font-size:12px; margin-top:6px; }
-  .announcement-item .photo-badge{ color:var(--accent); font-size:12px; font-weight:600; margin-top:6px; display:inline-block; }
-  .announcement-item .arrow{ color:var(--accent); font-weight:800; flex-shrink:0; }
+  .announcement-item::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+    background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 40%, transparent));
+    opacity:0.85; transition: opacity 0.25s var(--ease);
+  }
+  .announcement-item:hover{
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+    transform: translateY(-3px);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--card-glass) 100%, rgba(255,255,255,0.09)), var(--card-glass));
+    box-shadow: 0 18px 34px -14px rgba(0,0,0,0.7), 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent), inset 0 1px 1px rgba(255,255,255,0.08);
+  }
+  .announcement-item:hover::before{ opacity:1; }
+  .announcement-item .info{ min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .announcement-item .title-line{ font-size:15px; line-height:1.4; color:var(--text); overflow-wrap:anywhere; word-break:break-word; font-weight:700; letter-spacing:-0.01em; }
+  .announcement-item .meta-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .announcement-item .date{
+    color:var(--muted); font-size:11.5px; font-weight:600;
+    display:inline-flex; align-items:center; gap:5px;
+    background: rgba(255,255,255,0.04); border:1px solid var(--border);
+    padding:3px 9px; border-radius:999px;
+  }
+  .announcement-item .photo-badge{
+    color: var(--accent); font-size:11.5px; font-weight:700;
+    display:inline-flex; align-items:center; gap:5px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    padding:3px 9px; border-radius:999px;
+  }
+  .announcement-item .arrow{
+    color:var(--accent); font-weight:800; flex-shrink:0;
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.05); border:1px solid var(--border);
+    transition: all 0.25s var(--ease);
+  }
+  .announcement-item:hover .arrow{
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    transform: translateX(2px);
+  }
 
   /* ============ 🔎 ПОЛНОЭКРАННЫЙ ПРОСМОТР ОБЪЯВЛЕНИЯ ============ */
   .announce-view-overlay{
@@ -446,7 +485,10 @@
   .announce-view-overlay.open{ opacity:1; pointer-events:auto; }
   .announce-view{
     position:fixed; inset:0; z-index:61; overflow-y:auto;
-    background: var(--bg);
+    background: linear-gradient(165deg,
+      color-mix(in srgb, var(--accent) 22%, var(--bg)) 0%,
+      var(--bg) 45%,
+      #000 100%);
     transform: translateY(24px); opacity:0; pointer-events:none;
     transition: transform .4s var(--ease), opacity .35s var(--ease);
   }
@@ -455,7 +497,7 @@
   @media(max-width:720px){ .announce-view-inner{ padding:80px 18px 60px; } }
   .announce-view-head{
     position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between;
-    padding:18px 24px; background: var(--header-glass); backdrop-filter: blur(30px) saturate(210%);
+    padding:18px 24px; background: var(--header-glass); backdrop-filter: blur(18px) saturate(180%);
     border-bottom:1px solid var(--border);
   }
   .announce-view-head .cat-name{ font-weight:700; font-size:15px; color:var(--muted); }
@@ -484,8 +526,8 @@
     transform: translateY(70px) scale(.88) rotate(-3deg);
     transition: opacity .9s cubic-bezier(.34,1.56,.64,1), transform .9s cubic-bezier(.34,1.56,.64,1);
     transition-delay: var(--rd, 0ms);
-    will-change: opacity, transform;
   }
+  .reveal:not(.visible){ will-change: opacity, transform; }
   .reveal.visible{ opacity:1; transform: translateY(0) scale(1) rotate(0deg); }
   @media (prefers-reduced-motion: reduce){
     .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
@@ -519,7 +561,7 @@
   @keyframes btnWobble{ 0%{ transform: translateY(0) rotate(0); } 30%{ transform: translateY(-7px) rotate(-3deg); } 60%{ transform: translateY(-9px) rotate(3deg); } 100%{ transform: translateY(-6px) rotate(0); } }
   @keyframes wiggleArrow{ 0%,100%{ transform: translateX(0) rotate(0); } 50%{ transform: translateX(7px) rotate(20deg); } }
 
-  body::before{ animation: bgPan 20s ease-in-out infinite; }
+  body::before{ /* анимация панорамирования отключена — она заставляла все стеклянные панели пересчитывать блюр каждый кадр */ }
 
   .logo{ display:inline-block; animation: sway 4s ease-in-out infinite; transform-origin: center bottom; }
 
@@ -543,6 +585,8 @@
   .feature-card:nth-child(1) .num{ animation-delay:0s; }
   .feature-card:nth-child(2) .num{ animation-delay:.3s; }
   .feature-card:nth-child(3) .num{ animation-delay:.6s; }
+  .feature-card:nth-child(4) .num{ animation-delay:.9s; }
+  .feature-card:nth-child(5) .num{ animation-delay:1.2s; }
 
   .cat-tile{ transform-origin: center bottom; }
   .cat-tile:hover{ transform: translateY(-8px) rotate(-1.5deg) !important; }
@@ -631,6 +675,16 @@
           <h3 id="hpFeature3Title">Зал в аренду</h3>
           <p id="hpFeature3Text">Свободные слоты можно забронировать под съёмку, репетицию или мастер-класс.</p>
         </div>
+        <div class="feature-card reveal" style="--rd:300ms">
+          <div class="num">04</div>
+          <h3 id="hpFeature4Title">Гибкое расписание</h3>
+          <p id="hpFeature4Text">Утренние и вечерние группы всю неделю — легко подобрать удобное время.</p>
+        </div>
+        <div class="feature-card reveal" style="--rd:400ms">
+          <div class="num">05</div>
+          <h3 id="hpFeature5Title">Атмосфера сообщества</h3>
+          <p id="hpFeature5Text">Регулярные баттлы, съёмки и совместные выступления — не просто занятия, а комьюнити.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -638,7 +692,7 @@
   <section class="cat-strip">
     <div class="wrap">
       <h2 class="reveal" id="hpCatStripTitle">Всё о студии — в одном месте</h2>
-      <p class="reveal" id="hpCatStripText">Направления, педагоги, расписание, отзывы, цены, скидки и аренда зала. Откройте меню, чтобы посмотреть раздел.</p>
+      <p class="reveal" id="hpCatStripText">Направления, педагоги, расписание, отзывы, прайс, скидки и аренда зала. Откройте меню, чтобы посмотреть раздел.</p>
       <div class="cat-grid" id="catGridHome"></div>
     </div>
   </section>
@@ -837,6 +891,8 @@
       feature1Title: "hpFeature1Title", feature1Text: "hpFeature1Text",
       feature2Title: "hpFeature2Title", feature2Text: "hpFeature2Text",
       feature3Title: "hpFeature3Title", feature3Text: "hpFeature3Text",
+      feature4Title: "hpFeature4Title", feature4Text: "hpFeature4Text",
+      feature5Title: "hpFeature5Title", feature5Text: "hpFeature5Text",
       catStripTitle: "hpCatStripTitle",
       catStripText: "hpCatStripText",
       contactsTitle: "hpContactsTitle"
@@ -869,7 +925,7 @@ function togglePhones(event) {
     { key:"teachers",   label:"Педагоги" },
     { key:"schedule",   label:"Расписание" },
     { key:"reviews",    label:"Отзывы" },
-    { key:"prices",     label:"Цены" },
+    { key:"prices",     label:"Прайс" },
     { key:"discounts",  label:"Скидки" },
     { key:"rental",     label:"Аренда зала" }
   ];
@@ -898,6 +954,8 @@ function togglePhones(event) {
           photos: data.photos || [],
           linkLabel: data.linkLabel || "",
           linkUrl: data.linkUrl || "",
+          bgImage: data.bgImage || "",
+          bgDim: (typeof data.bgDim === "number") ? data.bgDim : 55,
           date: (data.createdAt && data.createdAt.toDate) ? data.createdAt.toDate().toLocaleDateString("ru-RU") : ""
         };
       });
@@ -985,7 +1043,7 @@ function togglePhones(event) {
       var btn = document.createElement("button");
       btn.className = "btn btn-primary";
       btn.textContent = item.cta;
-      btn.addEventListener("click", function(){ openDrawer(); openCategory(item.key); });
+      btn.addEventListener("click", function(){ handleCategoryClick(item.key); });
       right.appendChild(btn);
       showcaseContentEl.appendChild(left);
       showcaseContentEl.appendChild(right);
@@ -1031,19 +1089,42 @@ function togglePhones(event) {
   window.__applyShowcaseOverrides = applyShowcaseOverrides;
   if(window.__homepageData) applyShowcaseOverrides(window.__homepageData);
 
+  // "Расписание" — особый раздел: в нём всегда лишь одно объявление,
+  // поэтому вместо шторки со списком сразу открываем само объявление на весь экран.
+  async function openScheduleDirect(){
+    closeDrawer();
+    var items = await getItems("schedule");
+    if(items.length > 0){
+      openAnnouncement(items[0], "Расписание");
+    } else {
+      // объявления ещё нет — на всякий случай показываем обычную шторку с разделом
+      openDrawer();
+      openCategory("schedule");
+    }
+  }
+
+  function handleCategoryClick(key){
+    if(key === "schedule"){
+      openScheduleDirect();
+    } else {
+      openDrawer();
+      openCategory(key);
+    }
+  }
+
   var catGridHome = document.getElementById("catGridHome");
   CATEGORIES.forEach(function(c, i){
     var el = document.createElement("button");
     el.className = "cat-tile reveal";
     el.style.setProperty("--rd", (i * 60) + "ms");
     el.innerHTML = '<span class="name">' + c.label + '</span><span class="arrow">/</span>';
-    el.addEventListener("click", function(){ openDrawer(); openCategory(c.key); });
+    el.addEventListener("click", function(){ handleCategoryClick(c.key); });
     catGridHome.appendChild(el);
   });
   bindReveal();
 
   document.querySelectorAll("[data-open-category]").forEach(function(btn){
-    btn.addEventListener("click", function(){ openDrawer(); openCategory(btn.getAttribute("data-open-category")); });
+    btn.addEventListener("click", function(){ handleCategoryClick(btn.getAttribute("data-open-category")); });
   });
 
   var overlay = document.getElementById("overlay");
@@ -1079,7 +1160,10 @@ function togglePhones(event) {
       var li = document.createElement("li");
       var btn = document.createElement("button");
       btn.innerHTML = '<span class="n">' + c.label + '</span><span class="arrow">/</span>';
-      btn.addEventListener("click", function(){ openCategory(c.key); });
+      btn.addEventListener("click", function(){
+        if(c.key === "schedule"){ openScheduleDirect(); }
+        else { openCategory(c.key); }
+      });
       li.appendChild(btn);
       list.appendChild(li);
     });
@@ -1128,17 +1212,25 @@ function togglePhones(event) {
       titleEl.className = "title-line";
       titleEl.textContent = item.title;
       info.appendChild(titleEl);
-      if(item.date){
-        var d = document.createElement("span");
-        d.className = "date";
-        d.textContent = item.date;
-        info.appendChild(d);
-      }
-      if(item.photos && item.photos.length){
-        var pb = document.createElement("span");
-        pb.className = "photo-badge";
-        pb.textContent = "📷 " + item.photos.length;
-        info.appendChild(pb);
+
+      var hasDate = !!item.date;
+      var hasPhotos = item.photos && item.photos.length;
+      if(hasDate || hasPhotos){
+        var metaRow = document.createElement("div");
+        metaRow.className = "meta-row";
+        if(hasDate){
+          var d = document.createElement("span");
+          d.className = "date";
+          d.textContent = item.date;
+          metaRow.appendChild(d);
+        }
+        if(hasPhotos){
+          var pb = document.createElement("span");
+          pb.className = "photo-badge";
+          pb.textContent = "📷 " + item.photos.length;
+          metaRow.appendChild(pb);
+        }
+        info.appendChild(metaRow);
       }
 
       var arrow = document.createElement("span");
@@ -1166,6 +1258,16 @@ function togglePhones(event) {
   function openAnnouncement(item, catLabel){
     announceCatName.textContent = catLabel;
     announceViewInner.innerHTML = "";
+
+    if(item.bgImage){
+      var dim = (typeof item.bgDim === "number") ? item.bgDim : 55;
+      announceView.style.backgroundImage =
+        "linear-gradient(rgba(0,0,0," + (dim/100) + "), rgba(0,0,0," + (dim/100) + ")), url('" + item.bgImage + "')";
+      announceView.style.backgroundSize = "cover";
+      announceView.style.backgroundPosition = "center";
+    } else {
+      announceView.style.backgroundImage = "";
+    }
 
     var titleEl = document.createElement("h1");
     titleEl.className = "announce-title";

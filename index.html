@@ -567,10 +567,7 @@
   .announce-nav-prev{ left:18px; }
   .announce-nav-next{ right:18px; }
   @media(max-width:720px){
-    .announce-nav{ width:38px; height:38px; }
-    .announce-nav svg{ width:17px; height:17px; }
-    .announce-nav-prev{ left:8px; }
-    .announce-nav-next{ right:8px; }
+    .announce-nav{ display:none; }
   }
 
   .announce-dots{
@@ -781,7 +778,7 @@
           </svg>
           <div class="contact-info">
             <span class="title" id="contactChatTitle">Макс</span>
-            <span class="desc" id="contactChatDesc">Corporate Chat</span>
+            <span class="desc" id="contactChatDesc">Личный чат</span>
           </div>
         </a>
 
@@ -791,7 +788,7 @@
           </svg>
           <div class="contact-info">
             <span class="title">WhatsApp</span>
-            <span class="desc">Написать в чат</span>
+            <span class="desc">Личный чат</span>
           </div>
         </a>
 
@@ -801,7 +798,7 @@
           </svg>
           <div class="contact-info">
             <span class="title">Telegram</span>
-            <span class="desc">Чат и новости</span>
+            <span class="desc">Личный чат</span>
           </div>
         </a>
 
@@ -811,7 +808,7 @@
           </svg>
           <div class="contact-info">
             <span class="title">ВКонтакте</span>
-            <span class="desc">Группа и медиа</span>
+            <span class="desc">Группа</span>
           </div>
         </a>
 
@@ -849,7 +846,7 @@
   <div class="wrap footer-inner">
     <div>
       <div class="logo">KSTYLE</div>
-      <div class="meta" style="margin-top: 4px;">© 2026 KSTYLE. Студия танца.</div>
+      <div class="meta" style="margin-top: 4px;">© 2026 KSTYLE. Школа современного танца.</div>
     </div>
   </div>
 </footer>
@@ -1039,10 +1036,10 @@ function togglePhones(event) {
     { key:"directions", label:"Направления" },
     { key:"teachers",   label:"Педагоги" },
     { key:"schedule",   label:"Расписание" },
-    { key:"reviews",    label:"Отзывы" },
     { key:"prices",     label:"Прайс" },
     { key:"discounts",  label:"Скидки" },
-    { key:"rental",     label:"Аренда зала" }
+    { key:"rental",     label:"Аренда зала" },
+    { key:"reviews",    label:"Отзывы" }
   ];
 
   var itemsCache = {}; // кэш уже загруженных разделов, чтобы повторное открытие было мгновенным
@@ -1456,8 +1453,9 @@ function togglePhones(event) {
     var t = e.changedTouches[0];
     var dx = t.clientX - touchStartX;
     var dy = t.clientY - touchStartY;
-    // порог 40px и явно горизонтальный жест, чтобы не мешать вертикальному скроллу текста
-    if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3){
+    // порог 90px и явно горизонтальный жест (в 2 раза больше вертикального), чтобы
+    // случайный скролл/наклон пальца не переключал объявление
+    if(Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 2){
       if(dx < 0) goToAnnounce(announceState.index + 1);
       else goToAnnounce(announceState.index - 1);
     }

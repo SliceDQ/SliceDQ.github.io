@@ -175,6 +175,7 @@
   }
   
   .hero h1 {
+    position: relative; /* точка отсчёта для .hero-h1-reflect */
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
     font-size: clamp(46px, 9vw, 102px);
@@ -192,6 +193,32 @@
        (скачки масштаба) во время скролла. */
   }
   
+  /* ============ 🪞 ОТРАЖЕНИЕ ЗАГОЛОВКА (замена -webkit-box-reflect) ============
+     Вместо нестандартного box-reflect (даёт потолок ~60fps в части WebKit-рендереров)
+     используем обычный клон h1 (создаётся в JS ниже), отражённый через
+     transform: scaleY(-1) — это чисто композитная операция (GPU layer),
+     плюс mask-image для плавного затухания вниз. */
+  .hero-h1-reflect{
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 100%;
+    pointer-events: none;
+    user-select: none;
+    /* origin: center — блок остаётся строго под h1, переворачивается только
+       контент внутри (последняя строка оригинала оказывается сразу под ним).
+       origin:top двигал бы весь блок при флипе и накладывал его на оригинал —
+       это и было причиной "срезанного" отражения без ШАГ. */
+    transform: scaleY(-1);
+    transform-origin: center;
+    will-change: transform;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.12) 60%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.12) 60%, rgba(0,0,0,0) 100%);
+  }
+  @media(max-width:720px){
+    .hero-h1-reflect{ display:none; } /* на мобильных под заголовком мало места — экономим */
+  }
+
   .hero h1 .accent {
     background: var(--accent); 
     -webkit-background-clip: text;
@@ -524,6 +551,39 @@
     width:100%; height:220px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border);
     cursor:zoom-in; box-shadow: var(--shadow-3d);
   }
+
+  /* ============ ◀▶ ЛИСТАНИЕ ОБЪЯВЛЕНИЙ ============ */
+  .announce-nav{
+    position:fixed; top:50%; transform:translateY(-50%); z-index:63;
+    width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border); background: rgba(255,255,255,0.06); backdrop-filter: blur(6px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.4);
+    transition: all 0.25s var(--ease); opacity:0; pointer-events:none;
+  }
+  .announce-view.open .announce-nav{ opacity:1; pointer-events:auto; }
+  .announce-nav.is-hidden{ opacity:0 !important; pointer-events:none !important; }
+  .announce-nav svg{ width:20px; height:20px; stroke:var(--text); fill:none; }
+  .announce-nav:hover{ border-color:var(--accent); background: rgba(255,255,255,0.12); transform:translateY(-50%) scale(1.08); box-shadow: 0 10px 26px -4px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .announce-nav-prev{ left:18px; }
+  .announce-nav-next{ right:18px; }
+  @media(max-width:720px){
+    .announce-nav{ width:38px; height:38px; }
+    .announce-nav svg{ width:17px; height:17px; }
+    .announce-nav-prev{ left:8px; }
+    .announce-nav-next{ right:8px; }
+  }
+
+  .announce-dots{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:63;
+    display:flex; gap:7px; opacity:0; pointer-events:none; transition:opacity .25s var(--ease);
+  }
+  .announce-view.open .announce-dots{ opacity:1; }
+  .announce-dots.is-hidden{ opacity:0 !important; }
+  .announce-dots span{
+    width:6px; height:6px; border-radius:50%; background: rgba(255,255,255,0.25);
+    transition: all .25s var(--ease);
+  }
+  .announce-dots span.active{ background: var(--accent); width:18px; border-radius:4px; }
   .lightbox{
     position:fixed; inset:0; z-index:70; background:rgba(0,0,0,0.92);
     display:flex; align-items:center; justify-content:center; padding:24px;
@@ -581,7 +641,7 @@
   .hero h1 .accent{ display:inline-block; animation: sway 3.2s ease-in-out infinite; transform-origin: center bottom; will-change: transform; }
 
   .hero-eyebrow{ display:inline-block; }
-  .hero-eyebrow::before{ content:"● "; display:inline-block; animation: floaty 1.6s ease-in-out infinite; will-change: transform; }
+  .hero-eyebrow::before{ content:""; }
 
   .dot-btn:hover{ transform: scale(1.4) rotate(20deg) !important; }
   .dot-btn.active{ animation: floatyPulse 2.4s ease-in-out infinite; will-change: transform, box-shadow; }
@@ -643,19 +703,19 @@
 <main>
   <section class="hero">
     <div class="wrap">
-      <div class="hero-eyebrow reveal" style="--rd:0ms" id="hpEyebrow">Школа танца · открыты новые группы</div>
-      <h1 class="reveal" style="--rd:80ms"><span id="hpTitleLine1">Танцуй</span><br><span id="hpTitleLine2">без</span> <span class="accent" id="hpTitleAccent">границ</span></h1>
-      <p class="lead reveal" style="--rd:160ms" id="hpLead">KSTYLE — студия для тех, кто хочет двигаться иначе. Группы для новичков и профи, авторские направления и педагоги, готовые делиться сценическим опытом.</p>
+      <div class="hero-eyebrow reveal" style="--rd:0ms" id="hpEyebrow">Школа современного танца / открыты новые группы</div>
+      <h1 class="reveal" style="--rd:80ms"><span id="hpTitleLine1">Сделай</span><br><span id="hpTitleLine2">первый</span> <span class="accent" id="hpTitleAccent">шаг</span></h1>
+      <p class="lead reveal" style="--rd:160ms" id="hpLead">Школа современного танца "KerolStyle" для тех, кому тесно в рамках обычных будней и хочет красиво двигаться, а не просто переминаться с ноги на ногу.</p>
       <div class="hero-cta reveal" style="--rd:240ms">
         <button class="btn btn-primary" id="signupBtnHero">Записаться</button>
         <button class="btn btn-ghost" data-open-category="schedule" id="hpBtn1">Смотреть расписание</button>
         <button class="btn btn-ghost" data-open-category="directions" id="hpBtn2">Все направления</button>
       </div>
       <div class="rule-signature reveal" style="--rd:320ms">
-        <div class="stat"><span class="n" id="hpStat1n">2019</span><span class="cap" id="hpStat1cap">Работаем с</span></div>
-        <div class="stat"><span class="n" id="hpStat2n">6</span><span class="cap" id="hpStat2cap">Направлений</span></div>
-        <div class="stat"><span class="n" id="hpStat3n">12</span><span class="cap" id="hpStat3cap">Педагогов</span></div>
-        <div class="stat"><span class="n" id="hpStat4n">150+</span><span class="cap" id="hpStat4cap">Учеников</span></div>
+        <div class="stat"><span class="n" id="hpStat1n">2024</span><span class="cap" id="hpStat1cap">Работаем с</span></div>
+        <div class="stat"><span class="n" id="hpStat2n">15</span><span class="cap" id="hpStat2cap">Направлений</span></div>
+        <div class="stat"><span class="n" id="hpStat3n">5</span><span class="cap" id="hpStat3cap">Педагогов</span></div>
+        <div class="stat"><span class="n" id="hpStat4n">150+</span><span class="cap" id="hpStat4cap">Постановок</span></div>
       </div>
     </div>
   </section>
@@ -670,32 +730,32 @@
 
   <section class="features">
     <div class="wrap">
-      <h2 class="reveal" id="hpFeaturesTitle">Почему выбирают KSTYLE</h2>
+      <h2 class="reveal" id="hpFeaturesTitle">Почему мы?</h2>
       <div class="feature-grid">
         <div class="feature-card reveal" style="--rd:0ms">
           <div class="num">01</div>
-          <h3 id="hpFeature1Title">Педагоги-практики</h3>
-          <p id="hpFeature1Text">Преподают те, кто сам выступает и ставит номера — никакой теории без сцены.</p>
+          <h3 id="hpFeature1Title">Индивидуальный Подход</h3>
+          <p id="hpFeature1Text">Маленькие группы позволяют уделять максимум внимания каждому ученику, помогая совершенствовать технику и преодолевать трудности.</p>
         </div>
         <div class="feature-card reveal" style="--rd:100ms">
           <div class="num">02</div>
-          <h3 id="hpFeature2Title">Группы для любого уровня</h3>
-          <p id="hpFeature2Text">От первого занятия до подготовки к баттлам и сценическим выступлениям.</p>
+          <h3 id="hpFeature2Title">Опытные Преподаватели</h3>
+          <p id="hpFeature2Text">Наши педагоги - настоящие мастера своего дела, имеют богатый опыт работы и регулярно повышают квалификацию, осваивая новые техники и методики преподавания.</p>
         </div>
         <div class="feature-card reveal" style="--rd:200ms">
           <div class="num">03</div>
-          <h3 id="hpFeature3Title">Зал в аренду</h3>
-          <p id="hpFeature3Text">Свободные слоты можно забронировать под съёмку, репетицию или мастер-класс.</p>
+          <h3 id="hpFeature3Title">Разнообразие Танцевальных Стилей</h3>
+          <p id="hpFeature3Text">В нашей школе представлен широкий спектр направлений, начиная от классических танцев и заканчивая современными стилями.</p>
         </div>
         <div class="feature-card reveal" style="--rd:300ms">
           <div class="num">04</div>
-          <h3 id="hpFeature4Title">Гибкое расписание</h3>
-          <p id="hpFeature4Text">Утренние и вечерние группы всю неделю — легко подобрать удобное время.</p>
+          <h3 id="hpFeature4Title">Доступные Цены и Акции</h3>
+          <p id="hpFeature4Text">Наша цель — сделать танцы доступными каждому. Именно поэтому мы предлагаем привлекательные цены и специальные скидки.</p>
         </div>
         <div class="feature-card reveal" style="--rd:400ms">
           <div class="num">05</div>
-          <h3 id="hpFeature5Title">Атмосфера сообщества</h3>
-          <p id="hpFeature5Text">Регулярные баттлы, съёмки и совместные выступления — не просто занятия, а комьюнити.</p>
+          <h3 id="hpFeature5Title">Семейная Атмосфера</h3>
+          <p id="hpFeature5Text">Каждый ученик становится частью большой дружной семьи, где царит тепло и поддержка.</p>
         </div>
       </div>
     </div>
@@ -818,7 +878,14 @@
       <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
     </button>
   </div>
+  <button class="announce-nav announce-nav-prev" id="announcePrevBtn" aria-label="Предыдущее объявление">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+  </button>
+  <button class="announce-nav announce-nav-next" id="announceNextBtn" aria-label="Следующее объявление">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+  </button>
   <div class="announce-view-inner" id="announceViewInner"></div>
+  <div class="announce-dots" id="announceDots"></div>
 </div>
 
 <div class="lightbox" id="lightbox">
@@ -919,7 +986,43 @@
         }
       });
       if(window.__applyShowcaseOverrides) window.__applyShowcaseOverrides(data);
+      window.__syncHeroReflection && window.__syncHeroReflection();
     }).catch(function(e){ console.error("Ошибка загрузки текста главной:", e); });
+  })();
+
+  /* ============ 🪞 ОТРАЖЕНИЕ ЗАГОЛОВКА ============
+     Клонируем h1 и отражаем клон через CSS (transform: scaleY(-1) + mask-image),
+     это замена -webkit-box-reflect: обычный DOM-узел на GPU-слое, без потолка fps
+     и без багов box-reflect в мобильных webview. Пересобираем клон после того,
+     как текст h1 подтянется из Firestore, чтобы отражение не разъехалось со
+     старым текстом. */
+  (function setupHeroReflection(){
+    var h1 = document.querySelector(".hero h1");
+    if(!h1) return;
+    var reflect = null;
+
+    function build(){
+      if(reflect) reflect.remove();
+      reflect = h1.cloneNode(true);
+      reflect.classList.add("hero-h1-reflect");
+      reflect.removeAttribute("id");
+      reflect.removeAttribute("style");
+      reflect.setAttribute("aria-hidden", "true");
+
+      /* В отражении убираем вторую строку ("ПЕРВЫЙ") и перенос строки —
+         остаётся только первая строка ("СДЕЛАЙ") и акцент ("ШАГ"),
+         которые оказываются на одной строке. Так акцент в зеркале
+         поднимается и стоит на одном уровне с "СДЕЛАЙ", без разрыва. */
+      var br = reflect.querySelector("br");
+      if(br) br.remove();
+      var line2 = reflect.querySelector("#hpTitleLine2, [id$='TitleLine2']");
+      if(line2) line2.remove();
+
+      h1.insertAdjacentElement("afterend", reflect);
+    }
+
+    build();
+    window.__syncHeroReflection = build;
   })();
 </script>
 <script>
@@ -1024,8 +1127,8 @@ function togglePhones(event) {
   });
 
   var SHOWCASE = [
-    { key: "directions", num: "01", label: "Направления", title: "Выбирайте свой стиль", text: "Хип-хоп, k-pop, вог, хилсы — можно пробовать разные направления.", cta: "Смотреть направления" },
-    { key: "teachers", num: "02", label: "Педагоги", title: "Учат те, кто сам выступает", text: "Нашие педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },
+    { key: "directions", num: "01", label: "Направления", title: "Выбирайте свой стиль", text: "Latina mix, frame up, modern, high heels, flamenco, hip-hop, life style, jazz-fank, tango-solo, bachata, zumba, ирландский степ, стретчинг, здоровая спина, здоровые суставы.", cta: "Смотреть направления" },
+    { key: "teachers", num: "02", label: "Педагоги", title: "Перенимайте опыт у тех, кто знает сцену изнутри.", text: "Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },
     { key: "schedule", num: "03", label: "Расписание", title: "Занятия под ваш ритм", text: "Утренние и вечерние группы всю неделю. Найдите своё время.", cta: "Открыть расписание" }
   ];
 
@@ -1114,7 +1217,7 @@ function togglePhones(event) {
     closeDrawer();
     var items = await getItems("schedule");
     if(items.length > 0){
-      openAnnouncement(items[0], "Расписание");
+      openAnnouncement(items, 0, "Расписание");
     } else {
       // объявления ещё нет — на всякий случай показываем обычную шторку с разделом
       openDrawer();
@@ -1253,7 +1356,7 @@ function togglePhones(event) {
 
     var list = document.createElement("div");
     list.className = "announcement-list";
-    items.forEach(function(item){
+    items.forEach(function(item, idx){
       var card = document.createElement("button");
       card.type = "button";
       card.className = "announcement-item reveal";
@@ -1291,7 +1394,7 @@ function togglePhones(event) {
 
       card.appendChild(info);
       card.appendChild(arrow);
-      card.addEventListener("click", function(){ closeDrawer(); openAnnouncement(item, cat.label); });
+      card.addEventListener("click", function(){ closeDrawer(); openAnnouncement(items, idx, cat.label); });
       list.appendChild(card);
     });
     drawerBody.appendChild(list);
@@ -1304,10 +1407,81 @@ function togglePhones(event) {
   var announceViewInner = document.getElementById("announceViewInner");
   var announceCatName = document.getElementById("announceCatName");
   var announceCloseBtn = document.getElementById("announceCloseBtn");
+  var announcePrevBtn = document.getElementById("announcePrevBtn");
+  var announceNextBtn = document.getElementById("announceNextBtn");
+  var announceDots = document.getElementById("announceDots");
   var lightbox = document.getElementById("lightbox");
   var lightboxImg = document.getElementById("lightboxImg");
 
-  function openAnnouncement(item, catLabel){
+  // текущий список объявлений раздела + позиция в нём — нужно, чтобы можно
+  // было листать соседние объявления свайпом или стрелками, не закрывая экран
+  var announceState = { items: [], index: 0, catLabel: "" };
+
+  function renderAnnounceNav(){
+    var multi = announceState.items.length > 1;
+    announcePrevBtn.classList.toggle("is-hidden", !multi);
+    announceNextBtn.classList.toggle("is-hidden", !multi);
+    announceDots.classList.toggle("is-hidden", !multi);
+    announceDots.innerHTML = "";
+    if(!multi) return;
+    announceState.items.forEach(function(_, i){
+      var dot = document.createElement("span");
+      if(i === announceState.index) dot.classList.add("active");
+      announceDots.appendChild(dot);
+    });
+  }
+
+  function goToAnnounce(newIndex){
+    var len = announceState.items.length;
+    if(len === 0) return;
+    // зацикливаем — с последнего свайп вперёд ведёт к первому, и наоборот
+    announceState.index = (newIndex + len) % len;
+    renderAnnouncement(announceState.items[announceState.index], announceState.catLabel);
+    renderAnnounceNav();
+  }
+
+  announcePrevBtn.addEventListener("click", function(){ goToAnnounce(announceState.index - 1); });
+  announceNextBtn.addEventListener("click", function(){ goToAnnounce(announceState.index + 1); });
+
+  // свайп влево/вправо по телефону — переключает объявление внутри раздела
+  var touchStartX = 0, touchStartY = 0, touchActive = false;
+  announceView.addEventListener("touchstart", function(e){
+    if(announceState.items.length < 2) return;
+    var t = e.touches[0];
+    touchStartX = t.clientX; touchStartY = t.clientY; touchActive = true;
+  }, { passive:true });
+  announceView.addEventListener("touchend", function(e){
+    if(!touchActive) return;
+    touchActive = false;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - touchStartX;
+    var dy = t.clientY - touchStartY;
+    // порог 40px и явно горизонтальный жест, чтобы не мешать вертикальному скроллу текста
+    if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3){
+      if(dx < 0) goToAnnounce(announceState.index + 1);
+      else goToAnnounce(announceState.index - 1);
+    }
+  }, { passive:true });
+
+  document.addEventListener("keydown", function(e){
+    if(!announceView.classList.contains("open")) return;
+    if(e.key === "ArrowLeft") goToAnnounce(announceState.index - 1);
+    else if(e.key === "ArrowRight") goToAnnounce(announceState.index + 1);
+  });
+
+  function openAnnouncement(items, index, catLabel){
+    announceState.items = items;
+    announceState.index = index;
+    announceState.catLabel = catLabel;
+    renderAnnouncement(items[index], catLabel);
+    renderAnnounceNav();
+    announceOverlay.classList.add("open");
+    announceView.classList.add("open");
+    announceView.setAttribute("aria-hidden", "false");
+    lockPageScroll();
+  }
+
+  function renderAnnouncement(item, catLabel){
     announceCatName.textContent = catLabel;
     announceViewInner.innerHTML = "";
 
@@ -1365,12 +1539,8 @@ function togglePhones(event) {
       announceViewInner.appendChild(grid);
     }
 
-    announceOverlay.classList.add("open");
-    announceView.classList.add("open");
-    announceView.setAttribute("aria-hidden", "false");
     announceViewInner.scrollTop = 0;
     announceView.scrollTop = 0;
-    lockPageScroll();
   }
 
   function closeAnnouncement(){

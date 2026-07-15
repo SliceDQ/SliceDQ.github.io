@@ -572,7 +572,10 @@
 
   .announce-dots{
     position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:63;
-    display:flex; gap:7px; opacity:0; pointer-events:none; transition:opacity .25s var(--ease);
+    display:flex; align-items:center; gap:7px; opacity:0; pointer-events:none; transition:opacity .25s var(--ease);
+    padding:8px 12px; border-radius:999px;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(6px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.06);
   }
   .announce-view.open .announce-dots{ opacity:1; }
   .announce-dots.is-hidden{ opacity:0 !important; }
@@ -581,6 +584,23 @@
     transition: all .25s var(--ease);
   }
   .announce-dots span.active{ background: var(--accent); width:18px; border-radius:4px; }
+
+  /* ============ 🎞 АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ ОБЪЯВЛЕНИЙ ============
+     Только transform + opacity — это композитные свойства, GPU-слой,
+     без пересчёта layout/paint, поэтому анимация лёгкая и плавная
+     даже на слабых телефонах. */
+  .announce-view-inner{
+    transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .22s ease;
+    will-change: transform, opacity;
+  }
+  .announce-view-inner.slide-out-next{ transform: translateX(-22px); opacity:0; }
+  .announce-view-inner.slide-out-prev{ transform: translateX(22px); opacity:0; }
+  .announce-view-inner.slide-in-next{ transform: translateX(22px); opacity:0; }
+  .announce-view-inner.slide-in-prev{ transform: translateX(-22px); opacity:0; }
+  .announce-view-inner.no-anim-transition{ transition:none !important; }
+  @media (prefers-reduced-motion: reduce){
+    .announce-view-inner{ transition:none; }
+  }
   .lightbox{
     position:fixed; inset:0; z-index:70; background:rgba(0,0,0,0.92);
     display:flex; align-items:center; justify-content:center; padding:24px;
@@ -1428,13 +1448,39 @@ function togglePhones(event) {
     });
   }
 
+  var announceAnimTimer = null;
   function goToAnnounce(newIndex){
     var len = announceState.items.length;
     if(len === 0) return;
-    // зацикливаем — с последнего свайп вперёд ведёт к первому, и наоборот
-    announceState.index = (newIndex + len) % len;
-    renderAnnouncement(announceState.items[announceState.index], announceState.catLabel);
-    renderAnnounceNav();
+    var target = (newIndex + len) % len;
+    if(target === announceState.index) return;
+    // знак newIndex относительно текущего индекса (до применения модуля) надёжно
+    // говорит о направлении даже на границе цикла (напр. index=0, newIndex=-1 → prev)
+    var goingNext = newIndex > announceState.index;
+    var outClass = goingNext ? "slide-out-next" : "slide-out-prev";
+    var inClass = goingNext ? "slide-in-next" : "slide-in-prev";
+
+    clearTimeout(announceAnimTimer);
+    announceViewInner.classList.remove("slide-in-next", "slide-in-prev", "slide-out-next", "slide-out-prev");
+    announceViewInner.classList.add(outClass);
+
+    announceAnimTimer = setTimeout(function(){
+      announceState.index = target;
+      renderAnnouncement(announceState.items[announceState.index], announceState.catLabel);
+      renderAnnounceNav();
+
+      // подставляем новый контент со стартовой позиции без анимации...
+      announceViewInner.classList.remove(outClass);
+      announceViewInner.classList.add("no-anim-transition", inClass);
+      void announceViewInner.offsetWidth; // форсируем перерасчёт стилей (фиксируем стартовую позицию)
+      announceViewInner.classList.remove("no-anim-transition");
+      // ...а на следующем кадре включаем transition обратно к нормальному положению
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          announceViewInner.classList.remove(inClass);
+        });
+      });
+    }, 220);
   }
 
   announcePrevBtn.addEventListener("click", function(){ goToAnnounce(announceState.index - 1); });
@@ -1453,9 +1499,10 @@ function togglePhones(event) {
     var t = e.changedTouches[0];
     var dx = t.clientX - touchStartX;
     var dy = t.clientY - touchStartY;
-    // порог 90px и явно горизонтальный жест (в 2 раза больше вертикального), чтобы
-    // случайный скролл/наклон пальца не переключал объявление
-    if(Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 2){
+    // порог 55px и горизонтальный жест заметно сильнее вертикального (в 1.5 раза) —
+    // достаточно строго, чтобы скролл текста не путался со свайпом, но не пропускает
+    // обычные уверенные пролистывания
+    if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5){
       if(dx < 0) goToAnnounce(announceState.index + 1);
       else goToAnnounce(announceState.index - 1);
     }

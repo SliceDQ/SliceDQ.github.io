@@ -33,7 +33,7 @@
   html[data-mode="night"] {
     --ease: cubic-bezier(.22, 1, .36, 1);
     --radius: 14px;
-    --accent: #1E69FF; 
+    --accent: #8B5CF6; 
     --bg: #050507;          
     --card-glass: rgba(15, 15, 19, 0.88); 
     --header-glass: rgba(7, 7, 9, 0.9);
@@ -91,6 +91,7 @@
 
   /* ============ 📐 LAYOUT HELPERS ============ */
   .wrap{max-width:1180px;margin:0 auto;padding:0 28px; position:relative; z-index:1;}
+  .wrap-wide{max-width:1420px;}
   section{padding:100px 0; position:relative; z-index:1;}
   @media(max-width:720px){ section{padding:64px 0;} .wrap{padding:0 20px;} }
 
@@ -350,7 +351,8 @@
     backdrop-filter: blur(5px);
     box-shadow: var(--shadow-3d);
   }
-  .showcase-tabs{ display:flex; gap:0; border-bottom:1px solid var(--border); overflow-x:auto; overflow-y:hidden; }
+  .showcase-tabs{ display:flex; gap:0; border-bottom:1px solid var(--border); overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -ms-overflow-style:none; }
+  .showcase-tabs::-webkit-scrollbar{ display:none; height:0; }
   .showcase-tabs button{
     padding:20px 28px 20px 0; margin-right:34px; text-align:left; white-space:nowrap;
     display:flex; flex-direction:column; gap:6px; opacity:.4; transition: all 0.25s;
@@ -427,6 +429,85 @@
   }
   .cat-tile span.name{ font-weight:600; font-size:15.5px; }
   .cat-tile span.arrow{ color:var(--accent); font-weight:800; }
+
+  /* ============ 🖼 МИНИ-КАРТОЧКИ ВНУТРИ ВКЛАДОК (Направления / Педагоги) ============ */
+  .age-filter-bar{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
+  .age-filter-btn{
+    padding:9px 18px; border-radius:999px;
+    border:1px solid var(--border);
+    background: var(--card-glass);
+    color:var(--muted); font-weight:700; font-size:13.5px;
+    transition: all 0.25s var(--ease);
+  }
+  .age-filter-btn:hover{ border-color:var(--accent); color:var(--text); }
+  .age-filter-btn.active{
+    background: var(--accent); border-color: var(--accent); color:#fff;
+    box-shadow: 0 8px 20px -4px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .showcase-content.is-cards{ display:block; }
+  .showcase-content .mini-card-grid{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:28px 24px;
+  }
+  .showcase-content .mini-card-grid.is-empty{ display:block; }
+
+  .mini-card{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    text-align:left;
+    cursor:pointer;
+    background:none;
+    border:none;
+    flex: 0 0 170px;
+    width:170px;
+  }
+  .mini-card .mini-card-img{
+    position:relative;
+    width:100%;
+    aspect-ratio: 4/5;
+    border-radius:26%;
+    overflow:hidden;
+    background-size:cover; background-position:center;
+    background-color: rgba(255,255,255,0.05);
+    border:1px solid var(--border);
+    box-shadow: var(--shadow-3d-light);
+    transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .mini-card:hover .mini-card-img{
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow: 0 35px 60px -10px rgba(0,0,0,0.9), 0 12px 24px -12px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.3);
+  }
+  .mini-card .mini-card-img.no-photo{
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:11px; padding:10px; text-align:center; line-height:1.3;
+  }
+  .mini-card .mini-card-title{
+    font-weight:700; font-size:14.5px; letter-spacing:-.01em; line-height:1.3;
+    color:var(--text); padding-left:2px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .mini-card .mini-card-title::before{
+    content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0;
+    transition: transform 0.3s var(--ease);
+  }
+  .mini-card:hover .mini-card-title::before{ transform: scale(1.6); }
+
+  @media(max-width:720px){
+    .showcase-content .mini-card-grid{ gap:22px 12px; }
+    .mini-card{ flex-basis: calc(33.333% - 8px); width: calc(33.333% - 8px); }
+    .mini-card .mini-card-title{ font-size:12.5px; }
+  }
+  @media(max-width:380px){
+    .showcase-content .mini-card-grid{ gap:18px 10px; }
+    .mini-card{ flex-basis: calc(50% - 5px); width: calc(50% - 5px); }
+  }
+
+
+
 
   /* ============ 📞 CONTACTS ============ */
   .contacts-section { border-top: 1px solid var(--border); }
@@ -851,9 +932,9 @@
     <div class="logo">KSTYLE</div>
     <div class="header-actions">
       <div class="color-dots" role="group" aria-label="Выбор акцентного цвета">
-        <button class="dot-btn" data-color="#8B5CF6" style="background-color: #8B5CF6;" aria-label="Фиолетовый"></button>
+        <button class="dot-btn active" data-color="#8B5CF6" style="background-color: #8B5CF6;" aria-label="Фиолетовый"></button>
         <button class="dot-btn" data-color="#ff6b2b" style="background-color: #ff6b2b;" aria-label="Оранжевый"></button>
-        <button class="dot-btn active" data-color="#1E69FF" style="background-color: #1E69FF;" aria-label="Синий"></button>
+        <button class="dot-btn" data-color="#1E69FF" style="background-color: #1E69FF;" aria-label="Синий"></button>
       </div>
       <button class="burger" id="drawerOpenBtn" aria-label="Открыть меню разделов">
         <span></span><span></span><span></span>
@@ -870,8 +951,6 @@
       <p class="lead reveal" style="--rd:160ms" id="hpLead">Школа современного танца "KerolStyle" для тех, кому тесно в рамках обычных будней и хочет красиво двигаться, а не просто переминаться с ноги на ногу.</p>
       <div class="hero-cta reveal" style="--rd:240ms">
         <button class="btn btn-primary" id="signupBtnHero">Записаться</button>
-        <button class="btn btn-ghost" data-open-category="schedule" id="hpBtn1">Смотреть расписание</button>
-        <button class="btn btn-ghost" data-open-category="directions" id="hpBtn2">Все направления</button>
       </div>
       <div class="rule-signature reveal" style="--rd:320ms">
         <div class="stat"><span class="n" id="hpStat1n">2024</span><span class="cap" id="hpStat1cap">Работаем с</span></div>
@@ -883,7 +962,7 @@
   </section>
 
   <section class="showcase">
-    <div class="wrap reveal">
+    <div class="wrap wrap-wide reveal">
       <div class="showcase-tabs" id="showcaseTabs" role="tablist" aria-label="Разделы студии"></div>
       <div class="showcase-progress"><div class="showcase-progress-bar" id="showcaseProgressBar"></div></div>
       <div class="showcase-content" id="showcaseContent"></div>
@@ -1154,10 +1233,32 @@
 
   var whatsappBaseUrl = "https://wa.me/79250452166"; // запасной номер, обновится ниже из настроек
 
+  function readSettingsCache(key){
+    try{
+      var raw = localStorage.getItem("kstyle_settings_" + key);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      if(!parsed || (Date.now() - parsed.ts) > 10*60*1000) return null;
+      return parsed.data;
+    } catch(e){ return null; }
+  }
+  function writeSettingsCache(key, data){
+    try{ localStorage.setItem("kstyle_settings_" + key, JSON.stringify({ ts: Date.now(), data: data })); }
+    catch(e){}
+  }
+
   (function loadContactsIntoPage(){
+    var cached = readSettingsCache("contacts");
+    if(cached){ applyContactsData(cached); return; }
     db.collection("settings").doc("contacts").get().then(function(doc){
       if(!doc.exists) return;
       var data = doc.data();
+      writeSettingsCache("contacts", data);
+      applyContactsData(data);
+    }).catch(function(e){ console.error("Ошибка загрузки контактов:", e); });
+  })();
+
+  function applyContactsData(data){
 
       if(data.chatUrl){
         document.getElementById("contactChat").href = data.chatUrl;
@@ -1187,8 +1288,7 @@
       } else if(data.phone2 === ""){
         phoneLink2El.style.display = "none";
       }
-    }).catch(function(e){ console.error("Ошибка загрузки контактов:", e); });
-  })();
+  }
 
   // ============ ✅ КНОПКА "ЗАПИСАТЬСЯ" ============
   var maxChatUrl = "#";
@@ -1245,8 +1345,6 @@
       heroTitleAccent: "hpTitleAccent",
       heroLead: "hpLead",
       heroSignupBtn: "signupBtnHero",
-      heroBtn1: "hpBtn1",
-      heroBtn2: "hpBtn2",
       stat1Number: "hpStat1n", stat1Caption: "hpStat1cap",
       stat2Number: "hpStat2n", stat2Caption: "hpStat2cap",
       stat3Number: "hpStat3n", stat3Caption: "hpStat3cap",
@@ -1261,8 +1359,7 @@
       catStripText: "hpCatStripText",
       contactsTitle: "hpContactsTitle"
     };
-    db.collection("settings").doc("homepage").get().then(function(doc){
-      var data = doc.exists ? doc.data() : {};
+    function applyHomepageData(data){
       window.__homepageData = data;
       Object.keys(textMap).forEach(function(key){
         if(data[key]){
@@ -1272,6 +1369,15 @@
       });
       if(window.__applyShowcaseOverrides) window.__applyShowcaseOverrides(data);
       window.__syncHeroReflection && window.__syncHeroReflection();
+    }
+
+    var cachedHome = readSettingsCache("homepage");
+    if(cachedHome){ applyHomepageData(cachedHome); return; }
+
+    db.collection("settings").doc("homepage").get().then(function(doc){
+      var data = doc.exists ? doc.data() : {};
+      writeSettingsCache("homepage", data);
+      applyHomepageData(data);
     }).catch(function(e){ console.error("Ошибка загрузки текста главной:", e); });
   })();
 
@@ -1330,11 +1436,35 @@ function togglePhones(event) {
     { key:"reviews",    label:"Отзывы" }
   ];
 
-  var itemsCache = {}; // кэш уже загруженных разделов, чтобы повторное открытие было мгновенным
+  var itemsCache = {}; // кэш уже загруженных разделов в памяти вкладки, чтобы повторное открытие было мгновенным
+
+  // Персистентный кэш в localStorage: переживает перезагрузку страницы и новые визиты,
+  // поэтому повторные заходы юзеров в течение CACHE_TTL_MS не бьют по Firestore вообще.
+  // TTL небольшой (10 минут) — если поменяли объявление в админке, изменения долго ждать не придётся.
+  var CACHE_TTL_MS = 10 * 60 * 1000;
+  function readPersistentCache(catKey){
+    try{
+      var raw = localStorage.getItem("kstyle_ann_" + catKey);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      if(!parsed || (Date.now() - parsed.ts) > CACHE_TTL_MS) return null;
+      return parsed.data;
+    } catch(e){ return null; }
+  }
+  function writePersistentCache(catKey, data){
+    try{
+      localStorage.setItem("kstyle_ann_" + catKey, JSON.stringify({ ts: Date.now(), data: data }));
+    } catch(e){ /* localStorage может быть недоступен (приватный режим и т.п.) — просто пропускаем */ }
+  }
 
   async function getItems(catKey){
     if(itemsCache[catKey]){
       return itemsCache[catKey];
+    }
+    var persisted = readPersistentCache(catKey);
+    if(persisted){
+      itemsCache[catKey] = persisted; // поднимаем и в память, чтобы дальше было ещё быстрее
+      return persisted;
     }
     try{
       var snap = await db.collection("announcements")
@@ -1355,11 +1485,14 @@ function togglePhones(event) {
           linkLabel: data.linkLabel || "",
           linkUrl: data.linkUrl || "",
           bgImage: data.bgImage || "",
+          cardImage: data.cardImage || "",
+          ageGroup: data.ageGroup || "adult",
           bgDim: (typeof data.bgDim === "number") ? data.bgDim : 55,
           date: (data.createdAt && data.createdAt.toDate) ? data.createdAt.toDate().toLocaleDateString("ru-RU") : ""
         };
       });
       itemsCache[catKey] = result; // сохраняем в кэш, чтобы не грузить повторно
+      writePersistentCache(catKey, result);
       return result;
     } catch(e){
       console.error("Ошибка загрузки объявлений:", e);
@@ -1412,9 +1545,9 @@ function togglePhones(event) {
   });
 
   var SHOWCASE = [
-    { key: "directions", num: "01", label: "Направления", title: "Выбирайте свой стиль", text: "Latina mix, frame up, modern, high heels, flamenco, hip-hop, life style, jazz-fank, tango-solo, bachata, zumba, ирландский степ, стретчинг, здоровая спина, здоровые суставы.", cta: "Смотреть направления" },
-    { key: "teachers", num: "02", label: "Педагоги", title: "Перенимайте опыт у тех, кто знает сцену изнутри.", text: "Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },
-    { key: "schedule", num: "03", label: "Расписание", title: "Занятия под ваш ритм", text: "Утренние и вечерние группы всю неделю. Найдите своё время.", cta: "Открыть расписание" }
+    { key: "teachers", num: "01", label: "Педагоги", title: "Перенимайте опыт у тех, кто знает сцену изнутри.", text: "Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },
+    { key: "directions", num: "02", label: "Направления", title: "Выбирайте свой стиль", text: "Latina mix, frame up, modern, high heels, flamenco, hip-hop, life style, jazz-fank, tango-solo, bachata, zumba, ирландский степ, стретчинг, здоровая спина, здоровые суставы.", cta: "Смотреть направления" },
+    { key: "prices", num: "03", label: "Стоимость", title: "Стоимость занятий", text: "Разовые занятия, абонементы и специальные предложения.", cta: "Смотреть цены" }
   ];
 
   var showcaseTabsEl = document.getElementById("showcaseTabs");
@@ -1431,22 +1564,126 @@ function togglePhones(event) {
     showcaseTabsEl.appendChild(b);
   });
 
+  // Мини-карточки внутри вкладок «Направления» / «Педагоги»: обложка (bgImage
+  // или первое фото объявления) + маленький заголовок, без текста. Клик открывает
+  // уже существующую полноэкранную панель с полной информацией.
+  // Для «Направлений» сверху добавлена панель фильтра по возрасту (Все/Взрослые/Детские).
+  async function renderMiniCards(catKey, container){
+    var cat = CATEGORIES.find(function(c){ return c.key === catKey; });
+    var isDirections = catKey === "directions";
+    var activeFilter = "all";
+
+    var filterBar = null;
+    if(isDirections){
+      filterBar = document.createElement("div");
+      filterBar.className = "age-filter-bar";
+      container.appendChild(filterBar);
+    }
+
+    var grid = document.createElement("div");
+    grid.className = "mini-card-grid is-empty";
+    container.appendChild(grid);
+    var loading = document.createElement("div");
+    loading.className = "empty-state";
+    loading.innerHTML = '<div class="mark">Загрузка…</div>';
+    grid.appendChild(loading);
+
+    var items = await getItems(catKey);
+    if(!grid.isConnected) return; // вкладку успели переключить, пока грузились данные
+
+    function renderCards(filterKey){
+      grid.innerHTML = "";
+      var filtered = items;
+      if(isDirections && filterKey && filterKey !== "all"){
+        filtered = items.filter(function(it){ return (it.ageGroup || "adult") === filterKey; });
+      }
+
+      if(filtered.length === 0){
+        grid.classList.add("is-empty");
+        var empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.innerHTML = items.length === 0
+          ? '<div class="mark">Скоро здесь появится информация</div><p>Раздел «' + cat.label + '» пока пуст.</p>'
+          : '<div class="mark">Пока пусто</div><p>В этой категории пока нет направлений.</p>';
+        grid.appendChild(empty);
+        return;
+      }
+      grid.classList.remove("is-empty");
+
+      filtered.forEach(function(it, idx){
+        var cover = it.cardImage || it.bgImage || (it.photos && it.photos[0]) || "";
+        var card = document.createElement("button");
+        card.type = "button";
+        card.className = "mini-card reveal";
+        card.style.setProperty("--rd", (idx * 40) + "ms");
+
+        var img = document.createElement("div");
+        if(cover){
+          img.className = "mini-card-img";
+          img.style.backgroundImage = "url('" + cover + "')";
+        } else {
+          img.className = "mini-card-img no-photo";
+          img.textContent = "Фото не добавлено";
+        }
+        card.appendChild(img);
+
+        var titleEl = document.createElement("span");
+        titleEl.className = "mini-card-title";
+        titleEl.textContent = it.title;
+        card.appendChild(titleEl);
+
+        card.addEventListener("click", function(){ openAnnouncement(filtered, idx, cat.label, false); });
+        grid.appendChild(card);
+      });
+      bindReveal();
+    }
+
+    if(isDirections){
+      var filters = [
+        { key: "all", label: "Все" },
+        { key: "adult", label: "Взрослые" },
+        { key: "kids", label: "Детские" }
+      ];
+      filters.forEach(function(f){
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "age-filter-btn" + (f.key === "all" ? " active" : "");
+        btn.textContent = f.label;
+        btn.addEventListener("click", function(){
+          activeFilter = f.key;
+          filterBar.querySelectorAll(".age-filter-btn").forEach(function(b){ b.classList.remove("active"); });
+          btn.classList.add("active");
+          renderCards(activeFilter);
+        });
+        filterBar.appendChild(btn);
+      });
+    }
+
+    renderCards(activeFilter);
+  }
+
   function renderShowcaseContent(item){
     showcaseContentEl.classList.add("fade-out");
     setTimeout(function(){
       showcaseContentEl.innerHTML = '';
-      var left = document.createElement("div");
-      left.innerHTML = '<h3></h3><p></p>';
-      left.querySelector("h3").textContent = item.title;
-      left.querySelector("p").textContent = item.text;
-      var right = document.createElement("div");
-      var btn = document.createElement("button");
-      btn.className = "btn btn-primary";
-      btn.textContent = item.cta;
-      btn.addEventListener("click", function(){ handleCategoryClick(item.key); });
-      right.appendChild(btn);
-      showcaseContentEl.appendChild(left);
-      showcaseContentEl.appendChild(right);
+      if(item.key === "directions" || item.key === "teachers" || item.key === "prices"){
+        showcaseContentEl.classList.add("is-cards");
+        renderMiniCards(item.key, showcaseContentEl);
+      } else {
+        showcaseContentEl.classList.remove("is-cards");
+        var left = document.createElement("div");
+        left.innerHTML = '<h3></h3><p></p>';
+        left.querySelector("h3").textContent = item.title;
+        left.querySelector("p").textContent = item.text;
+        var right = document.createElement("div");
+        var btn = document.createElement("button");
+        btn.className = "btn btn-primary";
+        btn.textContent = item.cta;
+        btn.addEventListener("click", function(){ handleCategoryClick(item.key); });
+        right.appendChild(btn);
+        showcaseContentEl.appendChild(left);
+        showcaseContentEl.appendChild(right);
+      }
       showcaseContentEl.classList.remove("fade-out");
     }, 220);
   }
@@ -1690,51 +1927,102 @@ function togglePhones(event) {
       return;
     }
 
-    var list = document.createElement("div");
-    list.className = "announcement-list";
-    items.forEach(function(item, idx){
-      var card = document.createElement("button");
-      card.type = "button";
-      card.className = "announcement-item reveal";
+    var isDirections = catKey === "directions";
+    var activeFilter = "all";
+    var listEl = null;
 
-      var info = document.createElement("div");
-      info.className = "info";
-      var titleEl = document.createElement("span");
-      titleEl.className = "title-line";
-      titleEl.textContent = item.title;
-      info.appendChild(titleEl);
+    if(isDirections){
+      var filterBar = document.createElement("div");
+      filterBar.className = "age-filter-bar";
+      var filters = [
+        { key: "all", label: "Все" },
+        { key: "adult", label: "Взрослые" },
+        { key: "kids", label: "Детские" }
+      ];
+      filters.forEach(function(f){
+        var fbtn = document.createElement("button");
+        fbtn.type = "button";
+        fbtn.className = "age-filter-btn" + (f.key === "all" ? " active" : "");
+        fbtn.textContent = f.label;
+        fbtn.addEventListener("click", function(){
+          activeFilter = f.key;
+          filterBar.querySelectorAll(".age-filter-btn").forEach(function(b){ b.classList.remove("active"); });
+          fbtn.classList.add("active");
+          renderList(activeFilter);
+        });
+        filterBar.appendChild(fbtn);
+      });
+      drawerBody.appendChild(filterBar);
+    }
 
-      var hasDate = !!item.date;
-      var hasPhotos = item.photos && item.photos.length;
-      if(hasDate || hasPhotos){
-        var metaRow = document.createElement("div");
-        metaRow.className = "meta-row";
-        if(hasDate){
-          var d = document.createElement("span");
-          d.className = "date";
-          d.textContent = item.date;
-          metaRow.appendChild(d);
-        }
-        if(hasPhotos){
-          var pb = document.createElement("span");
-          pb.className = "photo-badge";
-          pb.textContent = "📷 " + item.photos.length;
-          metaRow.appendChild(pb);
-        }
-        info.appendChild(metaRow);
+    function renderList(filterKey){
+      var filtered = items;
+      if(isDirections && filterKey && filterKey !== "all"){
+        filtered = items.filter(function(it){ return (it.ageGroup || "adult") === filterKey; });
       }
 
-      var arrow = document.createElement("span");
-      arrow.className = "arrow";
-      arrow.textContent = "/";
+      if(listEl && listEl.parentNode) listEl.remove();
+      var existingEmpty = drawerBody.querySelector(".empty-state.filtered-empty");
+      if(existingEmpty) existingEmpty.remove();
 
-      card.appendChild(info);
-      card.appendChild(arrow);
-      card.addEventListener("click", function(){ closeDrawerInternal(); openAnnouncement(items, idx, cat.label, true); });
-      list.appendChild(card);
-    });
-    drawerBody.appendChild(list);
-    bindReveal();
+      if(filtered.length === 0){
+        var fEmpty = document.createElement("div");
+        fEmpty.className = "empty-state filtered-empty";
+        fEmpty.innerHTML = '<div class="mark">Пока пусто</div><p>В этой категории пока нет направлений.</p>';
+        drawerBody.appendChild(fEmpty);
+        listEl = null;
+        return;
+      }
+
+      var list = document.createElement("div");
+      list.className = "announcement-list";
+      filtered.forEach(function(item, idx){
+        var card = document.createElement("button");
+        card.type = "button";
+        card.className = "announcement-item reveal";
+
+        var info = document.createElement("div");
+        info.className = "info";
+        var titleEl = document.createElement("span");
+        titleEl.className = "title-line";
+        titleEl.textContent = item.title;
+        info.appendChild(titleEl);
+
+        var hasDate = !!item.date;
+        var hasPhotos = item.photos && item.photos.length;
+        if(hasDate || hasPhotos){
+          var metaRow = document.createElement("div");
+          metaRow.className = "meta-row";
+          if(hasDate){
+            var d = document.createElement("span");
+            d.className = "date";
+            d.textContent = item.date;
+            metaRow.appendChild(d);
+          }
+          if(hasPhotos){
+            var pb = document.createElement("span");
+            pb.className = "photo-badge";
+            pb.textContent = "📷 " + item.photos.length;
+            metaRow.appendChild(pb);
+          }
+          info.appendChild(metaRow);
+        }
+
+        var arrow = document.createElement("span");
+        arrow.className = "arrow";
+        arrow.textContent = "/";
+
+        card.appendChild(info);
+        card.appendChild(arrow);
+        card.addEventListener("click", function(){ closeDrawerInternal(); openAnnouncement(filtered, idx, cat.label, true); });
+        list.appendChild(card);
+      });
+      drawerBody.appendChild(list);
+      listEl = list;
+      bindReveal();
+    }
+
+    renderList(activeFilter);
   }
 
   // ============ 🔎 ПОЛНОЭКРАННЫЙ ПРОСМОТР ОБЪЯВЛЕНИЯ ============

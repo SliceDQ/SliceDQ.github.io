@@ -574,6 +574,8 @@
   }
   .announce-date{ color:var(--muted); font-size:13px; margin-bottom:28px; display:block; }
   .announce-text{ font-size:16.5px; line-height:1.8; color:var(--text); opacity:0.92; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
+  .announce-text .in-text-link{ color:var(--accent); text-decoration:underline; text-underline-offset:2px; font-weight:600; }
+  .announce-text .in-text-link:hover{ opacity:0.8; }
   .announce-photos{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; margin-top:32px; }
   .announce-photos img{
     width:100%; height:220px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border);
@@ -582,16 +584,16 @@
 
   /* ============ ◀▶ ЛИСТАНИЕ ОБЪЯВЛЕНИЙ ============ */
   .announce-nav{
-    position:fixed; top:50%; transform:translateY(-50%); z-index:63;
-    width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    border:1px solid var(--border); background: rgba(255,255,255,0.06); backdrop-filter: blur(6px);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.4);
-    transition: all 0.25s var(--ease); opacity:0; pointer-events:none;
+    position:fixed; top:auto; bottom:22px; transform:none; z-index:63;
+    width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border); background: rgba(255,255,255,0.04); backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.25s var(--ease); opacity:0.35; pointer-events:none;
   }
-  .announce-view.open .announce-nav{ opacity:1; pointer-events:auto; }
+  .announce-view.open .announce-nav{ opacity:0.35; pointer-events:auto; }
   .announce-nav.is-hidden{ opacity:0 !important; pointer-events:none !important; }
-  .announce-nav svg{ width:20px; height:20px; stroke:var(--text); fill:none; }
-  .announce-nav:hover{ border-color:var(--accent); background: rgba(255,255,255,0.12); transform:translateY(-50%) scale(1.08); box-shadow: 0 10px 26px -4px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .announce-nav svg{ width:15px; height:15px; stroke:var(--text); fill:none; }
+  .announce-nav:hover{ opacity:1; border-color:var(--accent); background: rgba(255,255,255,0.12); transform:scale(1.08); box-shadow: 0 10px 26px -4px color-mix(in srgb, var(--accent) 45%, transparent); }
   .announce-nav-prev{ left:18px; }
   .announce-nav-next{ right:18px; }
   @media(max-width:720px){
@@ -1509,6 +1511,33 @@ function togglePhones(event) {
   // было листать соседние объявления свайпом или стрелками, не закрывая экран
   var announceState = { items: [], index: 0, catLabel: "" };
 
+  // Экранируем HTML и превращаем ссылки, e-mail и телефоны в тексте объявления
+  // в кликабельные <a> — сам текст при этом остаётся обычным (перенос строк via CSS white-space).
+  function linkifyText(str){
+    if(!str) return "";
+    var esc = String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+    // 1) ссылки http(s):// и www.
+    esc = esc.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi, function(match){
+      var href = /^https?:\/\//i.test(match) ? match : "https://" + match;
+      return '<a class="in-text-link" href="' + href + '" target="_blank" rel="noopener">' + match + '</a>';
+    });
+
+    // 2) e-mail
+    esc = esc.replace(/([\w.+-]+@[\w-]+\.[\w.-]+)/g, function(match){
+      return '<a class="in-text-link" href="mailto:' + match + '">' + match + '</a>';
+    });
+
+    // 3) телефоны: +7 900 123-45-67, 8(900)123-45-67, 89001234567 и похожие форматы
+    esc = esc.replace(/(\+?\d[\d\s\-()]{8,}\d)/g, function(match){
+      var digits = match.replace(/[^\d+]/g, "");
+      if(digits.replace(/\D/g,"").length < 10) return match; // слишком коротко — не похоже на телефон
+      return '<a class="in-text-link" href="tel:' + digits + '">' + match + '</a>';
+    });
+
+    return esc;
+  }
+
   function renderAnnounceNav(){
     var multi = announceState.items.length > 1;
     announcePrevBtn.classList.toggle("is-hidden", !multi);
@@ -1629,7 +1658,7 @@ function togglePhones(event) {
 
     var textEl = document.createElement("div");
     textEl.className = "announce-text";
-    textEl.textContent = item.text;
+    textEl.innerHTML = linkifyText(item.text);
     announceViewInner.appendChild(textEl);
 
     if(item.linkUrl){

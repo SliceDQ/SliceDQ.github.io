@@ -396,6 +396,34 @@
   .phone-link:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
   .phone-link .call-icon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
 
+  /* ============ 🗺 КАК НАС НАЙТИ ============ */
+  .location-section { border-top: 1px solid var(--border); }
+  .location-section h2 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: clamp(26px, 3.8vw, 36px); margin-bottom: 28px; letter-spacing: -.02em; text-transform: uppercase;}
+  .location-layout { display: flex; gap: 24px; flex-wrap: wrap; align-items: stretch; }
+  .location-map-wrap {
+    flex: 1 1 480px; min-width: 280px; min-height: 380px; border-radius: var(--radius);
+    overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-3d-light);
+    position: relative; background: rgba(255,255,255,0.03);
+  }
+  #ymap { width: 100%; height: 100%; min-height: 380px; }
+  .location-info {
+    flex: 0 1 320px; min-width: 260px; display: flex; flex-direction: column;
+    gap: 18px; justify-content: center; padding: 28px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--card-glass);
+    box-shadow: var(--shadow-3d-light);
+  }
+  .location-info .addr-title { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .location-info .addr-text { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
+  .location-info .addr-link {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 6px;
+    padding: 13px 18px; border-radius: 999px; font-weight: 700; font-size: 14px;
+    background: color-mix(in srgb, var(--accent) 96%, transparent); color: #fff;
+    border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 10px 25px -6px rgba(0,0,0,0.6);
+    transition: all 0.25s var(--ease); width: fit-content;
+  }
+  .location-info .addr-link:hover { transform: translateY(-2px); }
+  @media(max-width:720px){ .location-map-wrap, #ymap { min-height: 280px; } }
+
   /* ============ 🛹 FOOTER ============ */
   footer{ border-top:1px solid var(--border); padding:60px 0; position:relative; z-index:1; }
   .footer-inner{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px; align-items:center; }
@@ -787,6 +815,26 @@
   </section>
 
 
+  <section class="location-section">
+    <div class="wrap">
+      <h2 class="reveal">Как нас найти</h2>
+      <div class="location-layout">
+        <div class="location-map-wrap reveal">
+          <div id="ymap"></div>
+        </div>
+        <div class="location-info reveal">
+          <div>
+            <div class="addr-title">Адрес студии</div>
+            <div class="addr-text" id="locationAddrText">Московская область, г. Раменское, ул. Космонавтов, 1</div>
+          </div>
+          <a class="addr-link" id="locationYmapLink" href="https://yandex.ru/maps/?pt=38.202295,55.585540&z=16&l=map" target="_blank" rel="noopener">
+            Открыть в Яндекс.Картах
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="contacts-section">
     <div class="wrap">
       <h2 class="reveal" id="hpContactsTitle">Связаться с нами</h2>
@@ -912,6 +960,52 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="https://api-maps.yandex.ru/v3/?apikey=fd5f5d0b-8278-4e53-a2de-aa9859814099&lang=ru_RU"></script>
+<script>
+  // ============ 🗺 КАРТА "КАК НАС НАЙТИ" ============
+  (function initYandexMap(){
+    var STUDIO_COORDS = [38.202295, 55.585540]; // [долгота, широта] — ул. Космонавтов, 1, Раменское
+    var mapEl = document.getElementById("ymap");
+    if(!mapEl || typeof ymaps3 === "undefined"){ return; }
+
+    ymaps3.ready.then(function () {
+      var YMap = ymaps3.YMap,
+          YMapDefaultSchemeLayer = ymaps3.YMapDefaultSchemeLayer,
+          YMapDefaultFeaturesLayer = ymaps3.YMapDefaultFeaturesLayer,
+          YMapMarker = ymaps3.YMapMarker,
+          YMapControls = ymaps3.YMapControls,
+          YMapZoomControl = ymaps3.YMapZoomControl;
+
+      var map = new YMap(mapEl, {
+        location: { center: STUDIO_COORDS, zoom: 16 }
+      });
+
+      map.addChild(new YMapDefaultSchemeLayer());
+      map.addChild(new YMapDefaultFeaturesLayer());
+
+      var markerEl = document.createElement("div");
+      markerEl.style.width = "36px";
+      markerEl.style.height = "36px";
+      markerEl.style.borderRadius = "50% 50% 50% 0";
+      markerEl.style.transform = "rotate(-45deg)";
+      markerEl.style.background = "#1E69FF";
+      markerEl.style.border = "2px solid #fff";
+      markerEl.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
+      markerEl.style.cursor = "pointer";
+      markerEl.title = "KSTYLE";
+
+      var marker = new YMapMarker(
+        { coordinates: STUDIO_COORDS },
+        markerEl
+      );
+      map.addChild(marker);
+
+      var controls = new YMapControls({ position: "right" });
+      controls.addChild(new YMapZoomControl({}));
+      map.addChild(controls);
+    }).catch(function(e){ console.error("Ошибка загрузки Яндекс.Карт:", e); });
+  })();
+</script>
 <script>
   firebase.initializeApp(firebaseConfig);
   var db = firebase.firestore();

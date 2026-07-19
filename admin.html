@@ -179,6 +179,13 @@
       <div class="tabs" id="tabs"></div>
 
       <div class="add-form">
+        <div id="newAgeGroupWrap">
+          <label for="newAgeGroup">Возрастная категория</label>
+          <select id="newAgeGroup">
+            <option value="adult">Взрослые</option>
+            <option value="kids">Детские</option>
+          </select>
+        </div>
         <label for="newTitle">Заголовок (видно в списке на сайте)</label>
         <input type="text" id="newTitle" placeholder="Например: Новая группа хип-хопа" maxlength="120">
         <label for="newText">Полный текст (без ограничения символов, откроется на полном экране)</label>
@@ -190,6 +197,15 @@
           <span class="photo-hint">Фото автоматически сжимаются, чтобы всё бесплатно хранилось в базе</span>
         </div>
         <div class="photo-previews" id="newPhotoPreviews"></div>
+        <div id="newCardImageWrap">
+          <label>Фото карточки (обложка карточки на главной странице)</label>
+          <div class="photo-input-row">
+            <input type="file" id="newCardImage" accept="image/*" style="display:none;">
+            <button type="button" class="file-btn" id="newCardImageBtn">Выбрать фото карточки</button>
+            <span class="photo-hint">Именно эта картинка покажется на маленькой карточке на главной</span>
+          </div>
+          <div class="photo-previews" id="newCardImagePreview"></div>
+        </div>
         <label>Фон объявления (необязательно — показывается только в полноэкранном просмотре)</label>
         <div class="photo-input-row">
           <input type="file" id="newBgImage" accept="image/*" style="display:none;">
@@ -271,12 +287,8 @@
         </div>
         <div class="group">
           <h3>Кнопки на главной</h3>
-          <label for="hSignupBtn">Кнопка «Записаться» (синяя, первая)</label>
+          <label for="hSignupBtn">Кнопка «Записаться» (синяя)</label>
           <input type="text" id="hSignupBtn" placeholder="Записаться">
-          <label for="hBtn1">Вторая кнопка</label>
-          <input type="text" id="hBtn1" placeholder="Смотреть расписание">
-          <label for="hBtn2">Третья кнопка</label>
-          <input type="text" id="hBtn2" placeholder="Все направления">
         </div>
         <div class="group">
           <h3>Цифры-статистика (4 плашки)</h3>
@@ -298,27 +310,22 @@
           <input type="text" id="hStat4cap" placeholder="Учеников">
         </div>
         <div class="group">
-          <h3>Блок с вкладками (01 Направления / 02 Педагоги / 03 Расписание)</h3>
-          <label for="hShow1Title">Вкладка «Направления» — заголовок</label>
-          <input type="text" id="hShow1Title" placeholder="Выбирайте свой стиль">
-          <label for="hShow1Text">Вкладка «Направления» — текст</label>
-          <textarea id="hShow1Text" placeholder="Хип-хоп, k-pop, вог, хилсы — можно пробовать разные направления."></textarea>
-          <label for="hShow1Cta">Вкладка «Направления» — кнопка</label>
-          <input type="text" id="hShow1Cta" placeholder="Смотреть направления">
+          <h3>Блок с вкладками (01 Педагоги / 02 Направления / 03 Стоимость)</h3>
+          <label for="hShow1Title">Вкладка «Педагоги» — заголовок</label>
+          <input type="text" id="hShow1Title" placeholder="Учат те, кто сам выступает">
+          <label for="hShow1Text">Вкладка «Педагоги» — текст</label>
+          <textarea id="hShow1Text" placeholder="Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки."></textarea>
+          <label for="hShow1Cta">Вкладка «Педагоги» — кнопка</label>
+          <input type="text" id="hShow1Cta" placeholder="Познакомиться">
 
-          <label for="hShow2Title">Вкладка «Педагоги» — заголовок</label>
-          <input type="text" id="hShow2Title" placeholder="Учат те, кто сам выступает">
-          <label for="hShow2Text">Вкладка «Педагоги» — текст</label>
-          <textarea id="hShow2Text" placeholder="Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки."></textarea>
-          <label for="hShow2Cta">Вкладка «Педагоги» — кнопка</label>
-          <input type="text" id="hShow2Cta" placeholder="Познакомиться">
+          <label for="hShow2Title">Вкладка «Направления» — заголовок</label>
+          <input type="text" id="hShow2Title" placeholder="Выбирайте свой стиль">
+          <label for="hShow2Text">Вкладка «Направления» — текст</label>
+          <textarea id="hShow2Text" placeholder="Хип-хоп, k-pop, вог, хилсы — можно пробовать разные направления."></textarea>
+          <label for="hShow2Cta">Вкладка «Направления» — кнопка</label>
+          <input type="text" id="hShow2Cta" placeholder="Смотреть направления">
 
-          <label for="hShow3Title">Вкладка «Расписание» — заголовок</label>
-          <input type="text" id="hShow3Title" placeholder="Занятия под ваш ритм">
-          <label for="hShow3Text">Вкладка «Расписание» — текст</label>
-          <textarea id="hShow3Text" placeholder="Утренние и вечерние группы всю неделю. Найдите своё время."></textarea>
-          <label for="hShow3Cta">Вкладка «Расписание» — кнопка</label>
-          <input type="text" id="hShow3Cta" placeholder="Открыть расписание">
+          <p class="sub" style="margin-top:6px;">Вкладка «Стоимость» показывает карточки, а не текст с кнопкой — добавляйте и редактируйте их в разделе «Объявления и ссылки» → «Прайс».</p>
         </div>
         <div class="group">
           <h3>Блок «Почему выбирают KSTYLE»</h3>
@@ -534,6 +541,49 @@
     });
   }
 
+  // --- Фото карточки: отдельная картинка-обложка для маленьких карточек на главной ---
+  var newCardImage = "";
+  var newCardImageInput = document.getElementById("newCardImage");
+  var newCardImageBtn = document.getElementById("newCardImageBtn");
+  var newCardImagePreview = document.getElementById("newCardImagePreview");
+
+  function refreshNewCardImagePreview(){
+    renderPhotoPreviews(newCardImagePreview, newCardImage ? [newCardImage] : [], function(){
+      newCardImage = "";
+      refreshNewCardImagePreview();
+    });
+  }
+  refreshNewCardImagePreview();
+
+  newCardImageBtn.addEventListener("click", function(){ newCardImageInput.click(); });
+  newCardImageInput.addEventListener("change", function(){
+    var addError = document.getElementById("addError");
+    var file = (newCardImageInput.files || [])[0];
+    newCardImageInput.value = "";
+    if(!file) return;
+    compressImage(file).then(function(result){
+      newCardImage = result;
+      refreshNewCardImagePreview();
+    }).catch(function(e){
+      addError.textContent = "Не удалось обработать фото карточки.";
+      console.error(e);
+    });
+  });
+
+  var newCardImageWrap = document.getElementById("newCardImageWrap");
+  var CARD_IMAGE_CATEGORIES = ["directions", "teachers", "prices"];
+  function refreshCardImageFieldVisibility(){
+    newCardImageWrap.style.display = CARD_IMAGE_CATEGORIES.indexOf(activeCat) === -1 ? "none" : "block";
+  }
+  refreshCardImageFieldVisibility();
+
+  var newAgeGroupWrap = document.getElementById("newAgeGroupWrap");
+  var newAgeGroupSelect = document.getElementById("newAgeGroup");
+  function refreshAgeGroupFieldVisibility(){
+    newAgeGroupWrap.style.display = activeCat === "directions" ? "block" : "none";
+  }
+  refreshAgeGroupFieldVisibility();
+
   var newBgImage = "";
   var newBgImageInput = document.getElementById("newBgImage");
   var newBgImageBtn = document.getElementById("newBgImageBtn");
@@ -606,6 +656,8 @@
         activeCat = c.key;
         renderTabs();
         watchCategory(activeCat);
+        if(typeof refreshCardImageFieldVisibility === "function") refreshCardImageFieldVisibility();
+        if(typeof refreshAgeGroupFieldVisibility === "function") refreshAgeGroupFieldVisibility();
       });
       tabsEl.appendChild(b);
     });
@@ -693,15 +745,12 @@
     heroTitleAccent: "hTitleAccent",
     heroLead: "hLead",
     heroSignupBtn: "hSignupBtn",
-    heroBtn1: "hBtn1",
-    heroBtn2: "hBtn2",
     stat1Number: "hStat1n", stat1Caption: "hStat1cap",
     stat2Number: "hStat2n", stat2Caption: "hStat2cap",
     stat3Number: "hStat3n", stat3Caption: "hStat3cap",
     stat4Number: "hStat4n", stat4Caption: "hStat4cap",
     show1Title: "hShow1Title", show1Text: "hShow1Text", show1Cta: "hShow1Cta",
     show2Title: "hShow2Title", show2Text: "hShow2Text", show2Cta: "hShow2Cta",
-    show3Title: "hShow3Title", show3Text: "hShow3Text", show3Cta: "hShow3Cta",
     featuresTitle: "hFeaturesTitle",
     feature1Title: "hFeature1Title", feature1Text: "hFeature1Text",
     feature2Title: "hFeature2Title", feature2Text: "hFeature2Text",
@@ -827,6 +876,19 @@
     var body = document.createElement("div");
     body.className = "body";
 
+    var ageGroupLabel = document.createElement("label");
+    ageGroupLabel.textContent = "Возрастная категория";
+    ageGroupLabel.style.marginTop = "0";
+    var ageGroupSelect = document.createElement("select");
+    ageGroupSelect.style.marginBottom = "10px";
+    var optAdult = document.createElement("option");
+    optAdult.value = "adult"; optAdult.textContent = "Взрослые";
+    var optKids = document.createElement("option");
+    optKids.value = "kids"; optKids.textContent = "Детские";
+    ageGroupSelect.appendChild(optAdult);
+    ageGroupSelect.appendChild(optKids);
+    ageGroupSelect.value = data.ageGroup || "adult";
+
     var titleInput = document.createElement("input");
     titleInput.type = "text";
     titleInput.maxLength = 120;
@@ -889,6 +951,44 @@
     linkUrlInput.placeholder = "https://... (оставьте пустым, чтобы убрать кнопку)";
     linkUrlInput.value = data.linkUrl || "";
     linkUrlInput.style.marginBottom = "10px";
+
+    var cardImgLabel = document.createElement("label");
+    cardImgLabel.textContent = "Фото карточки (обложка на главной странице)";
+    cardImgLabel.style.marginTop = "6px";
+
+    var editCardImage = data.cardImage || "";
+    var cardImgPreviewsEl = document.createElement("div");
+    cardImgPreviewsEl.className = "photo-previews";
+
+    var cardImgFilePicker = document.createElement("input");
+    cardImgFilePicker.type = "file";
+    cardImgFilePicker.accept = "image/*";
+    cardImgFilePicker.style.display = "none";
+
+    var cardImgBtn = document.createElement("button");
+    cardImgBtn.type = "button";
+    cardImgBtn.className = "file-btn";
+    cardImgBtn.textContent = "Выбрать фото карточки";
+    cardImgBtn.style.marginBottom = "10px";
+    cardImgBtn.addEventListener("click", function(){ cardImgFilePicker.click(); });
+
+    function refreshCardImgPreview(){
+      renderPhotoPreviews(cardImgPreviewsEl, editCardImage ? [editCardImage] : [], function(){
+        editCardImage = "";
+        refreshCardImgPreview();
+      });
+    }
+    refreshCardImgPreview();
+
+    cardImgFilePicker.addEventListener("change", function(){
+      var file = (cardImgFilePicker.files || [])[0];
+      cardImgFilePicker.value = "";
+      if(!file) return;
+      compressImage(file).then(function(result){
+        editCardImage = result;
+        refreshCardImgPreview();
+      }).catch(function(e){ alert("Не удалось обработать фото карточки."); console.error(e); });
+    });
 
     var bgLabel = document.createElement("label");
     bgLabel.textContent = "Фон объявления (необязательно — только для полноэкранного просмотра)";
@@ -959,6 +1059,8 @@
         title: titleVal,
         text: textVal,
         photos: editPhotos,
+        cardImage: editCardImage,
+        ageGroup: (data.category === "directions") ? ageGroupSelect.value : (data.ageGroup || ""),
         bgImage: editBgImage,
         bgDim: Number(bgDimInput.value),
         linkLabel: (linkLabelVal && linkUrlVal) ? linkLabelVal : "",
@@ -974,11 +1076,21 @@
     row.appendChild(saveBtn);
     row.appendChild(cancelBtn);
 
+    if(data.category === "directions"){
+      body.appendChild(ageGroupLabel);
+      body.appendChild(ageGroupSelect);
+    }
     body.appendChild(titleInput);
     body.appendChild(ta);
     body.appendChild(addPhotoBtn);
     body.appendChild(filePicker);
     body.appendChild(previewsEl);
+    if(CARD_IMAGE_CATEGORIES.indexOf(data.category) !== -1){
+      body.appendChild(cardImgLabel);
+      body.appendChild(cardImgBtn);
+      body.appendChild(cardImgFilePicker);
+      body.appendChild(cardImgPreviewsEl);
+    }
     body.appendChild(bgLabel);
     body.appendChild(bgBtn);
     body.appendChild(bgFilePicker);
@@ -1013,6 +1125,8 @@
       title: title,
       text: text,
       photos: newPhotos,
+      cardImage: newCardImage,
+      ageGroup: (activeCat === "directions") ? newAgeGroupSelect.value : "",
       bgImage: newBgImage,
       bgDim: Number(newBgDimInput.value),
       linkLabel: (linkLabel && linkUrl) ? linkLabel : "",
@@ -1025,6 +1139,9 @@
       newLinkUrlEl.value = "";
       newPhotos = [];
       renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
+      newCardImage = "";
+      refreshNewCardImagePreview();
+      newAgeGroupSelect.value = "adult";
       newBgImage = "";
       refreshNewBgPreview();
       newBgDimInput.value = 55;

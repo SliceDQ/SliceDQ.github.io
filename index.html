@@ -960,50 +960,31 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-<script src="https://api-maps.yandex.ru/v3/?apikey=fd5f5d0b-8278-4e53-a2de-aa9859814099&lang=ru_RU"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=fd5f5d0b-8278-4e53-a2de-aa9859814099&lang=ru_RU"></script>
 <script>
   // ============ 🗺 КАРТА "КАК НАС НАЙТИ" ============
   (function initYandexMap(){
-    var STUDIO_COORDS = [38.202295, 55.585540]; // [долгота, широта] — ул. Космонавтов, 1, Раменское
+    var STUDIO_COORDS = [55.585540, 38.202295]; // [широта, долгота] — ул. Космонавтов, 1, Раменское
     var mapEl = document.getElementById("ymap");
-    if(!mapEl || typeof ymaps3 === "undefined"){ return; }
+    if(!mapEl || typeof ymaps === "undefined"){ return; }
 
-    ymaps3.ready.then(function () {
-      var YMap = ymaps3.YMap,
-          YMapDefaultSchemeLayer = ymaps3.YMapDefaultSchemeLayer,
-          YMapDefaultFeaturesLayer = ymaps3.YMapDefaultFeaturesLayer,
-          YMapMarker = ymaps3.YMapMarker,
-          YMapControls = ymaps3.YMapControls,
-          YMapZoomControl = ymaps3.YMapZoomControl;
-
-      var map = new YMap(mapEl, {
-        location: { center: STUDIO_COORDS, zoom: 16 }
+    ymaps.ready(function () {
+      var map = new ymaps.Map(mapEl, {
+        center: STUDIO_COORDS,
+        zoom: 16,
+        controls: ["zoomControl"]
       });
 
-      map.addChild(new YMapDefaultSchemeLayer());
-      map.addChild(new YMapDefaultFeaturesLayer());
+      var placemark = new ymaps.Placemark(STUDIO_COORDS, {
+        hintContent: "KSTYLE",
+        balloonContent: "Московская область, г. Раменское, ул. Космонавтов, 1"
+      }, {
+        preset: "islands#blueDotIcon"
+      });
 
-      var markerEl = document.createElement("div");
-      markerEl.style.width = "36px";
-      markerEl.style.height = "36px";
-      markerEl.style.borderRadius = "50% 50% 50% 0";
-      markerEl.style.transform = "rotate(-45deg)";
-      markerEl.style.background = "#1E69FF";
-      markerEl.style.border = "2px solid #fff";
-      markerEl.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
-      markerEl.style.cursor = "pointer";
-      markerEl.title = "KSTYLE";
-
-      var marker = new YMapMarker(
-        { coordinates: STUDIO_COORDS },
-        markerEl
-      );
-      map.addChild(marker);
-
-      var controls = new YMapControls({ position: "right" });
-      controls.addChild(new YMapZoomControl({}));
-      map.addChild(controls);
-    }).catch(function(e){ console.error("Ошибка загрузки Яндекс.Карт:", e); });
+      map.geoObjects.add(placemark);
+      map.behaviors.disable("scrollZoom"); // чтобы карта не перехватывала скролл страницы колёсиком мыши
+    });
   })();
 </script>
 <script>

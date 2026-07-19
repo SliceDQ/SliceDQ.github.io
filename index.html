@@ -648,21 +648,21 @@
 
   /* ============ ◀▶ ЛИСТАНИЕ ОБЪЯВЛЕНИЙ ============ */
   .announce-nav{
-    position:fixed; top:auto; bottom:22px; transform:none; z-index:63;
+    position:fixed; top:auto; bottom:90px; transform:none; z-index:63;
     width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     border:1px solid var(--border); background: rgba(255,255,255,0.04); backdrop-filter: blur(6px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: all 0.25s var(--ease); opacity:0.35; pointer-events:none;
+    transition: all 0.25s var(--ease); opacity:0; pointer-events:none;
   }
-  .announce-view.open .announce-nav{ opacity:0.35; pointer-events:auto; }
+  .announce-nav.is-open{ opacity:0.35; pointer-events:auto; }
   .announce-nav.is-hidden{ opacity:0 !important; pointer-events:none !important; }
   .announce-nav svg{ width:15px; height:15px; stroke:var(--text); fill:none; }
   .announce-nav:hover{ opacity:1; border-color:var(--accent); background: rgba(255,255,255,0.12); transform:scale(1.08); box-shadow: 0 10px 26px -4px color-mix(in srgb, var(--accent) 45%, transparent); }
   .announce-nav-prev{ left:18px; }
   .announce-nav-next{ right:18px; }
   @media(min-width:721px){
-    .announce-nav{ width:52px; height:52px; opacity:0.75; background: rgba(255,255,255,0.08); }
-    .announce-view.open .announce-nav{ opacity:0.75; }
+    .announce-nav{ width:52px; height:52px; background: rgba(255,255,255,0.08); }
+    .announce-nav.is-open{ opacity:0.75; }
     .announce-nav svg{ width:22px; height:22px; }
     .announce-nav-prev{ left:28px; }
     .announce-nav-next{ right:28px; }
@@ -722,7 +722,7 @@
   .lightbox img{ max-width:100%; max-height:100%; border-radius:10px; object-fit:contain; }
 
   .lightbox-nav{
-    position:fixed; top:50%; transform:translateY(-50%); z-index:73;
+    position:fixed; top:auto; bottom:60px; transform:none; z-index:73;
     width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     border:1px solid var(--border); background: rgba(255,255,255,0.04); backdrop-filter: blur(6px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -731,11 +731,11 @@
   .lightbox.open .lightbox-nav{ opacity:0.35; pointer-events:auto; }
   .lightbox-nav.is-hidden{ opacity:0 !important; pointer-events:none !important; }
   .lightbox-nav svg{ width:15px; height:15px; stroke:#fff; fill:none; }
-  .lightbox-nav:hover{ opacity:1; border-color:var(--accent); background: rgba(255,255,255,0.12); transform:translateY(-50%) scale(1.08); }
+  .lightbox-nav:hover{ opacity:1; border-color:var(--accent); background: rgba(255,255,255,0.12); transform:scale(1.08); }
   .lightbox-nav-prev{ left:18px; }
   .lightbox-nav-next{ right:18px; }
   @media(min-width:721px){
-    .lightbox-nav{ width:52px; height:52px; opacity:0.75; background: rgba(255,255,255,0.08); }
+    .lightbox-nav{ width:52px; height:52px; background: rgba(255,255,255,0.08); }
     .lightbox.open .lightbox-nav{ opacity:0.75; }
     .lightbox-nav svg{ width:22px; height:22px; }
     .lightbox-nav-prev{ left:28px; }
@@ -1096,14 +1096,14 @@
       <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
     </button>
   </div>
-  <button class="announce-nav announce-nav-prev" id="announcePrevBtn" aria-label="Предыдущее объявление">
-    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
-  </button>
-  <button class="announce-nav announce-nav-next" id="announceNextBtn" aria-label="Следующее объявление">
-    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
-  </button>
   <div class="announce-view-inner" id="announceViewInner"></div>
 </div>
+<button class="announce-nav announce-nav-prev" id="announcePrevBtn" aria-label="Предыдущее объявление">
+  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+<button class="announce-nav announce-nav-next" id="announceNextBtn" aria-label="Следующее объявление">
+  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
 
 <div class="lightbox" id="lightbox">
   <button class="lightbox-nav lightbox-nav-prev" id="lightboxPrevBtn" aria-label="Предыдущее фото">
@@ -1572,6 +1572,8 @@ function togglePhones(event) {
       window.scrollTo(0, scrollLockY);
     }
   }
+  window.lockPageScroll = lockPageScroll;
+  window.unlockPageScroll = unlockPageScroll;
 
   // ============ ⬅️ КНОПКА "НАЗАД" НА ТЕЛЕФОНЕ ============
   // Каждый полноэкранный слой (меню, объявление, фото) при открытии кладёт
@@ -1613,6 +1615,9 @@ function togglePhones(event) {
       top.closeFn();
     }
   });
+  window.pushOverlay = pushOverlay;
+  window.replaceOverlay = replaceOverlay;
+  window.requestCloseOverlay = requestCloseOverlay;
 
   function openDrawer(){
     overlay.classList.add("open");
@@ -1865,6 +1870,8 @@ function togglePhones(event) {
     announceOverlay.classList.add("open");
     announceView.classList.add("open");
     announceView.setAttribute("aria-hidden", "false");
+    announcePrevBtn.classList.add("is-open");
+    announceNextBtn.classList.add("is-open");
     lockPageScroll();
     if(replaceTop && overlayStack.length){
       replaceOverlay("announce", closeAnnouncementInternal);
@@ -1939,6 +1946,8 @@ function togglePhones(event) {
     announceOverlay.classList.remove("open");
     announceView.classList.remove("open");
     announceView.setAttribute("aria-hidden", "true");
+    announcePrevBtn.classList.remove("is-open");
+    announceNextBtn.classList.remove("is-open");
     unlockPageScroll();
   }
   function closeAnnouncement(){

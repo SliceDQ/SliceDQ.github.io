@@ -1354,10 +1354,11 @@ function togglePhones(event) {
   // "Расписание" — особый раздел: в нём всегда лишь одно объявление,
   // поэтому вместо шторки со списком сразу открываем само объявление на весь экран.
   async function openScheduleDirect(){
-    closeDrawer();
+    var drawerWasOpen = drawer.classList.contains("open");
+    if(drawerWasOpen) closeDrawerInternal();
     var items = await getItems("schedule");
     if(items.length > 0){
-      openAnnouncement(items, 0, "Расписание");
+      openAnnouncement(items, 0, "Расписание", drawerWasOpen);
     } else {
       // объявления ещё нет — на всякий случай показываем обычную шторку с разделом
       openDrawer();
@@ -1427,6 +1428,47 @@ function togglePhones(event) {
     }
   }
 
+  // ============ ⬅️ КНОПКА "НАЗАД" НА ТЕЛЕФОНЕ ============
+  // Каждый полноэкранный слой (меню, объявление, фото) при открытии кладёт
+  // запись в историю браузера. Нажатие "назад" на телефоне тогда закрывает
+  // только верхний слой, а не сразу уводит с сайта.
+  var overlayStack = [];
+
+  function pushOverlay(name, closeFn){
+    overlayStack.push({ name: name, closeFn: closeFn });
+    history.pushState({ overlayName: name, overlayDepth: overlayStack.length }, "");
+  }
+  // Заменяет верхний слой новым без добавления лишней записи в историю —
+  // нужно, когда один экран мгновенно сменяется другим (например, открыли
+  // объявление прямо из шторки меню).
+  function replaceOverlay(name, closeFn){
+    if(overlayStack.length) overlayStack.pop();
+    overlayStack.push({ name: name, closeFn: closeFn });
+    history.replaceState({ overlayName: name, overlayDepth: overlayStack.length }, "");
+  }
+  // Вызывается из UI (крестик, клик по фону, Escape) — не закрывает слой
+  // напрямую, а просто "жмёт назад", чтобы реальное закрытие всегда шло
+  // через один и тот же путь (popstate), как и при нажатии кнопки телефона.
+  function requestCloseOverlay(name){
+    var top = overlayStack[overlayStack.length - 1];
+    if(top && top.name === name){
+      history.back();
+    } else {
+      var idx = -1;
+      for(var i = 0; i < overlayStack.length; i++){ if(overlayStack[i].name === name){ idx = i; break; } }
+      if(idx !== -1){
+        var o = overlayStack.splice(idx, 1)[0];
+        o.closeFn();
+      }
+    }
+  }
+  window.addEventListener("popstate", function(){
+    if(overlayStack.length){
+      var top = overlayStack.pop();
+      top.closeFn();
+    }
+  });
+
   function openDrawer(){
     overlay.classList.add("open");
     drawer.classList.add("open");
@@ -1434,13 +1476,17 @@ function togglePhones(event) {
     burgerBtn.classList.add("is-open");
     lockPageScroll();
     renderCategoryList();
+    pushOverlay("drawer", closeDrawerInternal);
   }
-  function closeDrawer(){
+  function closeDrawerInternal(){
     overlay.classList.remove("open");
     drawer.classList.remove("open");
     drawer.setAttribute("aria-hidden", "true");
     burgerBtn.classList.remove("is-open");
     unlockPageScroll();
+  }
+  function closeDrawer(){
+    requestCloseOverlay("drawer");
   }
   document.getElementById("drawerOpenBtn").addEventListener("click", openDrawer);
   document.getElementById("drawerCloseBtn").addEventListener("click", closeDrawer);
@@ -1534,7 +1580,7 @@ function togglePhones(event) {
 
       card.appendChild(info);
       card.appendChild(arrow);
-      card.addEventListener("click", function(){ closeDrawer(); openAnnouncement(items, idx, cat.label); });
+      card.addEventListener("click", function(){ closeDrawerInternal(); openAnnouncement(items, idx, cat.label, true); });
       list.appendChild(card);
     });
     drawerBody.appendChild(list);
@@ -1665,7 +1711,7 @@ function togglePhones(event) {
     else if(e.key === "ArrowRight") goToAnnounce(announceState.index + 1);
   });
 
-  function openAnnouncement(items, index, catLabel){
+  function openAnnouncement(items, index, catLabel, replaceTop){
     announceState.items = items;
     announceState.index = index;
     announceState.catLabel = catLabel;
@@ -1675,6 +1721,11 @@ function togglePhones(event) {
     announceView.classList.add("open");
     announceView.setAttribute("aria-hidden", "false");
     lockPageScroll();
+    if(replaceTop && overlayStack.length){
+      replaceOverlay("announce", closeAnnouncementInternal);
+    } else {
+      pushOverlay("announce", closeAnnouncementInternal);
+    }
   }
 
   function renderAnnouncement(item, catLabel){
@@ -1739,11 +1790,14 @@ function togglePhones(event) {
     announceView.scrollTop = 0;
   }
 
-  function closeAnnouncement(){
+  function closeAnnouncementInternal(){
     announceOverlay.classList.remove("open");
     announceView.classList.remove("open");
     announceView.setAttribute("aria-hidden", "true");
     unlockPageScroll();
+  }
+  function closeAnnouncement(){
+    requestCloseOverlay("announce");
   }
 
   announceCloseBtn.addEventListener("click", closeAnnouncement);
@@ -1827,11 +1881,15 @@ function togglePhones(event) {
     lightboxImg.src = lightboxState.items[lightboxState.index];
     renderLightboxNav();
     lightbox.classList.add("open");
+    pushOverlay("lightbox", closeLightboxInternal);
   }
-  function closeLightbox(){
+  function closeLightboxInternal(){
     lightbox.classList.remove("open");
     lightboxImg.src = "";
     lightboxState = { items: [], index: 0 };
+  }
+  function closeLightbox(){
+    requestCloseOverlay("lightbox");
   }
   lightbox.addEventListener("click", function(e){
     if(e.target === lightboxImg || e.target.closest(".lightbox-nav") || e.target.closest(".lightbox-dots")) return;

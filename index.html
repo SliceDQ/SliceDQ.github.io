@@ -837,24 +837,24 @@
   .lightbox-dots span{ width:6px; height:6px; border-radius:50%; background: rgba(255,255,255,0.3); transition: all .25s var(--ease); }
   .lightbox-dots span.active{ background: var(--accent); width:18px; border-radius:4px; }
 
-  /* ============ 🌊 SCROLL REVEAL (усиленный) ============ */
+  /* ============ 🌊 SCROLL REVEAL ============ */
   .reveal{
     opacity:0;
-    transform: translateY(70px) scale(.88) rotate(-3deg);
-    transition: opacity .9s cubic-bezier(.34,1.56,.64,1), transform .9s cubic-bezier(.34,1.56,.64,1);
+    transform: translateY(18px);
+    transition: opacity .5s ease, transform .5s ease;
     transition-delay: var(--rd, 0ms);
   }
   /* will-change убран: раньше вешался разом на ВСЕ ещё не показанные .reveal-карточки —
      это создавало десятки одновременных composite-слоёв ещё до того, как карточки
      появлялись в вьюпорте, и душило скролл на реальном железе. */
-  .reveal.visible{ opacity:1; transform: translateY(0) scale(1) rotate(0deg); }
+  .reveal.visible{ opacity:1; transform: translateY(0); }
   @media (prefers-reduced-motion: reduce){
     .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
   }
 
   /* плавная смена контента вкладок showcase */
-  .showcase-content{ transition: opacity .35s var(--ease), transform .35s var(--ease); }
-  .showcase-content.fade-out{ opacity:0; transform: translateY(8px) rotate(-1deg); }
+  .showcase-content{ transition: opacity .3s ease, transform .3s ease; }
+  .showcase-content.fade-out{ opacity:0; transform: translateY(6px); }
 
   /* бургер превращается в крестик при открытом меню */
   .burger span{ transform-origin:center; }

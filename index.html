@@ -167,6 +167,70 @@
     .signup-fab .label{ display:none; }
   }
 
+  /* ============ 📲 МЕНЮ ВЫБОРА МЕССЕНДЖЕРА ============ */
+  .signup-choice-overlay{
+    position:fixed; inset:0; z-index:90;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    opacity:0; pointer-events:none;
+    transition: opacity 0.25s var(--ease);
+  }
+  .signup-choice-overlay.open{ opacity:1; pointer-events:auto; }
+
+  .signup-choice{
+    position:fixed; inset:0; z-index:91;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    opacity:0; pointer-events:none;
+    transform: scale(0.96);
+    transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  }
+  .signup-choice.open{ opacity:1; pointer-events:auto; transform:scale(1); }
+
+  .signup-choice-panel{
+    width:100%; max-width:420px;
+    background: var(--card-glass);
+    border:1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow-3d);
+    padding: 28px;
+    position:relative;
+  }
+  .signup-choice-close{
+    position:absolute; top:16px; right:16px;
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border);
+    background: rgba(255,255,255,0.06);
+    transition: all 0.2s var(--ease);
+  }
+  .signup-choice-close:hover{ border-color:var(--accent); background: rgba(255,255,255,0.12); }
+  .signup-choice-close svg{ width:16px; height:16px; stroke:var(--text); fill:none; }
+  .signup-choice-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:22px; font-weight:700; letter-spacing:-.02em;
+    margin-bottom:6px; padding-right:40px;
+  }
+  .signup-choice-sub{ color:var(--muted); font-size:14.5px; margin-bottom:24px; }
+  .signup-choice-options{ display:flex; flex-direction:column; gap:14px; }
+  .signup-choice-opt{
+    display:flex; align-items:center; gap:16px;
+    padding:16px 18px; border-radius:16px;
+    border:1px solid var(--border);
+    background: rgba(255,255,255,0.05);
+    transition: all 0.22s var(--ease);
+  }
+  .signup-choice-opt:hover{ border-color:var(--accent); background: rgba(255,255,255,0.1); transform:translateY(-2px); }
+  .signup-choice-opt .ico{
+    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .signup-choice-opt .ico svg{ width:22px; height:22px; fill:var(--accent); }
+  .signup-choice-opt .txt{ display:flex; flex-direction:column; gap:2px; }
+  .signup-choice-opt .txt .name{ font-weight:700; font-size:16px; }
+  .signup-choice-opt .txt .desc{ font-size:13px; color:var(--muted); }
+
   /* ============ ⚡️ HERO ============ */
   .hero{ padding-top:100px; padding-bottom:140px; position:relative; }
   .hero-eyebrow{
@@ -596,6 +660,13 @@
   .announce-nav:hover{ opacity:1; border-color:var(--accent); background: rgba(255,255,255,0.12); transform:scale(1.08); box-shadow: 0 10px 26px -4px color-mix(in srgb, var(--accent) 45%, transparent); }
   .announce-nav-prev{ left:18px; }
   .announce-nav-next{ right:18px; }
+  @media(min-width:721px){
+    .announce-nav{ width:52px; height:52px; opacity:0.75; background: rgba(255,255,255,0.08); }
+    .announce-view.open .announce-nav{ opacity:0.75; }
+    .announce-nav svg{ width:22px; height:22px; }
+    .announce-nav-prev{ left:28px; }
+    .announce-nav-next{ right:28px; }
+  }
   @media(max-width:720px){
     .announce-nav{ display:none; }
   }
@@ -663,6 +734,13 @@
   .lightbox-nav:hover{ opacity:1; border-color:var(--accent); background: rgba(255,255,255,0.12); transform:translateY(-50%) scale(1.08); }
   .lightbox-nav-prev{ left:18px; }
   .lightbox-nav-next{ right:18px; }
+  @media(min-width:721px){
+    .lightbox-nav{ width:52px; height:52px; opacity:0.75; background: rgba(255,255,255,0.08); }
+    .lightbox.open .lightbox-nav{ opacity:0.75; }
+    .lightbox-nav svg{ width:22px; height:22px; }
+    .lightbox-nav-prev{ left:28px; }
+    .lightbox-nav-next{ right:28px; }
+  }
   @media(max-width:720px){ .lightbox-nav{ display:none; } }
 
   .lightbox-dots{
@@ -958,10 +1036,45 @@
   </div>
 </footer>
 
-<a href="#" target="_blank" rel="noopener" class="signup-fab" id="signupFab">
+<button type="button" class="signup-fab" id="signupFab">
   <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.002-2.633-1.019-5.101-2.875-6.959-1.856-1.857-4.321-2.879-6.961-2.88-5.441 0-9.866 4.412-9.87 9.849-.002 1.698.443 3.356 1.29 4.828l-.995 3.635 3.718-.977z"/></svg>
   <span class="label">Записаться</span>
-</a>
+</button>
+
+<div class="signup-choice-overlay" id="signupChoiceOverlay"></div>
+<div class="signup-choice" id="signupChoice" aria-hidden="true">
+  <div class="signup-choice-panel">
+    <button class="signup-choice-close" id="signupChoiceCloseBtn" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
+    <div class="signup-choice-title">Записаться на занятие</div>
+    <div class="signup-choice-sub">Выберите, куда написать</div>
+    <div class="signup-choice-options">
+      <a href="#" target="_blank" rel="noopener" class="signup-choice-opt" id="signupChoiceMax">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill-rule="evenodd" clip-rule="evenodd">
+            <path d="M12 2C6.48 2 2 6.48 2 12c0 2.5 0.9 4.8 2.4 6.6l-1.3 2.9c-.2 0.5 0.3 1 0.8 0.8l2.9-1.3c1.5 0.6 3.3 1 5.2 1 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 5c2.76 0 5 2.24 5 5s-2.24 5-5 5c-1.2 0-2.3-.4-3.2-1.1l-1.3 0.6 0.4-1.3C7.3 14.3 7 13.2 7 12c0-2.76 2.24-5 5-5z"/>
+          </svg>
+        </span>
+        <span class="txt">
+          <span class="name">MAX</span>
+          <span class="desc">Написать в личный чат</span>
+        </span>
+      </a>
+      <a href="#" target="_blank" rel="noopener" class="signup-choice-opt" id="signupChoiceWhatsapp">
+        <span class="ico">
+          <svg viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.002-2.633-1.019-5.101-2.875-6.959-1.856-1.857-4.321-2.879-6.961-2.88-5.441 0-9.866 4.412-9.87 9.849-.002 1.698.443 3.356 1.29 4.828l-.995 3.635 3.718-.977zm11.447-6.17c-.328-.164-1.94-.957-2.242-1.068-.301-.11-.522-.164-.743.164-.221.328-.855 1.068-1.047 1.287-.193.219-.386.246-.714.082-.328-.164-1.386-.51-2.64-1.627-.977-.872-1.637-1.95-1.829-2.278-.193-.328-.021-.506.143-.669.148-.147.328-.382.492-.574.164-.192.219-.328.328-.547.11-.219.055-.411-.027-.574-.082-.164-.743-1.792-1.019-2.459-.27-.65-.542-.56-.743-.57l-.633-.01c-.221 0-.58.082-.884.411-.304.328-1.161 1.135-1.161 2.767 0 1.632 1.189 3.203 1.354 3.422.165.219 2.34 3.574 5.67 5.014.792.341 1.41.546 1.893.7.796.253 1.52.217 2.092.131.638-.096 1.94-.793 2.214-1.559.273-.766.273-1.422.192-1.559-.081-.137-.301-.219-.629-.383z"/>
+          </svg>
+        </span>
+        <span class="txt">
+          <span class="name">WhatsApp</span>
+          <span class="desc">Написать в личный чат</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
 
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer" aria-hidden="true">
@@ -1046,7 +1159,11 @@
       if(!doc.exists) return;
       var data = doc.data();
 
-      if(data.chatUrl){ document.getElementById("contactChat").href = data.chatUrl; }
+      if(data.chatUrl){
+        document.getElementById("contactChat").href = data.chatUrl;
+        maxChatUrl = data.chatUrl;
+        updateSignupLinks();
+      }
       if(data.chatLabel){ document.getElementById("contactChatTitle").textContent = data.chatLabel; }
       if(data.chatDesc){ document.getElementById("contactChatDesc").textContent = data.chatDesc; }
 
@@ -1074,6 +1191,7 @@
   })();
 
   // ============ ✅ КНОПКА "ЗАПИСАТЬСЯ" ============
+  var maxChatUrl = "#";
   function buildSignupUrl(){
     var message = "Здравствуйте! Хочу записаться на занятия в KSTYLE.";
     var sep = whatsappBaseUrl.indexOf("?") === -1 ? "?" : "&";
@@ -1081,16 +1199,43 @@
   }
   function updateSignupLinks(){
     var url = buildSignupUrl();
-    var fab = document.getElementById("signupFab");
-    if(fab) fab.href = url;
+    var wa = document.getElementById("signupChoiceWhatsapp");
+    if(wa) wa.href = url;
+    var mx = document.getElementById("signupChoiceMax");
+    if(mx) mx.href = maxChatUrl;
   }
   updateSignupLinks();
+
+  var signupChoice = document.getElementById("signupChoice");
+  var signupChoiceOverlay = document.getElementById("signupChoiceOverlay");
+  var signupChoiceCloseBtn = document.getElementById("signupChoiceCloseBtn");
+
+  function openSignupChoice(){
+    updateSignupLinks();
+    signupChoice.classList.add("open");
+    signupChoiceOverlay.classList.add("open");
+    signupChoice.setAttribute("aria-hidden", "false");
+    lockPageScroll();
+    pushOverlay("signupChoice", closeSignupChoiceInternal);
+  }
+  function closeSignupChoiceInternal(){
+    signupChoice.classList.remove("open");
+    signupChoiceOverlay.classList.remove("open");
+    signupChoice.setAttribute("aria-hidden", "true");
+    unlockPageScroll();
+  }
+  function closeSignupChoice(){
+    requestCloseOverlay("signupChoice");
+  }
+
+  var signupFab = document.getElementById("signupFab");
+  if(signupFab){ signupFab.addEventListener("click", openSignupChoice); }
   var signupBtnHero = document.getElementById("signupBtnHero");
   if(signupBtnHero){
-    signupBtnHero.addEventListener("click", function(){
-      window.open(buildSignupUrl(), "_blank", "noopener");
-    });
+    signupBtnHero.addEventListener("click", openSignupChoice);
   }
+  signupChoiceOverlay.addEventListener("click", closeSignupChoice);
+  signupChoiceCloseBtn.addEventListener("click", closeSignupChoice);
 
   (function loadHomepageTextIntoPage(){
     var textMap = {

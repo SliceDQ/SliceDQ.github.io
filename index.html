@@ -70,15 +70,12 @@
   body::before {
     content: "";
     position: fixed;
-    top: 0; left: 0; width: 100%;
-    height: 100vh;
-    height: 100svh;
-    /* svh (small viewport height), а не dvh: dvh пересчитывается каждый раз,
-       когда мобильный браузер прячет/показывает адресную строку при скролле —
-       фиксированный блок меняет высоту "на лету", и background-size:cover
-       из-за этого пересчитывает картинку крупнее/мельче — видно как "скачок
-       масштаба" заднего фото прямо во время скролла. svh всегда одной и той
-       же (наименьшей) величины, поэтому фон больше не дёргается. */
+    inset: 0;
+    /* inset:0 вместо height:100vh/100svh — раньше на iOS Safari при долистывании
+       до конца страницы (bounce-скролл) браузер всё равно пересчитывал высоту
+       вьюпорта на лету, и background-size:cover пересчитывал картинку крупнее/мельче
+       ("скачок масштаба" заднего фото). inset:0 всегда точно равен видимой области
+       без промежуточных пересчётов по vh. */
     background-image: url('bg-stones.webp');
     background-size: cover;
     background-position: center;
@@ -578,7 +575,7 @@
   .phone-link .call-icon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
 
   @media(max-width:720px){
-    .contact-tile{ min-width: 0; flex-basis: calc(50% - 4px); padding: 18px 16px; backdrop-filter: none; box-shadow: none; flex-direction: column; align-items: flex-start; gap: 10px; border-width: 1.5px; }
+    .contact-tile{ min-width: 0; flex-basis: calc(50% - 4px); padding: 18px 16px; backdrop-filter: none; box-shadow: none; flex-direction: column; align-items: flex-start; gap: 10px; }
     #phoneTile{ flex-basis: 100%; flex-direction: row; align-items: center; }
     #phoneTile .phone-dropdown-wrapper{ gap:0; }
     .contact-tile:hover{ transform: none; box-shadow: none; }
@@ -589,6 +586,9 @@
     .contact-info .desc{ font-size: 12px; }
     .phone-link{ flex-wrap: wrap; white-space: normal; padding: 10px 12px; }
     .phone-link span:first-child{ font-size: 13px; }
+  }
+  @media(max-width:480px){
+    .contact-tile{ border-width: 2px; }
   }
 
   /* ============ 🗺 КАК НАС НАЙТИ ============ */

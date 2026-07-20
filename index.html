@@ -1691,10 +1691,14 @@ function togglePhones(event) {
     var grid = document.createElement("div");
     grid.className = "mini-card-grid is-empty";
     container.appendChild(grid);
-    var loading = document.createElement("div");
-    loading.className = "empty-state";
-    loading.innerHTML = '<div class="mark">Загрузка…</div>';
-    grid.appendChild(loading);
+    var alreadyCached = !!itemsCache[catKey];
+    var loading = null;
+    if(!alreadyCached){
+      loading = document.createElement("div");
+      loading.className = "empty-state";
+      loading.innerHTML = '<div class="mark">Загрузка…</div>';
+      grid.appendChild(loading);
+    }
 
     var items = await getItems(catKey);
     if(!grid.isConnected) return; // вкладку успели переключить, пока грузились данные
@@ -1813,6 +1817,11 @@ function togglePhones(event) {
   }
 
   function advanceShowcase(){ setShowcaseTab((showcaseActive + 1) % SHOWCASE.length, false); }
+  // Сразу тянем данные для всех трёх вкладок витрины параллельно (а не по одной
+  // при переключении) — переключение вкладок происходит по уже готовым данным,
+  // без "Загрузка…" на каждый клик. getItems сама дедуплицирует запросы, так что
+  // сама вкладка ниже (setShowcaseTab(0)) не сделает повторный сетевой запрос.
+  SHOWCASE.forEach(function(item){ getItems(item.key); });
   setShowcaseTab(0, false);
   showcaseTimer = setInterval(advanceShowcase, 60000);
   var resizeRaf = null;

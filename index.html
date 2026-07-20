@@ -578,14 +578,14 @@
   .phone-link .call-icon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
 
   @media(max-width:720px){
-    .contact-tile{ min-width: 0; flex-basis: calc(50% - 4px); padding: 18px 16px; backdrop-filter: none; box-shadow: none; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .contact-tile{ min-width: 0; flex-basis: calc(50% - 4px); padding: 18px 16px; backdrop-filter: none; box-shadow: none; flex-direction: column; align-items: flex-start; gap: 10px; border-width: 1.5px; }
     #phoneTile{ flex-basis: 100%; flex-direction: row; align-items: center; }
     #phoneTile .phone-dropdown-wrapper{ gap:0; }
     .contact-tile:hover{ transform: none; box-shadow: none; }
     .contacts-section h2{ margin-bottom: 16px; }
     .contacts-grid{ gap: 8px; }
     .contact-tile svg{ width: 24px; height: 24px; }
-    .contact-info .title{ font-size: 14.5px; font-weight:800; }
+    .contact-info .title{ font-size: 14.5px; font-weight:700; }
     .contact-info .desc{ font-size: 12px; }
     .phone-link{ flex-wrap: wrap; white-space: normal; padding: 10px 12px; }
     .phone-link span:first-child{ font-size: 13px; }
@@ -756,6 +756,13 @@
     transition: transform .4s var(--ease), opacity .35s var(--ease);
   }
   .announce-view.open{ transform:translateY(0); opacity:1; pointer-events:auto; }
+  .announce-bg{
+    position:absolute; inset:0; z-index:0;
+    background-size:cover; background-position:center;
+    opacity:0; transition: opacity .35s ease;
+  }
+  .announce-bg.active{ opacity:1; }
+  .announce-view-inner{ position:relative; z-index:1; }
   .announce-view-inner{ max-width:760px; margin:0 auto; padding:90px 24px 80px; }
   @media(max-width:720px){ .announce-view-inner{ padding:80px 18px 60px; } }
   .announce-view-head{
@@ -763,7 +770,7 @@
     padding:18px 24px; background: var(--header-glass); backdrop-filter: blur(7px);
     border-bottom:1px solid var(--border);
   }
-  .announce-view-head .cat-name{ font-weight:700; font-size:15px; color:var(--muted); }
+  .announce-view-head .cat-name{ font-weight:700; font-size:15px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .announce-title{
     font-family:'Montserrat', sans-serif; font-weight:900; font-size:clamp(24px,4vw,36px);
     line-height:1.15; letter-spacing:-.02em; margin-bottom:16px; text-transform:uppercase;
@@ -817,6 +824,15 @@
     transition: all .25s var(--ease);
   }
   .announce-dots span.active{ background: var(--accent); width:18px; border-radius:4px; }
+
+  @media(max-width:720px){
+    .announce-view-head{ gap:10px; }
+    .announce-view-head .cat-name{ flex:0 1 auto; min-width:0; }
+    .announce-dots{
+      position:static; transform:none; flex-shrink:0;
+      padding:6px 10px; margin:0 auto;
+    }
+  }
 
   /* ============ 🎞 АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ ОБЪЯВЛЕНИЙ ============
      Только transform + opacity — это композитные свойства, GPU-слой,
@@ -1232,6 +1248,8 @@
 
 <div class="announce-view-overlay" id="announceOverlay"></div>
 <div class="announce-view" id="announceView" aria-hidden="true">
+  <div class="announce-bg" id="announceBgA"></div>
+  <div class="announce-bg" id="announceBgB"></div>
   <div class="announce-view-head">
     <span class="cat-name" id="announceCatName"></span>
     <div class="announce-dots" id="announceDots"></div>
@@ -2219,6 +2237,9 @@ function togglePhones(event) {
   // ============ 🔎 ПОЛНОЭКРАННЫЙ ПРОСМОТР ОБЪЯВЛЕНИЯ ============
   var announceOverlay = document.getElementById("announceOverlay");
   var announceView = document.getElementById("announceView");
+  var announceBgA = document.getElementById("announceBgA");
+  var announceBgB = document.getElementById("announceBgB");
+  var announceBgActive = null; // указывает, какой из двух слоёв сейчас активен (виден)
   var announceViewInner = document.getElementById("announceViewInner");
   var announceCatName = document.getElementById("announceCatName");
   var announceCloseBtn = document.getElementById("announceCloseBtn");
@@ -2365,12 +2386,20 @@ function togglePhones(event) {
 
     if(item.bgImage){
       var dim = (typeof item.bgDim === "number") ? item.bgDim : 55;
-      announceView.style.backgroundImage =
+      var bgCss =
         "linear-gradient(rgba(0,0,0," + (dim/100) + "), rgba(0,0,0," + (dim/100) + ")), url('" + item.bgImage + "')";
-      announceView.style.backgroundSize = "cover";
-      announceView.style.backgroundPosition = "center";
+      // подставляем новое фото в скрытый слой, затем плавно проявляем его поверх старого
+      var nextLayer = announceBgActive === announceBgA ? announceBgB : announceBgA;
+      var prevLayer = announceBgActive === announceBgA ? announceBgA : announceBgB;
+      nextLayer.style.backgroundImage = bgCss;
+      nextLayer.classList.add("active");
+      if(prevLayer !== nextLayer) prevLayer.classList.remove("active");
+      announceBgActive = nextLayer;
     } else {
-      announceView.style.backgroundImage = "";
+      if(announceBgActive) announceBgActive.classList.remove("active");
+      announceBgA.classList.remove("active");
+      announceBgB.classList.remove("active");
+      announceBgActive = null;
     }
 
     var titleEl = document.createElement("h1");

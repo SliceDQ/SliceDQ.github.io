@@ -757,7 +757,9 @@
   }
   .announce-view.open{ transform:translateY(0); opacity:1; pointer-events:auto; }
   .announce-bg{
-    position:absolute; inset:0; z-index:0;
+    position:fixed; top:0; left:0; width:100vw;
+    height:100vh; height:var(--app-vh, 100vh);
+    z-index:0;
     background-size:cover; background-position:center;
     opacity:0; transition: opacity .35s ease;
   }

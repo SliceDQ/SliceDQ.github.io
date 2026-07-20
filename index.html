@@ -699,7 +699,7 @@
   }
   .announce-view-overlay.open{ opacity:1; pointer-events:auto; }
   .announce-view{
-    position:fixed; top:0; left:0; width:100%; height:100vh; height:100svh;
+    position:fixed; inset:0;
     z-index:61; overflow-y:auto;
     background: linear-gradient(165deg,
       color-mix(in srgb, var(--accent) 22%, var(--bg)) 0%,
@@ -788,7 +788,7 @@
     .announce-view-inner{ transition:none; }
   }
   .lightbox{
-    position:fixed; top:0; left:0; width:100%; height:100vh; height:100svh;
+    position:fixed; inset:0;
     z-index:70; background:rgba(0,0,0,0.92);
     display:flex; align-items:center; justify-content:center; padding:24px;
     opacity:0; pointer-events:none; transition:opacity .25s var(--ease);
@@ -1816,7 +1816,12 @@ function togglePhones(event) {
     }
   }
 
-  function advanceShowcase(){ setShowcaseTab((showcaseActive + 1) % SHOWCASE.length, false); }
+  function advanceShowcase(){
+    // Не крутим карусель, пока открыто что-то поверх (объявление, фото, меню)
+    // или вкладка сейчас не активна — незачем менять то, что человек не видит.
+    if((typeof overlayStack !== "undefined" && overlayStack.length) || document.hidden) return;
+    setShowcaseTab((showcaseActive + 1) % SHOWCASE.length, false);
+  }
   // Сразу тянем данные для всех трёх вкладок витрины параллельно (а не по одной
   // при переключении) — переключение вкладок происходит по уже готовым данным,
   // без "Загрузка…" на каждый клик. getItems сама дедуплицирует запросы, так что
@@ -1931,7 +1936,11 @@ function togglePhones(event) {
       document.body.style.left = "";
       document.body.style.right = "";
       document.body.style.width = "";
-      window.scrollTo(0, scrollLockY);
+      // На <html> глобально стоит scroll-behavior:smooth — обычный window.scrollTo
+      // из-за этого плавно "уезжает" к прежней позиции вместо мгновенного
+      // возврата. behavior:"instant" явно отменяет это именно для восстановления
+      // прокрутки после закрытия окна.
+      window.scrollTo({ top: scrollLockY, left: 0, behavior: "instant" });
     }
   }
   window.lockPageScroll = lockPageScroll;
@@ -1941,6 +1950,16 @@ function togglePhones(event) {
   // Каждый полноэкранный слой (меню, объявление, фото) при открытии кладёт
   // запись в историю браузера. Нажатие "назад" на телефоне тогда закрывает
   // только верхний слой, а не сразу уводит с сайта.
+  //
+  // Важно: пока body зафиксирован (position:fixed) во время открытого слоя,
+  // window.scrollY читается как 0 — и браузер может запомнить именно это как
+  // позицию для истории. При переходе назад браузер сам пытается восстановить
+  // скролл (scrollRestoration: "auto") ОДНОВРЕМЕННО с тем, как unlockPageScroll
+  // ниже сам возвращает страницу на место — получается видимый двойной прыжок
+  // (сначала наверх, потом обратно). Отключаем встроенное восстановление,
+  // чтобы скроллом управлял только наш код.
+  if("scrollRestoration" in history){ history.scrollRestoration = "manual"; }
+
   var overlayStack = [];
 
   function pushOverlay(name, closeFn){

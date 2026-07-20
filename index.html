@@ -70,12 +70,12 @@
   body::before {
     content: "";
     position: fixed;
-    inset: 0;
-    /* inset:0 вместо height:100vh/100svh — раньше на iOS Safari при долистывании
-       до конца страницы (bounce-скролл) браузер всё равно пересчитывал высоту
-       вьюпорта на лету, и background-size:cover пересчитывал картинку крупнее/мельче
-       ("скачок масштаба" заднего фото). inset:0 всегда точно равен видимой области
-       без промежуточных пересчётов по vh. */
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;   /* fallback для очень старых браузеров */
+    height: 100lvh;  /* ключевой фикс: lvh не пересчитывается при скрытии/появлении
+       адресной строки на мобильных, в отличие от inset:0 / vh — именно это было
+       причиной скачка масштаба background-size:cover при скролле */
     background-image: url('bg-stones.webp');
     background-size: cover;
     background-position: center;
@@ -746,7 +746,8 @@
   }
   .announce-view-overlay.open{ opacity:1; pointer-events:auto; }
   .announce-view{
-    position:fixed; inset:0;
+    position:fixed; top:0; left:0; width:100vw;
+    height:100vh; height:100lvh;
     z-index:61; overflow-y:auto;
     background: linear-gradient(165deg,
       color-mix(in srgb, var(--accent) 22%, var(--bg)) 0%,

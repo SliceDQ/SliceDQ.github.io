@@ -72,10 +72,9 @@
     position: fixed;
     top: 0; left: 0;
     width: 100vw;
-    height: 100vh;   /* fallback для очень старых браузеров */
-    height: 100lvh;  /* ключевой фикс: lvh не пересчитывается при скрытии/появлении
-       адресной строки на мобильных, в отличие от inset:0 / vh — именно это было
-       причиной скачка масштаба background-size:cover при скролле */
+    height: 100vh; /* fallback, если JS ещё не отработал / отключён */
+    height: var(--app-vh, 100vh); /* реальная зафиксированная высота экрана,
+       не меняется при скролле — см. скрипт перед </head> */
     background-image: url('bg-stones.webp');
     background-size: cover;
     background-position: center;
@@ -747,7 +746,7 @@
   .announce-view-overlay.open{ opacity:1; pointer-events:auto; }
   .announce-view{
     position:fixed; top:0; left:0; width:100vw;
-    height:100vh; height:100lvh;
+    height:100vh; height:var(--app-vh, 100vh);
     z-index:61; overflow-y:auto;
     background: linear-gradient(165deg,
       color-mix(in srgb, var(--accent) 22%, var(--bg)) 0%,
@@ -993,6 +992,31 @@
     body::before{ animation: none; }
   }
 </style>
+<script>
+  // Фиксируем реальную высоту экрана в CSS-переменную, чтобы фон не "скакал"
+  // при скрытии/появлении адресной строки на мобильных браузерах.
+  // Пересчитываем только при настоящем ресайзе (поворот экрана и т.п.),
+  // а не при каждом скролле — именно скролл-триггер вызывал баг.
+  (function(){
+    var lastW = window.innerWidth;
+    function setAppVH(){
+      document.documentElement.style.setProperty('--app-vh', window.innerHeight + 'px');
+    }
+    setAppVH();
+    var resizeTimer = null;
+    window.addEventListener('resize', function(){
+      // если ширина не изменилась — это почти наверняка просто скрытие/появление
+      // адресной строки от скролла, а не реальный ресайз/поворот — игнорируем
+      if(window.innerWidth === lastW) return;
+      lastW = window.innerWidth;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(setAppVH, 120);
+    });
+    window.addEventListener('orientationchange', function(){
+      setTimeout(setAppVH, 200);
+    });
+  })();
+</script>
 </head>
 <body>
 

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 <style>
   /* ============ 🛠 RESET & BASE ============ */
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -70,8 +70,7 @@
   body::before {
     content: "";
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
+    top: 0; left: 0; right: 0;
     height: 100vh; /* fallback, если JS ещё не отработал / отключён */
     height: var(--app-vh, 100vh); /* реальная зафиксированная высота экрана,
        не меняется при скролле — см. скрипт перед </head> */
@@ -745,25 +744,31 @@
   }
   .announce-view-overlay.open{ opacity:1; pointer-events:auto; }
   .announce-view{
-    position:fixed; top:0; left:0; width:100vw;
+    position:fixed; top:0; left:0; right:0;
     height:100vh; height:var(--app-vh, 100vh);
-    z-index:61; overflow-y:auto;
+    z-index:61; overflow:hidden;
     background: linear-gradient(165deg,
       color-mix(in srgb, var(--accent) 22%, var(--bg)) 0%,
-      var(--bg) 45%,
-      #000 100%);
-    transform: translateY(24px); opacity:0; pointer-events:none;
-    transition: transform .4s var(--ease), opacity .35s var(--ease);
+      var(--bg) 100%);
+    opacity:0; pointer-events:none;
+    transition: opacity .35s var(--ease);
   }
-  .announce-view.open{ transform:translateY(0); opacity:1; pointer-events:auto; }
+  .announce-view.open{ opacity:1; pointer-events:auto; }
   .announce-bg{
-    position:fixed; top:0; left:0; width:100vw;
-    height:100vh; height:var(--app-vh, 100vh);
+    position:absolute; inset:0;
     z-index:0;
     background-size:cover; background-position:center;
     opacity:0; transition: opacity .35s ease;
   }
   .announce-bg.active{ opacity:1; }
+  .announce-view-scroll{
+    position:absolute; inset:0; z-index:1;
+    overflow-y:auto;
+    overscroll-behavior: contain;
+    transform: translateY(24px);
+    transition: transform .4s var(--ease);
+  }
+  .announce-view.open .announce-view-scroll{ transform:translateY(0); }
   .announce-view-inner{ position:relative; z-index:1; }
   .announce-view-inner{ max-width:760px; margin:0 auto; padding:90px 24px 80px; }
   @media(max-width:720px){ .announce-view-inner{ padding:80px 18px 60px; } }
@@ -1112,7 +1117,7 @@
       <h2 class="reveal" id="hpContactsTitle">Связаться с нами</h2>
       <div class="contacts-grid">
         
-        <a href="#" target="_blank" class="cat-tile contact-tile reveal" style="--rd:0ms" id="contactChat">
+        <a href="#" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:0ms" id="contactChat">
           <svg viewBox="0 0 24 24" fill-rule="evenodd" clip-rule="evenodd">
             <path d="M12 2C6.48 2 2 6.48 2 12c0 2.5 0.9 4.8 2.4 6.6l-1.3 2.9c-.2 0.5 0.3 1 0.8 0.8l2.9-1.3c1.5 0.6 3.3 1 5.2 1 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 5c2.76 0 5 2.24 5 5s-2.24 5-5 5c-1.2 0-2.3-.4-3.2-1.1l-1.3 0.6 0.4-1.3C7.3 14.3 7 13.2 7 12c0-2.76 2.24-5 5-5z"/>
           </svg>
@@ -1122,7 +1127,7 @@
           </div>
         </a>
 
-        <a href="https://wa.me/79250452166" target="_blank" class="cat-tile contact-tile reveal" style="--rd:60ms" id="contactWhatsapp">
+        <a href="https://wa.me/79250452166" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:60ms" id="contactWhatsapp">
           <svg viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.002-2.633-1.019-5.101-2.875-6.959-1.856-1.857-4.321-2.879-6.961-2.88-5.441 0-9.866 4.412-9.87 9.849-.002 1.698.443 3.356 1.29 4.828l-.995 3.635 3.718-.977zm11.447-6.17c-.328-.164-1.94-.957-2.242-1.068-.301-.11-.522-.164-.743.164-.221.328-.855 1.068-1.047 1.287-.193.219-.386.246-.714.082-.328-.164-1.386-.51-2.64-1.627-.977-.872-1.637-1.95-1.829-2.278-.193-.328-.021-.506.143-.669.148-.147.328-.382.492-.574.164-.192.219-.328.328-.547.11-.219.055-.411-.027-.574-.082-.164-.743-1.792-1.019-2.459-.27-.65-.542-.56-.743-.57l-.633-.01c-.221 0-.58.082-.884.411-.304.328-1.161 1.135-1.161 2.767 0 1.632 1.189 3.203 1.354 3.422.165.219 2.34 3.574 5.67 5.014.792.341 1.41.546 1.893.7.796.253 1.52.217 2.092.131.638-.096 1.94-.793 2.214-1.559.273-.766.273-1.422.192-1.559-.081-.137-.301-.219-.629-.383z"/>
           </svg>
@@ -1132,7 +1137,7 @@
           </div>
         </a>
 
-        <a href="https://t.me/your_studio" target="_blank" class="cat-tile contact-tile reveal" style="--rd:120ms" id="contactTelegram">
+        <a href="https://t.me/your_studio" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:120ms" id="contactTelegram">
           <svg viewBox="0 0 24 24">
             <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.87 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.46c.536-.196 1.006.128.832.941z"/>
           </svg>
@@ -1142,7 +1147,7 @@
           </div>
         </a>
 
-        <a href="https://vk.ru/club116263150" target="_blank" class="cat-tile contact-tile reveal" style="--rd:180ms" id="contactVk">
+        <a href="https://vk.ru/club116263150" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:180ms" id="contactVk">
           <svg viewBox="0 0 24 24">
             <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.626 12.435c.484.473.996.916 1.443 1.417.472.53.916 1.084 1.282 1.696.194.323.357.665.342 1.056-.02.502-.303.829-.769.896-.282.041-.564.02-.846.02h-2.618c-.628-.016-1.118-.242-1.493-.761-.39-.536-.75-.1-.115-1.597-.133-.314-.287-.618-.466-.906-.284-.457-.655-.572-1.146-.353-.332.148-.48.423-.526.772-.094.695-.125 1.396-.242 2.086-.076.442-.36.721-.806.753-.523.037-1.049.043-1.569-.033-2.18-.322-3.95-1.396-5.462-2.984-1.28-1.343-2.247-2.946-2.997-4.686-.178-.412-.047-.733.402-.743h2.641c.367.004.64.196.772.543.518 1.353 1.222 2.594 2.163 3.692.228.266.452.53.754.673.308.146.516.059.625-.262.08-.235.116-.48.134-.727.067-.923.061-1.844-.131-2.75-.078-.364-.284-.576-.639-.636-.201-.034-.16-.098-.067-.21.147-.178.368-.266.602-.266h4.155c.441.048.539.261.574.697.086 1.062.039 2.12-.132 3.174-.034.213-.01.458.106.634.156.236.4.218.574.053.642-.614 1.127-1.357 1.517-2.176.284-.596.502-1.218.667-1.853.07-.27.234-.439.521-.442h2.783c.063 0 .126.002.189.009.522.06.697.311.545.811-.318 1.043-.889 1.956-1.575 2.782-.362.437-.775.828-1.148 1.255-.38.435-.355.666.06.1.1.z"/>
           </svg>
@@ -1277,14 +1282,16 @@
 <div class="announce-view" id="announceView" aria-hidden="true">
   <div class="announce-bg" id="announceBgA"></div>
   <div class="announce-bg" id="announceBgB"></div>
-  <div class="announce-view-head">
-    <span class="cat-name" id="announceCatName"></span>
-    <div class="announce-dots" id="announceDots"></div>
-    <button class="icon-btn" id="announceCloseBtn" aria-label="Закрыть">
-      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
-    </button>
+  <div class="announce-view-scroll" id="announceViewScroll">
+    <div class="announce-view-head">
+      <span class="cat-name" id="announceCatName"></span>
+      <div class="announce-dots" id="announceDots"></div>
+      <button class="icon-btn" id="announceCloseBtn" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <div class="announce-view-inner" id="announceViewInner"></div>
   </div>
-  <div class="announce-view-inner" id="announceViewInner"></div>
 </div>
 <button class="announce-nav announce-nav-prev" id="announcePrevBtn" aria-label="Предыдущее объявление">
   <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
@@ -1474,6 +1481,17 @@
     if(vk) vk.href = vkUrl;
   }
   updateSignupLinks();
+
+  // Пока maxChatUrl не пришёл из Firestore, у этих ссылок href="#" — клик по ним
+  // раньше всё равно открывал пустую вкладку (из-за target="_blank"). Блокируем
+  // переход, пока реальная ссылка ещё не подгрузилась.
+  ["contactChat", "signupChoiceMax"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("click", function(e){
+      if(el.getAttribute("href") === "#") e.preventDefault();
+    });
+  });
 
   var signupChoice = document.getElementById("signupChoice");
   var signupChoiceOverlay = document.getElementById("signupChoiceOverlay");
@@ -2114,7 +2132,6 @@ function togglePhones(event) {
   document.getElementById("drawerOpenBtn").addEventListener("click", openDrawer);
   document.getElementById("drawerCloseBtn").addEventListener("click", closeDrawer);
   overlay.addEventListener("click", closeDrawer);
-  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeDrawer(); });
 
   function renderCategoryList(){
     drawerTitle.textContent = "Разделы";
@@ -2268,6 +2285,7 @@ function togglePhones(event) {
   var announceBgB = document.getElementById("announceBgB");
   var announceBgActive = null; // указывает, какой из двух слоёв сейчас активен (виден)
   var announceViewInner = document.getElementById("announceViewInner");
+  var announceViewScroll = document.getElementById("announceViewScroll");
   var announceCatName = document.getElementById("announceCatName");
   var announceCloseBtn = document.getElementById("announceCloseBtn");
   var announcePrevBtn = document.getElementById("announcePrevBtn");
@@ -2474,7 +2492,7 @@ function togglePhones(event) {
     }
 
     announceViewInner.scrollTop = 0;
-    announceView.scrollTop = 0;
+    announceViewScroll.scrollTop = 0;
   }
 
   function closeAnnouncementInternal(){
@@ -2591,10 +2609,17 @@ function togglePhones(event) {
     else if(e.key === "ArrowRight") goToLightboxPhoto(lightboxState.index + 1);
   });
 
+  // Единый обработчик Escape для ВСЕХ слоёв (шторка, объявление, лайтбокс, выбор мессенджера).
+  // Раньше было три независимых keydown-слушателя (шторка / объявление+лайтбокс),
+  // которые могли сработать одновременно на одно нажатие Escape при открытых
+  // друг на друге слоях (напр. шторка → категория → объявление) — это закрывало
+  // не только верхний слой, а расходилось с overlayStack/history и портило
+  // последующую работу кнопки "назад". Теперь Escape всегда закрывает только
+  // самый верхний слой, тем же путём (requestCloseOverlay), что и остальной UI.
   document.addEventListener("keydown", function(e){
-    if(e.key === "Escape"){
-      if(lightbox.classList.contains("open")) closeLightbox();
-      else if(announceView.classList.contains("open")) closeAnnouncement();
+    if(e.key !== "Escape") return;
+    if(overlayStack.length){
+      requestCloseOverlay(overlayStack[overlayStack.length - 1].name);
     }
   });
 

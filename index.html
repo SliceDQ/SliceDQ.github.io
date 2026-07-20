@@ -544,6 +544,17 @@
   .phone-link:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
   .phone-link .call-icon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700; }
 
+  @media(max-width:720px){
+    .contact-tile{ min-width: 0; flex-basis: 100%; padding: 16px 18px; backdrop-filter: none; box-shadow: none; }
+    .contact-tile:hover{ transform: none; box-shadow: none; }
+    .contacts-grid{ gap: 12px; }
+    .contact-tile svg{ width: 20px; height: 20px; }
+    .contact-info .title{ font-size: 14.5px; }
+    .contact-info .desc{ font-size: 12px; }
+    .phone-link{ flex-wrap: wrap; white-space: normal; padding: 10px 12px; }
+    .phone-link span:first-child{ font-size: 13px; }
+  }
+
   /* ============ 🗺 КАК НАС НАЙТИ ============ */
   .location-section { border-top: 1px solid var(--border); }
   .location-section h2 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: clamp(26px, 3.8vw, 36px); margin-bottom: 28px; letter-spacing: -.02em; text-transform: uppercase;}
@@ -843,9 +854,9 @@
   /* ============ 🌊 SCROLL REVEAL ============ */
   .reveal{
     opacity:0;
-    transform: translateY(18px);
-    transition: opacity .5s ease, transform .5s ease;
-    transition-delay: var(--rd, 0ms);
+    transform: translateY(8px);
+    transition: opacity .22s ease, transform .22s ease;
+    transition-delay: calc(var(--rd, 0ms) * 0.4);
   }
   /* will-change убран: раньше вешался разом на ВСЕ ещё не показанные .reveal-карточки —
      это создавало десятки одновременных composite-слоёв ещё до того, как карточки
@@ -866,8 +877,8 @@
   .burger.is-open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
 
   /* мягкое появление шапки при загрузке */
-  header{ animation: headerIn .6s var(--ease) both; }
-  @keyframes headerIn{ from{ opacity:0; transform: translateY(-12px); } to{ opacity:1; transform: translateY(0); } }
+  header{ animation: headerIn .3s var(--ease) both; }
+  @keyframes headerIn{ from{ opacity:0; transform: translateY(-6px); } to{ opacity:1; transform: translateY(0); } }
 
   /* ============ 🎈 ПОСТОЯННЫЕ ПОКАЧИВАНИЯ (везде и заметно) ============ */
   @keyframes sway{ 0%,100%{ transform: rotate(-4deg); } 50%{ transform: rotate(4deg); } }

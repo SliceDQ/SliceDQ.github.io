@@ -73,7 +73,8 @@
     top: 0; left: 0; right: 0;
     height: 100vh; /* fallback, если JS ещё не отработал / отключён */
     height: var(--app-vh, 100vh); /* реальная зафиксированная высота экрана,
-       не меняется при скролле — см. скрипт перед </head> */
+       не меняется при скролле — см. скрипт перед <base target="_blank">
+</head> */
     background-image: url('bg-stones.webp');
     background-size: cover;
     background-position: center;
@@ -1149,7 +1150,7 @@
 
         <a href="https://vk.ru/club116263150" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:180ms" id="contactVk">
           <svg viewBox="0 0 24 24">
-            <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.626 12.435c.484.473.996.916 1.443 1.417.472.53.916 1.084 1.282 1.696.194.323.357.665.342 1.056-.02.502-.303.829-.769.896-.282.041-.564.02-.846.02h-2.618c-.628-.016-1.118-.242-1.493-.761-.39-.536-.75-.1-.115-1.597-.133-.314-.287-.618-.466-.906-.284-.457-.655-.572-1.146-.353-.332.148-.48.423-.526.772-.094.695-.125 1.396-.242 2.086-.076.442-.36.721-.806.753-.523.037-1.049.043-1.569-.033-2.18-.322-3.95-1.396-5.462-2.984-1.28-1.343-2.247-2.946-2.997-4.686-.178-.412-.047-.733.402-.743h2.641c.367.004.64.196.772.543.518 1.353 1.222 2.594 2.163 3.692.228.266.452.53.754.673.308.146.516.059.625-.262.08-.235.116-.48.134-.727.067-.923.061-1.844-.131-2.75-.078-.364-.284-.576-.639-.636-.201-.034-.16-.098-.067-.21.147-.178.368-.266.602-.266h4.155c.441.048.539.261.574.697.086 1.062.039 2.12-.132 3.174-.034.213-.01.458.106.634.156.236.4.218.574.053.642-.614 1.127-1.357 1.517-2.176.284-.596.502-1.218.667-1.853.07-.27.234-.439.521-.442h2.783c.063 0 .126.002.189.009.522.06.697.311.545.811-.318 1.043-.889 1.956-1.575 2.782-.362.437-.775.828-1.148 1.255-.38.435-.355.666.06.1.1.z"/>
+            <path d="M13.162 18.994c.609 0 .858-.406.851-.915-.031-1.917.714-2.949 2.117-1.546 1.597 1.9 2.442 2.461 3.937 2.461h1.583c.809 0 1.161-.293 1.161-.804 0-.723-.828-1.86-2.021-3.239-.601-.702-.972-1.293-.972-1.708 0-.556.363-1.049 1.104-2.081 1.443-2 2.021-3.257 2.021-3.831 0-.523-.371-.858-.987-.858h-1.583c-.657 0-.973.351-1.161.865 0 0-1.371 3.339-3.174 4.502-.606.393-.878.517-1.208.517-.353 0-.517-.246-.517-.858v-2.98c0-.815-.239-1.181-.998-1.181h-2.516c-.556 0-.888.377-.888.735 0 .77.939.913 1.036 2.995v2.267c0 .965-.174 1.14-.554 1.14-.998 0-3.174-2.815-4.51-6.036-.264-.634-.529-.876-1.192-.876H2.5c-.727 0-.869.351-.869.735 0 .698.858 3.784 3.938 7.878 2.05 2.774 4.937 4.278 7.593 4.278z"/>
           </svg>
           <div class="contact-info">
             <span class="title">ВКонтакте</span>
@@ -1590,6 +1591,10 @@
       reflect.removeAttribute("id");
       reflect.removeAttribute("style");
       reflect.setAttribute("aria-hidden", "true");
+      // Удаляем ВСЕ id у дочерних элементов, чтобы Firebase не путался
+      // при обновлении текста (getElementById находил бы клон вместо оригинала)
+      var allIds = reflect.querySelectorAll("[id]");
+      for(var i = 0; i < allIds.length; i++) allIds[i].removeAttribute("id");
 
       /* В отражении убираем вторую строку ("ПЕРВЫЙ") и перенос строки —
          остаётся только первая строка ("СДЕЛАЙ") и акцент ("ШАГ"),
@@ -2304,24 +2309,36 @@ function togglePhones(event) {
     if(!str) return "";
     var esc = String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
+    // Однопроходная замена через плейсхолдеры: предотвращает вложенные <a>
+    // (например, телефон внутри href уже созданной ссылки).
+    var placeholders = [];
+    var phIndex = 0;
+    function makePlaceholder(html){
+      var key = "" + (phIndex++) + "";
+      placeholders.push({ key: key, html: html });
+      return key;
+    }
+
     // 1) ссылки http(s):// и www.
     esc = esc.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi, function(match){
       var href = /^https?:\/\//i.test(match) ? match : "https://" + match;
-      return '<a class="in-text-link" href="' + href + '" target="_blank" rel="noopener">' + match + '</a>';
+      return makePlaceholder('<a class="in-text-link" href="' + href + '" target="_blank" rel="noopener">' + match + '</a>');
     });
 
     // 2) e-mail
     esc = esc.replace(/([\w.+-]+@[\w-]+\.[\w.-]+)/g, function(match){
-      return '<a class="in-text-link" href="mailto:' + match + '">' + match + '</a>';
+      return makePlaceholder('<a class="in-text-link" href="mailto:' + match + '">' + match + '</a>');
     });
 
     // 3) телефоны: +7 900 123-45-67, 8(900)123-45-67, 89001234567 и похожие форматы
     esc = esc.replace(/(\+?\d[\d\s\-()]{8,}\d)/g, function(match){
       var digits = match.replace(/[^\d+]/g, "");
-      if(digits.replace(/\D/g,"").length < 10) return match; // слишком коротко — не похоже на телефон
-      return '<a class="in-text-link" href="tel:' + digits + '">' + match + '</a>';
+      if(digits.replace(/\D/g,"").length < 10) return match;
+      return makePlaceholder('<a class="in-text-link" href="tel:' + digits + '">' + match + '</a>');
     });
 
+    // Раскрываем плейсхолдеры
+    placeholders.forEach(function(p){ esc = esc.replace(p.key, p.html); });
     return esc;
   }
 

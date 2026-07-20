@@ -6,6 +6,9 @@
 <title>KSTYLE — школа танцев</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
   /* ============ 🛠 RESET & BASE ============ */
@@ -558,7 +561,7 @@
     box-shadow: var(--shadow-3d-light);
   }
   .location-info .addr-title { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
-  .location-info .addr-text { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
+  .location-info .addr-text { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.4; }
   .location-info .addr-link {
     display: inline-flex; align-items: center; gap: 10px; margin-top: 6px;
     padding: 13px 18px; border-radius: 999px; font-weight: 700; font-size: 14px;
@@ -1049,7 +1052,7 @@
           </div>
         </a>
 
-        <a href="https://vk.com/your_studio" target="_blank" class="cat-tile contact-tile reveal" style="--rd:180ms" id="contactVk">
+        <a href="https://vk.ru/club116263150" target="_blank" class="cat-tile contact-tile reveal" style="--rd:180ms" id="contactVk">
           <svg viewBox="0 0 24 24">
             <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.626 12.435c.484.473.996.916 1.443 1.417.472.53.916 1.084 1.282 1.696.194.323.357.665.342 1.056-.02.502-.303.829-.769.896-.282.041-.564.02-.846.02h-2.618c-.628-.016-1.118-.242-1.493-.761-.39-.536-.75-.1-.115-1.597-.133-.314-.287-.618-.466-.906-.284-.457-.655-.572-1.146-.353-.332.148-.48.423-.526.772-.094.695-.125 1.396-.242 2.086-.076.442-.36.721-.806.753-.523.037-1.049.043-1.569-.033-2.18-.322-3.95-1.396-5.462-2.984-1.28-1.343-2.247-2.946-2.997-4.686-.178-.412-.047-.733.402-.743h2.641c.367.004.64.196.772.543.518 1.353 1.222 2.594 2.163 3.692.228.266.452.53.754.673.308.146.516.059.625-.262.08-.235.116-.48.134-.727.067-.923.061-1.844-.131-2.75-.078-.364-.284-.576-.639-.636-.201-.034-.16-.098-.067-.21.147-.178.368-.266.602-.266h4.155c.441.048.539.261.574.697.086 1.062.039 2.12-.132 3.174-.034.213-.01.458.106.634.156.236.4.218.574.053.642-.614 1.127-1.357 1.517-2.176.284-.596.502-1.218.667-1.853.07-.27.234-.439.521-.442h2.783c.063 0 .126.002.189.009.522.06.697.311.545.811-.318 1.043-.889 1.956-1.575 2.782-.362.437-.775.828-1.148 1.255-.38.435-.355.666.06.1.1.z"/>
           </svg>
@@ -1098,7 +1101,7 @@
         <div class="location-info reveal">
           <div>
             <div class="addr-title">Адрес студии</div>
-            <div class="addr-text" id="locationAddrText">Московская область, г. Раменское, ул. Космонавтов, 1<br>Цокольный этаж, вход с 2 сторон</div>
+            <div class="addr-text" id="locationAddrText">Московская&nbsp;область, Г.&nbsp;Раменское,<br>ул.&nbsp;Космонавтов, д.&nbsp;1, Цокольный&nbsp;этаж.<br>Вход&nbsp;с&nbsp;двух&nbsp;сторон.</div>
           </div>
           <a class="addr-link" id="locationYmapLink" href="https://yandex.ru/maps/?pt=38.202159,55.585620&z=17&l=map" target="_blank" rel="noopener">
             Открыть в Яндекс.Картах
@@ -1151,6 +1154,17 @@
         </span>
         <span class="txt">
           <span class="name">WhatsApp</span>
+          <span class="desc">Написать в личный чат</span>
+        </span>
+      </a>
+      <a href="https://vk.ru/club116263150" target="_blank" rel="noopener" class="signup-choice-opt" id="signupChoiceVk">
+        <span class="ico">
+          <svg viewBox="0 0 24 24">
+            <path d="M13.162 18.994c.609 0 .858-.406.851-.915-.031-1.917.714-2.949 2.117-1.546 1.597 1.9 2.442 2.461 3.937 2.461h1.583c.809 0 1.161-.293 1.161-.804 0-.723-.828-1.86-2.021-3.239-.601-.702-.972-1.293-.972-1.708 0-.556.363-1.049 1.104-2.081 1.443-2 2.021-3.257 2.021-3.831 0-.523-.371-.858-.987-.858h-1.583c-.657 0-.973.351-1.161.865 0 0-1.371 3.339-3.174 4.502-.606.393-.878.517-1.208.517-.353 0-.517-.246-.517-.858v-2.98c0-.815-.239-1.181-.998-1.181h-2.516c-.556 0-.888.377-.888.735 0 .77.939.913 1.036 2.995v2.267c0 .965-.174 1.14-.554 1.14-.998 0-3.174-2.815-4.51-6.036-.264-.634-.529-.876-1.192-.876H2.5c-.727 0-.869.351-.869.735 0 .698.858 3.784 3.938 7.878 2.05 2.774 4.937 4.278 7.593 4.278z"/>
+          </svg>
+        </span>
+        <span class="txt">
+          <span class="name">ВКонтакте</span>
           <span class="desc">Написать в личный чат</span>
         </span>
       </a>
@@ -1234,6 +1248,44 @@
   firebase.initializeApp(firebaseConfig);
   var db = firebase.firestore();
 
+  // Включаем офлайн-персистентность Firestore (IndexedDB): при повторных заходах
+  // данные отдаются мгновенно из локального кеша, а актуализация идёт в фоне.
+  // Оборачиваем в try/catch + .catch — в некоторых браузерах/режимах (приватный
+  // режим, несколько открытых вкладок, старый Safari) это может не сработать,
+  // и тогда просто продолжаем работать как раньше, без персистентности.
+  try{
+    db.enablePersistence({ synchronizeTabs: true }).catch(function(err){
+      console.warn("Firestore persistence недоступна:", err && err.code);
+    });
+  } catch(e){ /* SDK может не поддерживать метод — просто пропускаем */ }
+
+  // Firestore иногда отвечает ошибкой (resource-exhausted / unavailable / deadline-exceeded)
+  // из-за защиты от слишком частых запросов — раньше такой запрос просто падал в catch
+  // и часть контента (контакты/объявления) молча не появлялась. Теперь такие запросы
+  // повторяются несколько раз с нарастающей паузой, прежде чем сдаться.
+  function firestoreGetWithRetry(getPromiseFn, maxRetries){
+    maxRetries = (typeof maxRetries === "number") ? maxRetries : 3;
+    return new Promise(function(resolve, reject){
+      var attempt = 0;
+      function tryOnce(){
+        getPromiseFn().then(resolve).catch(function(err){
+          attempt++;
+          var retriable = !err || !err.code ||
+            err.code === "resource-exhausted" || err.code === "unavailable" ||
+            err.code === "deadline-exceeded" || err.code === "aborted" ||
+            err.code === "cancelled" || err.code === "internal";
+          if(attempt <= maxRetries && retriable){
+            var delay = Math.min(5000, 500 * Math.pow(2, attempt - 1)) + Math.random() * 300;
+            setTimeout(tryOnce, delay);
+          } else {
+            reject(err);
+          }
+        });
+      }
+      tryOnce();
+    });
+  }
+
   var whatsappBaseUrl = "https://wa.me/79250452166"; // запасной номер, обновится ниже из настроек
 
   function readSettingsCache(key){
@@ -1245,15 +1297,30 @@
       return parsed.data;
     } catch(e){ return null; }
   }
+  // Как readSettingsCache, но не отбрасывает устаревшую запись — возвращает
+  // { data, fresh }, чтобы можно было мгновенно показать хоть что-то (даже старое),
+  // пока в фоне тянется актуальная версия (stale-while-revalidate).
+  function readSettingsCacheSWR(key){
+    try{
+      var raw = localStorage.getItem("kstyle_settings_" + key);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      if(!parsed || !parsed.data) return null;
+      return { data: parsed.data, fresh: (Date.now() - parsed.ts) <= 10*60*1000 };
+    } catch(e){ return null; }
+  }
   function writeSettingsCache(key, data){
     try{ localStorage.setItem("kstyle_settings_" + key, JSON.stringify({ ts: Date.now(), data: data })); }
     catch(e){}
   }
 
   (function loadContactsIntoPage(){
-    var cached = readSettingsCache("contacts");
-    if(cached){ applyContactsData(cached); return; }
-    db.collection("settings").doc("contacts").get().then(function(doc){
+    var swr = readSettingsCacheSWR("contacts");
+    if(swr){
+      applyContactsData(swr.data); // мгновенно рисуем то, что есть, даже если кеш устарел
+      if(swr.fresh) return; // кеш свежий — сеть не трогаем
+    }
+    firestoreGetWithRetry(function(){ return db.collection("settings").doc("contacts").get(); }).then(function(doc){
       if(!doc.exists) return;
       var data = doc.data();
       writeSettingsCache("contacts", data);
@@ -1277,7 +1344,11 @@
         updateSignupLinks();
       }
       if(data.telegram){ document.getElementById("contactTelegram").href = data.telegram; }
-      if(data.vk){ document.getElementById("contactVk").href = data.vk; }
+      if(data.vk){
+        document.getElementById("contactVk").href = data.vk;
+        vkUrl = data.vk;
+        updateSignupLinks();
+      }
 
       if(data.phone1){
         document.getElementById("phoneLink1").href = "tel:" + data.phone1.replace(/[^\d+]/g, "");
@@ -1295,6 +1366,7 @@
 
   // ============ ✅ КНОПКА "ЗАПИСАТЬСЯ" ============
   var maxChatUrl = "#";
+  var vkUrl = "https://vk.ru/club116263150";
   function buildSignupUrl(){
     var message = "Здравствуйте! Хочу записаться на занятия в KSTYLE.";
     var sep = whatsappBaseUrl.indexOf("?") === -1 ? "?" : "&";
@@ -1306,6 +1378,8 @@
     if(wa) wa.href = url;
     var mx = document.getElementById("signupChoiceMax");
     if(mx) mx.href = maxChatUrl;
+    var vk = document.getElementById("signupChoiceVk");
+    if(vk) vk.href = vkUrl;
   }
   updateSignupLinks();
 
@@ -1375,10 +1449,13 @@
       window.__syncHeroReflection && window.__syncHeroReflection();
     }
 
-    var cachedHome = readSettingsCache("homepage");
-    if(cachedHome){ applyHomepageData(cachedHome); return; }
+    var swrHome = readSettingsCacheSWR("homepage");
+    if(swrHome){
+      applyHomepageData(swrHome.data);
+      if(swrHome.fresh) return;
+    }
 
-    db.collection("settings").doc("homepage").get().then(function(doc){
+    firestoreGetWithRetry(function(){ return db.collection("settings").doc("homepage").get(); }).then(function(doc){
       var data = doc.exists ? doc.data() : {};
       writeSettingsCache("homepage", data);
       applyHomepageData(data);
@@ -1442,17 +1519,18 @@ function togglePhones(event) {
 
   var itemsCache = {}; // кэш уже загруженных разделов в памяти вкладки, чтобы повторное открытие было мгновенным
 
-  // Персистентный кэш в localStorage: переживает перезагрузку страницы и новые визиты,
-  // поэтому повторные заходы юзеров в течение CACHE_TTL_MS не бьют по Firestore вообще.
-  // TTL небольшой (10 минут) — если поменяли объявление в админке, изменения долго ждать не придётся.
+  // Персистентный кэш в localStorage: переживает перезагрузку страницы и новые визиты.
+  // Пока кэшу меньше CACHE_TTL_MS — отдаём его мгновенно без обращения к Firestore.
+  // Как только он устарел — данные обязательно перечитываются с сервера, чтобы не
+  // показать старую версию вместо новой (см. getItems ниже).
   var CACHE_TTL_MS = 10 * 60 * 1000;
-  function readPersistentCache(catKey){
+  function readPersistentCacheSWR(catKey){
     try{
       var raw = localStorage.getItem("kstyle_ann_" + catKey);
       if(!raw) return null;
       var parsed = JSON.parse(raw);
-      if(!parsed || (Date.now() - parsed.ts) > CACHE_TTL_MS) return null;
-      return parsed.data;
+      if(!parsed || !parsed.data) return null;
+      return { data: parsed.data, fresh: (Date.now() - parsed.ts) <= CACHE_TTL_MS };
     } catch(e){ return null; }
   }
   function writePersistentCache(catKey, data){
@@ -1461,47 +1539,73 @@ function togglePhones(event) {
     } catch(e){ /* localStorage может быть недоступен (приватный режим и т.п.) — просто пропускаем */ }
   }
 
+  async function fetchCategoryFromFirestore(catKey){
+    var snap = await firestoreGetWithRetry(function(){
+      return db.collection("announcements")
+
+        .where("category", "==", catKey)
+        .get();
+    });
+    var docs = snap.docs.slice().sort(function(a, b){
+      var ta = (a.data().createdAt && a.data().createdAt.toMillis) ? a.data().createdAt.toMillis() : 0;
+      var tb = (b.data().createdAt && b.data().createdAt.toMillis) ? b.data().createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+    return docs.map(function(d){
+      var data = d.data();
+      return {
+        id: d.id,
+        title: data.title || (data.text || "").split("\n")[0],
+        text: data.text || "",
+        photos: data.photos || [],
+        linkLabel: data.linkLabel || "",
+        linkUrl: data.linkUrl || "",
+        bgImage: data.bgImage || "",
+        cardImage: data.cardImage || "",
+        ageGroup: data.ageGroup || "adult",
+        bgDim: (typeof data.bgDim === "number") ? data.bgDim : 55,
+        date: (data.createdAt && data.createdAt.toDate) ? data.createdAt.toDate().toLocaleDateString("ru-RU") : ""
+      };
+    });
+  }
+
+  var pendingFetches = {}; // защита от дублирующих чтений одной категории при повторных кликах/автопрокрутке
+
   async function getItems(catKey){
     if(itemsCache[catKey]){
       return itemsCache[catKey];
     }
-    var persisted = readPersistentCache(catKey);
-    if(persisted){
-      itemsCache[catKey] = persisted; // поднимаем и в память, чтобы дальше было ещё быстрее
-      return persisted;
+    // Кэш отдаём мгновенно (без обращения к Firebase) только пока он реально свежий.
+    // Как только он устарел — ждём настоящий ответ от Firestore, чтобы не показать
+    // пользователю старые данные вместо новых.
+    var persisted = readPersistentCacheSWR(catKey);
+    if(persisted && persisted.fresh){
+      itemsCache[catKey] = persisted.data;
+      return persisted.data;
     }
-    try{
-      var snap = await db.collection("announcements")
-        .where("category", "==", catKey)
-        .get();
-      var docs = snap.docs.slice().sort(function(a, b){
-        var ta = (a.data().createdAt && a.data().createdAt.toMillis) ? a.data().createdAt.toMillis() : 0;
-        var tb = (b.data().createdAt && b.data().createdAt.toMillis) ? b.data().createdAt.toMillis() : 0;
-        return tb - ta;
-      });
-      var result = docs.map(function(d){
-        var data = d.data();
-        return {
-          id: d.id,
-          title: data.title || (data.text || "").split("\n")[0],
-          text: data.text || "",
-          photos: data.photos || [],
-          linkLabel: data.linkLabel || "",
-          linkUrl: data.linkUrl || "",
-          bgImage: data.bgImage || "",
-          cardImage: data.cardImage || "",
-          ageGroup: data.ageGroup || "adult",
-          bgDim: (typeof data.bgDim === "number") ? data.bgDim : 55,
-          date: (data.createdAt && data.createdAt.toDate) ? data.createdAt.toDate().toLocaleDateString("ru-RU") : ""
-        };
-      });
-      itemsCache[catKey] = result; // сохраняем в кэш, чтобы не грузить повторно
-      writePersistentCache(catKey, result);
-      return result;
-    } catch(e){
-      console.error("Ошибка загрузки объявлений:", e);
-      return [];
+    if(pendingFetches[catKey]){
+      return pendingFetches[catKey]; // запрос за этой категорией уже летит — не дублируем чтение
     }
+    var fetchPromise = (async function(){
+      try{
+        var result = await fetchCategoryFromFirestore(catKey);
+        itemsCache[catKey] = result; // сохраняем в кэш, чтобы не грузить повторно
+        writePersistentCache(catKey, result);
+        return result;
+      } catch(e){
+        console.error("Ошибка загрузки объявлений:", e);
+        // Сеть недоступна/ошибка — лучше показать хоть устаревшие данные, чем ничего.
+        if(persisted){
+          itemsCache[catKey] = persisted.data;
+          return persisted.data;
+        }
+        return [];
+      } finally {
+        delete pendingFetches[catKey];
+      }
+    })();
+    pendingFetches[catKey] = fetchPromise;
+    return fetchPromise;
   }
 
   var revealObserver = ("IntersectionObserver" in window)

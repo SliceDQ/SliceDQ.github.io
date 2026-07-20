@@ -1825,10 +1825,18 @@ function togglePhones(event) {
   setShowcaseTab(0, false);
   showcaseTimer = setInterval(advanceShowcase, 60000);
   var resizeRaf = null;
+  var lastShowcaseWidth = window.innerWidth;
   window.addEventListener("resize", function(){
     if(resizeRaf) return;
     resizeRaf = requestAnimationFrame(function(){
       resizeRaf = null;
+      // На мобильных скролл прячет/показывает адресную строку — это тоже триггерит
+      // "resize" (меняется только высота viewport). Раньше это заново пересобирало
+      // витрину с анимацией на каждый такой чих во время скролла, что выглядело как
+      // "перезагрузка карточек". Реагируем только на реальное изменение ширины.
+      var currentWidth = window.innerWidth;
+      if(currentWidth === lastShowcaseWidth) return;
+      lastShowcaseWidth = currentWidth;
       setShowcaseTab(showcaseActive, false);
     });
   }, { passive: true });

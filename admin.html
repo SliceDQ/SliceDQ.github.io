@@ -222,6 +222,11 @@
         </div>
         <label for="newVideoUrl">Видео внутри объявления (необязательно)</label>
         <input type="text" id="newVideoUrl" placeholder="Ссылка на видеосервис или прямой адрес видео">
+        <label for="newVideoPosition">Расположение медиа в объявлении</label>
+        <select id="newVideoPosition">
+          <option value="after" selected>После текста</option>
+          <option value="before">Перед текстом</option>
+        </select>
         <p class="sub">Поддерживаются YouTube, VK, Rutube, Vimeo, Dailymotion, OK и прямые ссылки на видео.</p>
         <div class="add-form-actions">
           <button class="btn-primary" id="addBtn">Опубликовать</button>
@@ -727,6 +732,7 @@
   var newLinkLabelEl = document.getElementById("newLinkLabel");
   var newLinkUrlEl = document.getElementById("newLinkUrl");
   var newVideoUrlEl = document.getElementById("newVideoUrl");
+  var newVideoPositionEl = document.getElementById("newVideoPosition");
 
   function normalizeUrl(url){
     url = url.trim();
@@ -1017,6 +1023,11 @@
     videoUrlInput.value = data.videoUrl || "";
     videoUrlInput.style.marginBottom = "10px";
 
+    var videoPositionInput = document.createElement("select");
+    videoPositionInput.innerHTML = '<option value="after">Медиа после текста</option><option value="before">Медиа перед текстом</option>';
+    videoPositionInput.value = data.videoPosition === "before" ? "before" : "after";
+    videoPositionInput.style.marginBottom = "10px";
+
     var cardImgLabel = document.createElement("label");
     cardImgLabel.textContent = "Фото карточки (обложка на главной странице)";
     cardImgLabel.style.marginTop = "6px";
@@ -1135,7 +1146,8 @@
         bgDim: Number(bgDimInput.value),
         linkLabel: (linkLabelVal && linkUrlVal) ? linkLabelVal : "",
         linkUrl: (linkLabelVal && linkUrlVal) ? linkUrlVal : "",
-        videoUrl: videoUrlVal
+        videoUrl: videoUrlVal,
+        videoPosition: videoPositionInput.value
       }).catch(function(e){ alert("Ошибка сохранения"); console.error(e); });
     });
 
@@ -1171,6 +1183,7 @@
     body.appendChild(linkLabelInput);
     body.appendChild(linkUrlInput);
     body.appendChild(videoUrlInput);
+    body.appendChild(videoPositionInput);
     body.appendChild(row);
     itemEl.appendChild(body);
   }
@@ -1209,6 +1222,7 @@
       linkLabel: (linkLabel && linkUrl) ? linkLabel : "",
       linkUrl: (linkLabel && linkUrl) ? linkUrl : "",
       videoUrl: videoUrl,
+      videoPosition: newVideoPositionEl.value,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function(){
       newTitleEl.value = "";
@@ -1216,6 +1230,7 @@
       newLinkLabelEl.value = "";
       newLinkUrlEl.value = "";
       newVideoUrlEl.value = "";
+      newVideoPositionEl.value = "after";
       newPhotos = [];
       renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
       newCardImage = "";

@@ -274,7 +274,15 @@
     margin-bottom:24px; font-weight:700; text-shadow: 0 2px 8px rgba(255,107,43,0.3);
   }
   
-  .hero-title-wrap{ position:relative; max-width:100%; }
+  .hero-title-wrap{
+    --reflection-depth:86px;
+    --reflection-gap:-7px;
+    position:relative;
+    max-width:100%;
+    padding-bottom:calc(var(--reflection-depth) + var(--reflection-gap));
+    transform-origin:22% 42%;
+    transition:transform .24s cubic-bezier(.2,.75,.25,1);
+  }
   .hero h1 {
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
@@ -293,58 +301,44 @@
        (скачки масштаба) во время скролла. */
   }
   
-  /* ============ 🪞 ОТРАЖЕНИЕ ЗАГОЛОВКА (замена -webkit-box-reflect) ============
-     Вместо нестандартного box-reflect (даёт потолок ~60fps в части WebKit-рендереров)
-     используем отдельный декоративный span внутри h1 (создаётся в JS ниже), отражённый через
-     transform: scaleY(-1) — это чисто композитная операция (GPU layer),
-     плюс mask-image для плавного затухания вниз. */
-  .hero-h1-reflect{
+  /* Exact mirrored title in a clipped, fading layer. */
+  .hero-title-reflection{
     position: absolute;
     left: 0;
-    top: calc(100% + 8px);
-    width: max-content;
-    max-width: 100%;
+    right:0;
+    top:calc(100% - var(--reflection-depth));
+    height:var(--reflection-depth);
     overflow:hidden;
-    display:flex;
-    align-items:baseline;
-    gap:.2em;
-    white-space:nowrap;
     pointer-events: none;
     user-select: none;
-    font-family:'Montserrat',sans-serif;
-    font-weight:900;
-    font-size:clamp(46px,9vw,102px);
-    line-height:.95;
-    letter-spacing:-.03em;
-    text-transform:uppercase;
-    color:#fff;
-    /* origin: center — блок остаётся строго под h1, переворачивается только
-       контент внутри (последняя строка оригинала оказывается сразу под ним).
-       origin:top двигал бы весь блок при флипе и накладывал его на оригинал —
-       это и было причиной "срезанного" отражения без ШАГ. */
-    transform: scaleY(-1);
-    transform-origin: center;
-    will-change: transform;
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.12) 60%, rgba(0,0,0,0) 100%);
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.12) 60%, rgba(0,0,0,0) 100%);
+    opacity:.34;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.62) 34%,transparent 100%);
+    mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.62) 34%,transparent 100%);
+  }
+  .hero-title-reflection h1{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    margin:0;
+    transform:scaleY(-1);
+    transform-origin:center;
+    filter:none;
   }
   @media(max-width:720px){
     .hero{ padding-top:64px; }
+    .hero-title-wrap{ --reflection-depth:56px; --reflection-gap:-4px; }
     .hero h1{ font-size:clamp(34px,9.6vw,40px); line-height:1; }
-    .hero-h1-reflect{
-      display:flex; top:calc(100% + 7px); font-size:26px; gap:.18em; opacity:.58;
-      -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
-      mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
-    }
+    .hero-title-reflection{ opacity:.28; }
   }
 
   @media(max-height:600px) and (pointer:coarse){
     .hero{ padding-top:38px; padding-bottom:72px; }
+    .hero-title-wrap{ --reflection-depth:48px; --reflection-gap:-3px; }
     .hero h1{ font-size:clamp(40px,5.4vw,58px); line-height:.98; }
-    .hero-h1-reflect{ font-size:clamp(26px,3.5vw,38px); top:calc(100% + 5px); }
   }
 
-  .hero h1 .accent, .hero-h1-reflect .accent {
+  .hero h1 .accent {
     background: var(--accent); 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -355,9 +349,9 @@
       drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
   }
   
-  .hero p.lead{ max-width:540px; margin-top:38px; color:var(--text); opacity:0.9; font-size:17.5px; line-height:1.65; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-  @media(max-width:720px){ .hero p.lead{ margin-top:64px; } }
-  @media(max-height:600px) and (pointer:coarse){ .hero p.lead{ margin-top:54px; max-width:620px; } }
+  .hero p.lead{ position:relative; z-index:2; max-width:540px; margin-top:-12px; color:var(--text); opacity:0.9; font-size:17.5px; line-height:1.65; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  @media(max-width:720px){ .hero p.lead{ margin-top:-8px; } }
+  @media(max-height:600px) and (pointer:coarse){ .hero p.lead{ margin-top:-6px; max-width:620px; } }
   .hero-cta{ display:flex; gap:14px; margin-top:42px; flex-wrap:wrap; }
   
   .btn{
@@ -858,11 +852,13 @@
   .home-video-slot{ display:none; padding:20px 0 70px; }
   .home-video-slot.has-video{ display:block; }
   .site-video{
-    position:relative; width:min(100%,420px); aspect-ratio:9/16; overflow:hidden; margin-inline:auto;
+    position:relative; width:min(100%,860px); aspect-ratio:16/9; overflow:hidden; margin-inline:auto;
     border:1px solid rgba(255,255,255,.12); border-radius:24px;
     background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
     box-shadow:0 24px 70px rgba(0,0,0,.32);
   }
+  .site-video.is-vertical{ width:min(100%,420px); aspect-ratio:9/16; }
+  .site-video.is-square{ width:min(100%,620px); aspect-ratio:1; }
   .site-video::after{
     content:""; position:absolute; inset:0; pointer-events:none;
     box-shadow:inset 0 0 70px rgba(0,0,0,.35); border-radius:inherit;
@@ -884,11 +880,17 @@
   .site-video-play::before{ content:""; margin-left:4px; border-left:16px solid currentColor; border-top:10px solid transparent; border-bottom:10px solid transparent; }
   .site-video-title{ font:800 clamp(17px,2.5vw,26px)/1.25 'Montserrat',sans-serif; max-width:680px; }
   .site-video-hint{ color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
-  .site-video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; z-index:2; }
+  .site-video iframe, .site-video video{ position:absolute; inset:0; width:100%; height:100%; border:0; z-index:2; }
+  .site-video video{ object-fit:contain; background:#000; }
+  .site-video-open{
+    position:absolute; right:10px; bottom:10px; z-index:3; padding:8px 11px; border-radius:9px;
+    color:#fff; background:rgba(0,0,0,.68); font-size:12px; font-weight:700; backdrop-filter:blur(8px);
+  }
   .announce-video{ margin-top:30px; }
   @media(max-width:720px){
     .home-video-slot{ padding:8px 0 48px; }
-    .site-video{ width:min(100%,380px); border-radius:18px; }
+    .site-video{ width:100%; border-radius:18px; }
+    .site-video.is-vertical{ width:min(100%,380px); }
     .site-video-play{ width:54px; height:54px; }
   }
 
@@ -1091,6 +1093,7 @@
 
   @media (prefers-reduced-motion: reduce){
     .hero-eyebrow::before, .burger, .feature-card .num, .rule-signature .stat .n, body::before{ animation:none !important; }
+    .hero-title-wrap, .hero-title-reflection{ transition:none !important; transform:none !important; }
   }
   @media (max-width: 720px){
     body::before{ animation: none; }
@@ -1653,13 +1656,13 @@
       var host = url.hostname.replace(/^www\./, "").toLowerCase();
       var videoId = "";
       if(host === "youtu.be") videoId = url.pathname.split("/")[1] || "";
-      if(host === "youtube.com" || host === "m.youtube.com"){
+      if(host === "youtube.com" || host === "m.youtube.com" || host === "music.youtube.com" || host === "youtube-nocookie.com"){
         videoId = url.searchParams.get("v") || "";
         if(!videoId && /^\/(shorts|embed|live)\//.test(url.pathname)) videoId = url.pathname.split("/")[2] || "";
       }
-      if(videoId && /^[\w-]{6,20}$/.test(videoId)) return "https://www.youtube-nocookie.com/embed/" + videoId + "?autoplay=1&rel=0";
+      if(videoId && /^[\w-]{6,20}$/.test(videoId)) return "https://www.youtube.com/embed/" + videoId + "?autoplay=1&rel=0&playsinline=1";
 
-      var rutubeMatch = url.pathname.match(/\/(?:video|shorts)\/([a-zA-Z0-9]+)/);
+      var rutubeMatch = url.pathname.match(/\/(?:video|shorts)\/([a-zA-Z0-9-]+)/);
       if((host === "rutube.ru" || host === "rutube.com") && rutubeMatch){
         return "https://rutube.ru/play/embed/" + rutubeMatch[1] + "?autoplay=1";
       }
@@ -1671,15 +1674,42 @@
       if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && vkMatch){
         return "https://vk.com/video_ext.php?oid=" + vkMatch[1] + "&id=" + vkMatch[2] + "&hd=2&autoplay=1";
       }
+
+      var vimeoMatch = url.pathname.match(/^\/(?:video\/)?(\d+)/);
+      if((host === "vimeo.com" || host === "player.vimeo.com") && vimeoMatch){
+        return "https://player.vimeo.com/video/" + vimeoMatch[1] + "?autoplay=1";
+      }
+
+      var dailyMatch = host === "dai.ly" ? url.pathname.match(/^\/([\w-]+)/) : url.pathname.match(/\/(?:video|embed\/video)\/([\w-]+)/);
+      if((host === "dailymotion.com" || host === "dai.ly") && dailyMatch){
+        return "https://www.dailymotion.com/embed/video/" + dailyMatch[1] + "?autoplay=1";
+      }
+
+      var okMatch = url.pathname.match(/\/(?:video|videoembed)\/(\d+)/);
+      if(host === "ok.ru" && okMatch){
+        return "https://ok.ru/videoembed/" + okMatch[1] + "?autoplay=1";
+      }
     } catch(e){ return ""; }
     return "";
   }
 
+  function buildDirectVideoUrl(rawUrl){
+    var value = (rawUrl || "").trim();
+    if(!value) return "";
+    try{
+      var url = new URL(value.indexOf("http") === 0 ? value : "https://" + value);
+      if(url.protocol !== "http:" && url.protocol !== "https:") return "";
+      return url.href;
+    } catch(e){ return ""; }
+  }
+
   function createSiteVideo(rawUrl, title, extraClass){
     var embedUrl = buildVideoEmbedUrl(rawUrl);
-    if(!embedUrl) return null;
+    var directUrl = embedUrl ? "" : buildDirectVideoUrl(rawUrl);
+    if(!embedUrl && !directUrl) return null;
     var frame = document.createElement("div");
     frame.className = "site-video" + (extraClass ? " " + extraClass : "");
+    if(/\/(shorts|clip)(?:\/|\?)/i.test(rawUrl || "")) frame.classList.add("is-vertical");
     var cover = document.createElement("button");
     cover.type = "button";
     cover.className = "site-video-cover";
@@ -1696,13 +1726,38 @@
     cover.appendChild(titleEl);
     cover.appendChild(hint);
     cover.addEventListener("click", function(){
-      var iframe = document.createElement("iframe");
-      iframe.src = embedUrl;
-      iframe.title = title || "Видео KSTYLE";
-      iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
-      iframe.allowFullscreen = true;
-      iframe.referrerPolicy = "strict-origin-when-cross-origin";
-      frame.appendChild(iframe);
+      if(directUrl){
+        var video = document.createElement("video");
+        video.src = directUrl;
+        video.controls = true;
+        video.autoplay = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.setAttribute("controlsList", "nodownload");
+        video.addEventListener("loadedmetadata", function(){
+          if(!video.videoWidth || !video.videoHeight) return;
+          var ratio = video.videoWidth / video.videoHeight;
+          frame.style.aspectRatio = video.videoWidth + " / " + video.videoHeight;
+          frame.classList.toggle("is-vertical", ratio < .82);
+          frame.classList.toggle("is-square", ratio >= .82 && ratio <= 1.18);
+        }, { once:true });
+        frame.appendChild(video);
+      } else {
+        var iframe = document.createElement("iframe");
+        iframe.src = embedUrl;
+        iframe.title = title || "Видео KSTYLE";
+        iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+        iframe.allowFullscreen = true;
+        iframe.referrerPolicy = "strict-origin-when-cross-origin";
+        frame.appendChild(iframe);
+      }
+      var external = document.createElement("a");
+      external.className = "site-video-open";
+      external.href = buildDirectVideoUrl(rawUrl);
+      external.target = "_blank";
+      external.rel = "noopener noreferrer";
+      external.textContent = "Открыть отдельно";
+      frame.appendChild(external);
       cover.remove();
     }, { once:true });
     frame.appendChild(cover);
@@ -1785,30 +1840,54 @@
 
     function build(){
       if(reflect) reflect.remove();
-      reflect = document.createElement("span");
-      reflect.className = "hero-h1-reflect";
+      reflect = document.createElement("div");
+      reflect.className = "hero-title-reflection";
       reflect.setAttribute("aria-hidden", "true");
 
-      /* В отражении показываем первые два слова на одной строке. Акцентное
-         «ШАГ» остаётся только в основном заголовке и продолжает покачиваться. */
-      var line1 = h1.querySelector("#hpTitleLine1");
-      var line2 = h1.querySelector("#hpTitleLine2");
-      if(line1){
-        var line1Clone = line1.cloneNode(true);
-        line1Clone.removeAttribute("id");
-        reflect.appendChild(line1Clone);
-      }
-      if(line2){
-        var line2Clone = line2.cloneNode(true);
-        line2Clone.removeAttribute("id");
-        reflect.appendChild(line2Clone);
-      }
+      /* Clone the rendered heading so line breaks match every viewport. */
+      var copy = h1.cloneNode(true);
+      copy.classList.remove("reveal", "show");
+      copy.removeAttribute("style");
+      copy.querySelectorAll("[id]").forEach(function(node){ node.removeAttribute("id"); });
+      reflect.appendChild(copy);
 
       titleWrap.appendChild(reflect);
+
+      /* Keep the accent in the reflection on the same animation frame. */
+      requestAnimationFrame(function(){
+        var originalAccent = h1.querySelector(".accent");
+        var reflectedAccent = copy.querySelector(".accent");
+        if(!originalAccent || !reflectedAccent || !originalAccent.getAnimations || !reflectedAccent.getAnimations) return;
+        var originalAnimation = originalAccent.getAnimations()[0];
+        var reflectedAnimation = reflectedAccent.getAnimations()[0];
+        if(originalAnimation && reflectedAnimation) reflectedAnimation.currentTime = originalAnimation.currentTime;
+      });
     }
 
     build();
     window.__syncHeroReflection = build;
+
+    /* Gently rock the heading and its reflection together while scrolling. */
+    if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      var lastScrollY = window.scrollY;
+      var scrollFrame = 0;
+      var settleTimer = 0;
+      window.addEventListener("scroll", function(){
+        if(scrollFrame) return;
+        scrollFrame = requestAnimationFrame(function(){
+          scrollFrame = 0;
+          if(!reflect) return;
+          var delta = window.scrollY - lastScrollY;
+          lastScrollY = window.scrollY;
+          var tilt = Math.max(-1.05, Math.min(1.05, delta * 0.026));
+          titleWrap.style.transform = "rotate(" + tilt + "deg) translateX(" + (tilt * 1.1) + "px)";
+          clearTimeout(settleTimer);
+          settleTimer = setTimeout(function(){
+            titleWrap.style.transform = "rotate(0deg) translateX(0)";
+          }, 90);
+        });
+      }, { passive:true });
+    }
   })();
 </script>
 <script>

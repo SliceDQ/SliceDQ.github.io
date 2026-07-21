@@ -221,8 +221,8 @@
           <input type="text" id="newLinkUrl" placeholder="https://...">
         </div>
         <label for="newVideoUrl">Видео внутри объявления (необязательно)</label>
-        <input type="text" id="newVideoUrl" placeholder="Ссылка YouTube, VK Video или Rutube">
-        <p class="sub">Плеер откроется прямо внутри объявления. Вставляйте обычную ссылку на страницу видео.</p>
+        <input type="text" id="newVideoUrl" placeholder="Ссылка на видеосервис или прямой адрес видео">
+        <p class="sub">Поддерживаются YouTube, VK, Rutube, Vimeo, Dailymotion, OK и прямые ссылки на видео.</p>
         <div class="add-form-actions">
           <button class="btn-primary" id="addBtn">Опубликовать</button>
         </div>
@@ -371,7 +371,7 @@
         </div>
         <div class="group">
           <h3>Видео на главной странице</h3>
-          <p class="sub">YouTube, VK Video или Rutube. Пустое поле скрывает видеоблок. Каждый блок появляется между указанными разделами.</p>
+          <p class="sub">YouTube, VK, Rutube, Vimeo, Dailymotion, OK или прямая ссылка на видео. Формат плеера подстроится автоматически.</p>
           <label for="hVideo1Title">1. После первого экрана — подпись</label>
           <input type="text" id="hVideo1Title" placeholder="Почувствуйте атмосферу KSTYLE">
           <input type="text" id="hVideo1Url" placeholder="Ссылка на видео">
@@ -1013,7 +1013,7 @@
 
     var videoUrlInput = document.createElement("input");
     videoUrlInput.type = "text";
-    videoUrlInput.placeholder = "Видео: ссылка YouTube, VK Video или Rutube";
+    videoUrlInput.placeholder = "Видео: ссылка на сервис или прямой адрес файла";
     videoUrlInput.value = data.videoUrl || "";
     videoUrlInput.style.marginBottom = "10px";
 

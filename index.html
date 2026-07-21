@@ -272,8 +272,8 @@
     margin-bottom:24px; font-weight:700; text-shadow: 0 2px 8px rgba(255,107,43,0.3);
   }
   
+  .hero-title-wrap{ position:relative; }
   .hero h1 {
-    position: relative; /* точка отсчёта для .hero-h1-reflect */
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
     font-size: clamp(46px, 9vw, 102px);
@@ -308,6 +308,13 @@
     white-space:nowrap;
     pointer-events: none;
     user-select: none;
+    font-family:'Montserrat',sans-serif;
+    font-weight:900;
+    font-size:clamp(46px,9vw,102px);
+    line-height:.95;
+    letter-spacing:-.03em;
+    text-transform:uppercase;
+    color:#fff;
     /* origin: center — блок остаётся строго под h1, переворачивается только
        контент внутри (последняя строка оригинала оказывается сразу под ним).
        origin:top двигал бы весь блок при флипе и накладывал его на оригинал —
@@ -320,14 +327,13 @@
   }
   @media(max-width:720px){
     .hero-h1-reflect{
-      display:flex; top:calc(100% + 5px); font-size:.72em; gap:.18em; opacity:.72;
+      display:flex; top:calc(100% + 7px); font-size:32px; gap:.18em; opacity:.62;
       -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
       mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
     }
-    .hero p.lead{ margin-top:58px; }
   }
 
-  .hero h1 .accent {
+  .hero h1 .accent, .hero-h1-reflect .accent {
     background: var(--accent); 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -339,6 +345,7 @@
   }
   
   .hero p.lead{ max-width:540px; margin-top:38px; color:var(--text); opacity:0.9; font-size:17.5px; line-height:1.65; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  @media(max-width:720px){ .hero p.lead{ margin-top:64px; } }
   .hero-cta{ display:flex; gap:14px; margin-top:42px; flex-wrap:wrap; }
   
   .btn{
@@ -1135,7 +1142,9 @@
   <section class="hero">
     <div class="wrap">
       <div class="hero-eyebrow reveal" style="--rd:0ms" id="hpEyebrow">Школа современного танца / открыты новые группы</div>
-      <h1 class="reveal" style="--rd:80ms"><span id="hpTitleLine1">Сделай</span><br><span id="hpTitleLine2">первый</span> <span class="accent" id="hpTitleAccent">шаг</span></h1>
+      <div class="hero-title-wrap">
+        <h1 class="reveal" style="--rd:80ms"><span id="hpTitleLine1">Сделай</span><br><span id="hpTitleLine2">первый</span> <span class="accent" id="hpTitleAccent">шаг</span></h1>
+      </div>
       <p class="lead reveal" style="--rd:160ms" id="hpLead">Школа современного танца "KerolStyle" для тех, кому тесно в рамках обычных будней и хочет красиво двигаться, а не просто переминаться с ноги на ногу.</p>
       <div class="hero-cta reveal" style="--rd:240ms">
         <button class="btn btn-primary" id="signupBtnHero">Записаться</button>
@@ -1758,7 +1767,8 @@
      старым текстом. */
   (function setupHeroReflection(){
     var h1 = document.querySelector(".hero h1");
-    if(!h1) return;
+    var titleWrap = document.querySelector(".hero-title-wrap");
+    if(!h1 || !titleWrap) return;
     var reflect = null;
 
     function build(){
@@ -1782,7 +1792,7 @@
         reflect.appendChild(accentClone);
       }
 
-      h1.appendChild(reflect);
+      titleWrap.appendChild(reflect);
     }
 
     build();

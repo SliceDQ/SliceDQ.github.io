@@ -860,6 +860,13 @@
     flex:0 0 var(--announce-media-size); width:var(--announce-media-size); aspect-ratio:1;
     margin:0; border-radius:var(--radius); scroll-snap-align:start; box-shadow:var(--shadow-3d);
   }
+  .announce-video-card{
+    flex:0 0 var(--announce-media-size); width:var(--announce-media-size); height:var(--announce-media-size);
+    display:grid; place-items:center; border:1px solid var(--border); border-radius:var(--radius);
+    color:var(--text); scroll-snap-align:start; box-shadow:var(--shadow-3d);
+    background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 42%),#09090c;
+  }
+  .announce-video-card:hover .site-video-play{ transform:scale(1.08); background:var(--accent); }
   .announce-photos .site-video-title,
   .announce-photos .site-video-hint,
   .announce-photos .site-video-open{ display:none; }
@@ -981,7 +988,7 @@
   }
   .lightbox.open{ opacity:1; pointer-events:auto; }
   .lightbox-img-wrap{
-    max-width:100%; max-height:100%; display:flex; align-items:center; justify-content:center;
+    width:100%; height:100%; max-width:100%; max-height:100%; display:flex; align-items:center; justify-content:center;
     transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .22s ease;
     will-change: transform, opacity;
   }
@@ -992,6 +999,12 @@
   .lightbox-img-wrap.no-anim-transition{ transition:none !important; }
   @media (prefers-reduced-motion: reduce){ .lightbox-img-wrap{ transition:none; } }
   .lightbox img{ max-width:100%; max-height:100%; border-radius:10px; object-fit:contain; }
+  .lightbox .site-video{ width:min(90vw,980px); max-height:82vh; margin:0; }
+  .lightbox .site-video.is-vertical{ width:min(76vw,460px); }
+  @media(max-width:720px){
+    .lightbox .site-video{ width:calc(100vw - 28px); }
+    .lightbox .site-video.is-vertical{ width:min(calc(100vw - 28px),430px); }
+  }
 
   .lightbox-nav{
     position:fixed; top:auto; bottom:60px; transform:none; z-index:73;
@@ -1444,9 +1457,7 @@
     <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
   </button>
   <div class="lightbox-dots" id="lightboxDots"></div>
-  <div class="lightbox-img-wrap" id="lightboxImgWrap">
-    <img id="lightboxImg" src="" alt="">
-  </div>
+  <div class="lightbox-img-wrap" id="lightboxImgWrap"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -2646,7 +2657,6 @@ function togglePhones(event) {
   var announceNextBtn = document.getElementById("announceNextBtn");
   var announceDots = document.getElementById("announceDots");
   var lightbox = document.getElementById("lightbox");
-  var lightboxImg = document.getElementById("lightboxImg");
 
   // текущий список объявлений раздела + позиция в нём — нужно, чтобы можно
   // было листать соседние объявления свайпом или стрелками, не закрывая экран
@@ -2830,11 +2840,23 @@ function togglePhones(event) {
     if(item.videoUrl || hasPhotos){
       var grid = document.createElement("div");
       grid.className = "announce-photos";
+      var galleryItems = [];
+      if(item.videoUrl) galleryItems.push({ type:"video", url:item.videoUrl, title:item.title });
+      if(hasPhotos){
+        item.photos.forEach(function(src){ galleryItems.push({ type:"image", src:src }); });
+      }
 
       /* Video is the first card in the same swipeable strip as photos. */
       if(item.videoUrl){
-        var announcementVideo = createSiteVideo(item.videoUrl, item.title, "announce-video");
-        if(announcementVideo) grid.appendChild(announcementVideo);
+        var videoCard = document.createElement("button");
+        videoCard.type = "button";
+        videoCard.className = "announce-video-card";
+        videoCard.setAttribute("aria-label", "Открыть видео в галерее");
+        var videoPlay = document.createElement("span");
+        videoPlay.className = "site-video-play";
+        videoCard.appendChild(videoPlay);
+        videoCard.addEventListener("click", function(){ openLightbox(galleryItems, 0); });
+        grid.appendChild(videoCard);
       }
 
       if(hasPhotos){
@@ -2842,7 +2864,7 @@ function togglePhones(event) {
           var img = document.createElement("img");
           img.src = src;
           img.loading = "lazy";
-          img.addEventListener("click", function(){ openLightbox(item.photos, photoIdx); });
+          img.addEventListener("click", function(){ openLightbox(galleryItems, photoIdx + (item.videoUrl ? 1 : 0)); });
           grid.appendChild(img);
         });
       }
@@ -2894,6 +2916,24 @@ function togglePhones(event) {
   var lightboxImgWrap = document.getElementById("lightboxImgWrap");
   var lightboxState = { items: [], index: 0 };
 
+  function renderLightboxItem(){
+    lightboxImgWrap.innerHTML = "";
+    var item = lightboxState.items[lightboxState.index];
+    if(!item) return;
+    if(typeof item === "string") item = { type:"image", src:item };
+
+    if(item.type === "video"){
+      var player = createSiteVideo(item.url, item.title || "Видео");
+      if(player) lightboxImgWrap.appendChild(player);
+      return;
+    }
+
+    var img = document.createElement("img");
+    img.src = item.src;
+    img.alt = item.alt || "";
+    lightboxImgWrap.appendChild(img);
+  }
+
   function renderLightboxNav(){
     var multi = lightboxState.items.length > 1;
     lightboxPrevBtn.classList.toggle("is-hidden", !multi);
@@ -2924,7 +2964,7 @@ function togglePhones(event) {
 
     lightboxAnimTimer = setTimeout(function(){
       lightboxState.index = target;
-      lightboxImg.src = lightboxState.items[lightboxState.index];
+      renderLightboxItem();
       renderLightboxNav();
 
       lightboxImgWrap.classList.remove(outClass);
@@ -2960,24 +3000,26 @@ function togglePhones(event) {
     }
   }, { passive:true });
 
-  function openLightbox(photos, index){
-    lightboxState.items = Array.isArray(photos) ? photos : [photos];
+  function openLightbox(mediaItems, index){
+    lightboxState.items = (Array.isArray(mediaItems) ? mediaItems : [mediaItems]).map(function(item){
+      return typeof item === "string" ? { type:"image", src:item } : item;
+    });
     lightboxState.index = index || 0;
-    lightboxImg.src = lightboxState.items[lightboxState.index];
+    renderLightboxItem();
     renderLightboxNav();
     lightbox.classList.add("open");
     pushOverlay("lightbox", closeLightboxInternal);
   }
   function closeLightboxInternal(){
     lightbox.classList.remove("open");
-    lightboxImg.src = "";
+    lightboxImgWrap.innerHTML = "";
     lightboxState = { items: [], index: 0 };
   }
   function closeLightbox(){
     requestCloseOverlay("lightbox");
   }
   lightbox.addEventListener("click", function(e){
-    if(e.target === lightboxImg || e.target.closest(".lightbox-nav") || e.target.closest(".lightbox-dots")) return;
+    if((e.target !== lightboxImgWrap && e.target.closest(".lightbox-img-wrap")) || e.target.closest(".lightbox-nav") || e.target.closest(".lightbox-dots")) return;
     closeLightbox();
   });
 

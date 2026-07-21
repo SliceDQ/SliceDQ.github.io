@@ -844,11 +844,26 @@
   .announce-text{ font-size:16.5px; line-height:1.8; color:var(--text); opacity:0.92; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
   .announce-text .in-text-link{ color:var(--accent); text-decoration:underline; text-underline-offset:2px; font-weight:600; }
   .announce-text .in-text-link:hover{ opacity:0.8; }
-  .announce-photos{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; margin-top:32px; }
+  .announce-photos{
+    --announce-media-size:min(78vw,360px);
+    display:flex; gap:14px; margin-top:22px; padding:2px 2px 10px;
+    overflow-x:auto; overscroll-behavior-inline:contain; scroll-snap-type:x mandatory;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  }
+  .announce-photos::-webkit-scrollbar{ display:none; }
   .announce-photos img{
-    width:100%; height:220px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border);
+    flex:0 0 var(--announce-media-size); width:var(--announce-media-size); height:var(--announce-media-size);
+    object-fit:cover; border-radius:var(--radius); border:1px solid var(--border); scroll-snap-align:start;
     cursor:zoom-in; box-shadow: var(--shadow-3d);
   }
+  .announce-photos .announce-video{
+    flex:0 0 var(--announce-media-size); width:var(--announce-media-size); aspect-ratio:1;
+    margin:0; border-radius:var(--radius); scroll-snap-align:start; box-shadow:var(--shadow-3d);
+  }
+  .announce-photos .site-video-title,
+  .announce-photos .site-video-hint,
+  .announce-photos .site-video-open{ display:none; }
+  .announce-photos + .announce-text{ margin-top:22px; }
   .home-video-slot{ display:none; padding:20px 0 70px; }
   .home-video-slot.has-video{ display:block; }
   .site-video{
@@ -886,7 +901,6 @@
     position:absolute; right:10px; bottom:10px; z-index:3; padding:8px 11px; border-radius:9px;
     color:#fff; background:rgba(0,0,0,.68); font-size:12px; font-weight:700; backdrop-filter:blur(8px);
   }
-  .announce-video{ margin-top:30px; }
   @media(max-width:720px){
     .home-video-slot{ padding:8px 0 48px; }
     .site-video{ width:100%; border-radius:18px; }
@@ -2732,6 +2746,7 @@ function togglePhones(event) {
   // свайп влево/вправо по телефону — переключает объявление внутри раздела
   var touchStartX = 0, touchStartY = 0, touchActive = false;
   announceView.addEventListener("touchstart", function(e){
+    if(e.target.closest(".announce-photos")){ touchActive = false; return; }
     if(announceState.items.length < 2) return;
     var t = e.touches[0];
     touchStartX = t.clientX; touchStartY = t.clientY; touchActive = true;
@@ -2811,15 +2826,34 @@ function togglePhones(event) {
       announceViewInner.appendChild(dateEl);
     }
 
+    var hasPhotos = item.photos && item.photos.length;
+    if(item.videoUrl || hasPhotos){
+      var grid = document.createElement("div");
+      grid.className = "announce-photos";
+
+      /* Video is the first card in the same swipeable strip as photos. */
+      if(item.videoUrl){
+        var announcementVideo = createSiteVideo(item.videoUrl, item.title, "announce-video");
+        if(announcementVideo) grid.appendChild(announcementVideo);
+      }
+
+      if(hasPhotos){
+        item.photos.forEach(function(src, photoIdx){
+          var img = document.createElement("img");
+          img.src = src;
+          img.loading = "lazy";
+          img.addEventListener("click", function(){ openLightbox(item.photos, photoIdx); });
+          grid.appendChild(img);
+        });
+      }
+
+      if(grid.children.length) announceViewInner.appendChild(grid);
+    }
+
     var textEl = document.createElement("div");
     textEl.className = "announce-text";
     textEl.innerHTML = linkifyText(item.text);
     announceViewInner.appendChild(textEl);
-
-    if(item.videoUrl){
-      var announcementVideo = createSiteVideo(item.videoUrl, item.title, "announce-video");
-      if(announcementVideo) announceViewInner.appendChild(announcementVideo);
-    }
 
     if(item.linkUrl){
       var linkA = document.createElement("a");
@@ -2833,19 +2867,6 @@ function togglePhones(event) {
         '<span class="lbl"></span><span class="arrow">↗</span>';
       linkA.querySelector(".lbl").textContent = item.linkLabel || "Открыть ссылку";
       announceViewInner.appendChild(linkA);
-    }
-
-    if(item.photos && item.photos.length){
-      var grid = document.createElement("div");
-      grid.className = "announce-photos";
-      item.photos.forEach(function(src, photoIdx){
-        var img = document.createElement("img");
-        img.src = src;
-        img.loading = "lazy";
-        img.addEventListener("click", function(){ openLightbox(item.photos, photoIdx); });
-        grid.appendChild(img);
-      });
-      announceViewInner.appendChild(grid);
     }
 
     announceViewInner.scrollTop = 0;

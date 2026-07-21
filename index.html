@@ -1750,7 +1750,8 @@
     cover.appendChild(play);
     cover.appendChild(titleEl);
     cover.appendChild(hint);
-    cover.addEventListener("click", function(){
+    cover.addEventListener("click", function(event){
+      event.stopPropagation();
       if(directUrl){
         var video = document.createElement("video");
         video.src = directUrl;

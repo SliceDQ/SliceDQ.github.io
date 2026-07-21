@@ -1670,7 +1670,7 @@
       if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && url.pathname.indexOf("video_ext.php") !== -1){
         return url.href;
       }
-      var vkMatch = (url.pathname + url.search).match(/video(-?\d+)_([0-9]+)/);
+      var vkMatch = (url.pathname + url.search).match(/(?:video|clip)(-?\d+)_([0-9]+)/);
       if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && vkMatch){
         return "https://vk.com/video_ext.php?oid=" + vkMatch[1] + "&id=" + vkMatch[2] + "&hd=2&autoplay=1";
       }
@@ -1709,7 +1709,7 @@
     if(!embedUrl && !directUrl) return null;
     var frame = document.createElement("div");
     frame.className = "site-video" + (extraClass ? " " + extraClass : "");
-    if(/\/(shorts|clip)(?:\/|\?)/i.test(rawUrl || "")) frame.classList.add("is-vertical");
+    if(/(?:\/shorts\/|(?:^|[\/?=&])clip-?\d+_\d+)/i.test(rawUrl || "")) frame.classList.add("is-vertical");
     var cover = document.createElement("button");
     cover.type = "button";
     cover.className = "site-video-cover";

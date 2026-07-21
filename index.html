@@ -117,9 +117,17 @@
   }
   
   .header-actions{ display:flex; align-items:center; gap:20px; }
-  .accent-picker{ position:relative; display:flex; align-items:center; }
+  .accent-picker{
+    position:relative; display:flex; flex-direction:column; align-items:center;
+    padding:6px; border:1px solid transparent; border-radius:20px;
+    transition:background .18s ease, border-color .18s ease, border-radius .18s ease;
+  }
+  .accent-picker.open{
+    background:rgba(12,12,15,.96); border-color:var(--border);
+    border-radius:18px 18px 0 0;
+  }
   .accent-trigger{
-    width:18px; height:18px; border-radius:50%; background:var(--accent);
+    width:24px; height:24px; border-radius:50%; background:var(--accent);
     border:1px solid rgba(255,255,255,.45); padding:0;
     box-shadow:0 0 0 3px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35);
     transition:transform .2s var(--ease), box-shadow .2s var(--ease);
@@ -128,20 +136,30 @@
     transform:scale(1.18); box-shadow:0 0 0 4px rgba(255,255,255,.12), 0 6px 16px rgba(0,0,0,.45);
   }
   .accent-menu{
-    position:absolute; top:calc(100% + 14px); right:0; z-index:80;
-    display:flex; gap:10px; padding:12px; border:1px solid var(--border);
-    border-radius:16px; background:rgba(12,12,15,.96);
+    position:absolute; top:100%; left:-1px; z-index:80;
+    display:flex; flex-direction:column; align-items:center; gap:9px;
+    width:calc(100% + 2px); padding:8px 6px 12px;
+    border:1px solid var(--border); border-top:0;
+    border-radius:0 0 18px 18px; background:rgba(12,12,15,.96);
     box-shadow:0 18px 45px rgba(0,0,0,.55);
-    opacity:0; visibility:hidden; transform:translateY(-6px) scale(.96);
-    transform-origin:top right; transition:opacity .18s ease, transform .18s var(--ease), visibility .18s;
+    opacity:0; visibility:hidden; transform:scaleY(.82);
+    transform-origin:top; transition:opacity .18s ease, transform .18s var(--ease), visibility .18s;
   }
-  .accent-menu.open{ opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+  .accent-menu.open{ opacity:1; visibility:visible; transform:scaleY(1); }
   .accent-option{
-    width:24px; height:24px; border-radius:50%; padding:0;
+    width:26px; height:26px; border-radius:50%; padding:0;
     border:2px solid transparent; transition:transform .18s var(--ease), box-shadow .18s;
   }
   .accent-option:hover{ transform:scale(1.18); }
-  .accent-option.active{ box-shadow:0 0 0 2px #0c0c0f, 0 0 0 4px #fff; }
+  .accent-option.is-current{ display:none; }
+  .accent-quick{
+    width:32px; height:32px; border-radius:11px; display:grid; place-items:center;
+    color:var(--text); background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.08);
+    transition:background .18s, color .18s, transform .18s var(--ease);
+  }
+  .accent-quick:hover{ color:var(--accent); background:rgba(255,255,255,.11); transform:translateY(-1px); }
+  .accent-quick svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .accent-menu-divider{ width:24px; height:1px; background:var(--border); margin:1px 0; }
   .icon-btn{
     width:42px; height:42px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
@@ -301,7 +319,12 @@
     mask-image: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.12) 60%, rgba(0,0,0,0) 100%);
   }
   @media(max-width:720px){
-    .hero-h1-reflect{ display:none; } /* на мобильных под заголовком мало места — экономим */
+    .hero-h1-reflect{
+      display:flex; top:calc(100% + 5px); font-size:.72em; gap:.18em; opacity:.72;
+      -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
+      mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
+    }
+    .hero p.lead{ margin-top:58px; }
   }
 
   .hero h1 .accent {
@@ -813,6 +836,42 @@
     width:100%; height:220px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border);
     cursor:zoom-in; box-shadow: var(--shadow-3d);
   }
+  .home-video-slot{ display:none; padding:20px 0 70px; }
+  .home-video-slot.has-video{ display:block; }
+  .site-video{
+    position:relative; width:100%; aspect-ratio:16/9; overflow:hidden;
+    border:1px solid rgba(255,255,255,.12); border-radius:24px;
+    background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+    box-shadow:0 24px 70px rgba(0,0,0,.32);
+  }
+  .site-video::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    box-shadow:inset 0 0 70px rgba(0,0,0,.35); border-radius:inherit;
+  }
+  .site-video-cover{
+    position:absolute; inset:0; z-index:1; width:100%; height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    padding:28px; color:var(--text); text-align:center;
+    background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 42%),#09090c;
+  }
+  .site-video-play{
+    width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
+    border:1px solid color-mix(in srgb,var(--accent) 55%,white 10%);
+    background:color-mix(in srgb,var(--accent) 18%,rgba(255,255,255,.04));
+    box-shadow:0 12px 34px color-mix(in srgb,var(--accent) 20%,transparent);
+    transition:transform .25s var(--ease), background .25s;
+  }
+  .site-video-cover:hover .site-video-play{ transform:scale(1.08); background:var(--accent); }
+  .site-video-play::before{ content:""; margin-left:4px; border-left:16px solid currentColor; border-top:10px solid transparent; border-bottom:10px solid transparent; }
+  .site-video-title{ font:800 clamp(17px,2.5vw,26px)/1.25 'Montserrat',sans-serif; max-width:680px; }
+  .site-video-hint{ color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
+  .site-video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; z-index:2; }
+  .announce-video{ margin-top:30px; }
+  @media(max-width:720px){
+    .home-video-slot{ padding:8px 0 48px; }
+    .site-video{ border-radius:16px; }
+    .site-video-play{ width:54px; height:54px; }
+  }
 
   /* ============ ◀▶ ЛИСТАНИЕ ОБЪЯВЛЕНИЙ ============ */
   .announce-nav{
@@ -1052,12 +1111,17 @@
     <div class="header-actions">
       <div class="accent-picker" id="accentPicker">
         <button class="accent-trigger" id="accentTrigger" type="button" aria-label="Выбрать цвет сайта" aria-expanded="false" aria-controls="accentMenu"></button>
-        <div class="accent-menu" id="accentMenu" role="menu" aria-label="Цвет сайта">
-          <button class="accent-option" type="button" data-color="#ff6b2b" style="background:#ff6b2b" aria-label="Оранжевый" role="menuitem"></button>
-          <button class="accent-option" type="button" data-color="#8B5CF6" style="background:#8B5CF6" aria-label="Фиолетовый" role="menuitem"></button>
-          <button class="accent-option" type="button" data-color="#1E69FF" style="background:#1E69FF" aria-label="Синий" role="menuitem"></button>
-          <button class="accent-option" type="button" data-color="#22c55e" style="background:#22c55e" aria-label="Зелёный" role="menuitem"></button>
-          <button class="accent-option" type="button" data-color="#ec4899" style="background:#ec4899" aria-label="Розовый" role="menuitem"></button>
+        <div class="accent-menu" id="accentMenu" role="dialog" aria-label="Быстрые действия и цвет сайта">
+          <button class="accent-quick" id="accentContactsBtn" type="button" aria-label="Перейти к контактам">
+            <svg viewBox="0 0 24 24"><path d="M4 4h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2C9 21 3 15 2 6a2 2 0 0 1 2-2z"></path></svg>
+          </button>
+          <button class="accent-quick" id="accentSignupBtn" type="button" aria-label="Записаться на занятие">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+          <span class="accent-menu-divider" aria-hidden="true"></span>
+          <button class="accent-option" type="button" data-color="#ff6b2b" style="background:linear-gradient(135deg,#ff9a5c,#ff4f16)" aria-label="Оранжевый" role="menuitem"></button>
+          <button class="accent-option" type="button" data-color="#8B5CF6" style="background:linear-gradient(135deg,#b794f6,#6d28d9)" aria-label="Фиолетовый" role="menuitem"></button>
+          <button class="accent-option" type="button" data-color="#22c55e" style="background:linear-gradient(135deg,#74e69a,#149447)" aria-label="Зелёный" role="menuitem"></button>
         </div>
       </div>
       <button class="burger" id="drawerOpenBtn" aria-label="Открыть меню разделов">
@@ -1086,6 +1150,8 @@
     </div>
   </section>
 
+  <div class="home-video-slot" id="homeVideoSlot1"><div class="wrap"></div></div>
+
   <section class="showcase">
     <div class="wrap wrap-wide reveal">
       <div class="showcase-tabs" id="showcaseTabs" role="tablist" aria-label="Разделы студии"></div>
@@ -1093,6 +1159,8 @@
       <div class="showcase-content" id="showcaseContent"></div>
     </div>
   </section>
+
+  <div class="home-video-slot" id="homeVideoSlot2"><div class="wrap wrap-wide"></div></div>
 
   <section class="features">
     <div class="wrap">
@@ -1127,6 +1195,8 @@
     </div>
   </section>
 
+  <div class="home-video-slot" id="homeVideoSlot3"><div class="wrap"></div></div>
+
   <section class="cat-strip">
     <div class="wrap">
       <h2 class="reveal" id="hpCatStripTitle">Всё о студии — в одном месте</h2>
@@ -1134,6 +1204,8 @@
       <div class="cat-grid" id="catGridHome"></div>
     </div>
   </section>
+
+  <div class="home-video-slot" id="homeVideoSlot4"><div class="wrap"></div></div>
 
 
   <section class="contacts-section" id="contacts">
@@ -1209,6 +1281,8 @@
       </div>
     </div>
   </section>
+
+  <div class="home-video-slot" id="homeVideoSlot5"><div class="wrap"></div></div>
 
   <section class="location-section">
     <div class="wrap">
@@ -1549,6 +1623,83 @@
   signupChoiceOverlay.addEventListener("click", closeSignupChoice);
   signupChoiceCloseBtn.addEventListener("click", closeSignupChoice);
 
+  // ============ ▶ ВСТРОЕННЫЕ ВИДЕО ============
+  function buildVideoEmbedUrl(rawUrl){
+    var value = (rawUrl || "").trim();
+    if(!value) return "";
+    try{
+      var url = new URL(value.indexOf("http") === 0 ? value : "https://" + value);
+      var host = url.hostname.replace(/^www\./, "").toLowerCase();
+      var videoId = "";
+      if(host === "youtu.be") videoId = url.pathname.split("/")[1] || "";
+      if(host === "youtube.com" || host === "m.youtube.com"){
+        videoId = url.searchParams.get("v") || "";
+        if(!videoId && /^\/(shorts|embed|live)\//.test(url.pathname)) videoId = url.pathname.split("/")[2] || "";
+      }
+      if(videoId && /^[\w-]{6,20}$/.test(videoId)) return "https://www.youtube-nocookie.com/embed/" + videoId + "?autoplay=1&rel=0";
+
+      var rutubeMatch = url.pathname.match(/\/(?:video|shorts)\/([a-zA-Z0-9]+)/);
+      if((host === "rutube.ru" || host === "rutube.com") && rutubeMatch){
+        return "https://rutube.ru/play/embed/" + rutubeMatch[1] + "?autoplay=1";
+      }
+
+      if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && url.pathname.indexOf("video_ext.php") !== -1){
+        return url.href;
+      }
+      var vkMatch = (url.pathname + url.search).match(/video(-?\d+)_([0-9]+)/);
+      if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && vkMatch){
+        return "https://vk.com/video_ext.php?oid=" + vkMatch[1] + "&id=" + vkMatch[2] + "&hd=2&autoplay=1";
+      }
+    } catch(e){ return ""; }
+    return "";
+  }
+
+  function createSiteVideo(rawUrl, title, extraClass){
+    var embedUrl = buildVideoEmbedUrl(rawUrl);
+    if(!embedUrl) return null;
+    var frame = document.createElement("div");
+    frame.className = "site-video" + (extraClass ? " " + extraClass : "");
+    var cover = document.createElement("button");
+    cover.type = "button";
+    cover.className = "site-video-cover";
+    cover.setAttribute("aria-label", "Воспроизвести видео" + (title ? ": " + title : ""));
+    var play = document.createElement("span");
+    play.className = "site-video-play";
+    var titleEl = document.createElement("span");
+    titleEl.className = "site-video-title";
+    titleEl.textContent = title || "Смотреть видео";
+    var hint = document.createElement("span");
+    hint.className = "site-video-hint";
+    hint.textContent = "Смотреть на сайте";
+    cover.appendChild(play);
+    cover.appendChild(titleEl);
+    cover.appendChild(hint);
+    cover.addEventListener("click", function(){
+      var iframe = document.createElement("iframe");
+      iframe.src = embedUrl;
+      iframe.title = title || "Видео KSTYLE";
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      frame.appendChild(iframe);
+      cover.remove();
+    }, { once:true });
+    frame.appendChild(cover);
+    return frame;
+  }
+
+  function renderHomepageVideos(data){
+    for(var i = 1; i <= 5; i++){
+      var slot = document.getElementById("homeVideoSlot" + i);
+      if(!slot) continue;
+      var wrap = slot.firstElementChild;
+      wrap.innerHTML = "";
+      var player = createSiteVideo(data["video" + i + "Url"], data["video" + i + "Title"]);
+      slot.classList.toggle("has-video", !!player);
+      if(player) wrap.appendChild(player);
+    }
+  }
+
   (function loadHomepageTextIntoPage(){
     var textMap = {
       heroEyebrow: "hpEyebrow",
@@ -1581,6 +1732,7 @@
         }
       });
       if(window.__applyShowcaseOverrides) window.__applyShowcaseOverrides(data);
+      renderHomepageVideos(data);
       window.__syncHeroReflection && window.__syncHeroReflection();
     }
 
@@ -1702,6 +1854,7 @@ function togglePhones(event) {
         photos: data.photos || [],
         linkLabel: data.linkLabel || "",
         linkUrl: data.linkUrl || "",
+        videoUrl: data.videoUrl || "",
         bgImage: data.bgImage || "",
         cardImage: data.cardImage || "",
         ageGroup: data.ageGroup || "adult",
@@ -1782,6 +1935,8 @@ function togglePhones(event) {
     var picker = document.getElementById("accentPicker");
     var trigger = document.getElementById("accentTrigger");
     var menu = document.getElementById("accentMenu");
+    var contactsBtn = document.getElementById("accentContactsBtn");
+    var signupBtn = document.getElementById("accentSignupBtn");
     var options = menu.querySelectorAll(".accent-option");
     var storageKey = "kstyle-accent-color";
     var allowedColors = Array.prototype.map.call(options, function(option){
@@ -1793,13 +1948,14 @@ function togglePhones(event) {
       root.style.setProperty("--accent", color);
       trigger.style.backgroundColor = color;
       options.forEach(function(option){
-        option.classList.toggle("active", option.getAttribute("data-color").toLowerCase() === color.toLowerCase());
+        option.classList.toggle("is-current", option.getAttribute("data-color").toLowerCase() === color.toLowerCase());
       });
       localStorage.setItem(storageKey, color);
     }
 
     function closeMenu(){
       menu.classList.remove("open");
+      picker.classList.remove("open");
       trigger.setAttribute("aria-expanded", "false");
     }
 
@@ -1810,6 +1966,7 @@ function togglePhones(event) {
       event.stopPropagation();
       var willOpen = !menu.classList.contains("open");
       menu.classList.toggle("open", willOpen);
+      picker.classList.toggle("open", willOpen);
       trigger.setAttribute("aria-expanded", String(willOpen));
     });
     options.forEach(function(option){
@@ -1817,6 +1974,15 @@ function togglePhones(event) {
         applyColor(option.getAttribute("data-color"));
         closeMenu();
       });
+    });
+    contactsBtn.addEventListener("click", function(){
+      closeMenu();
+      var contacts = document.getElementById("contacts");
+      if(contacts) contacts.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+    signupBtn.addEventListener("click", function(){
+      closeMenu();
+      openSignupChoice();
     });
     document.addEventListener("click", function(event){
       if(!picker.contains(event.target)) closeMenu();
@@ -2548,6 +2714,11 @@ function togglePhones(event) {
     textEl.className = "announce-text";
     textEl.innerHTML = linkifyText(item.text);
     announceViewInner.appendChild(textEl);
+
+    if(item.videoUrl){
+      var announcementVideo = createSiteVideo(item.videoUrl, item.title, "announce-video");
+      if(announcementVideo) announceViewInner.appendChild(announcementVideo);
+    }
 
     if(item.linkUrl){
       var linkA = document.createElement("a");

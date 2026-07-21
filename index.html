@@ -22,6 +22,8 @@
     font-kerning: normal;
     width: 100%;
     touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     /* overflow-x:hidden убран отсюда: вместе с тем же свойством на body
        он мог отключать быстрый composited-скролл в реальных браузерах —
        body::before ниже само гасит горизонтальный оverflow. */
@@ -272,7 +274,7 @@
     margin-bottom:24px; font-weight:700; text-shadow: 0 2px 8px rgba(255,107,43,0.3);
   }
   
-  .hero-title-wrap{ position:relative; }
+  .hero-title-wrap{ position:relative; max-width:100%; }
   .hero h1 {
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
@@ -302,6 +304,7 @@
     top: calc(100% + 8px);
     width: max-content;
     max-width: 100%;
+    overflow:hidden;
     display:flex;
     align-items:baseline;
     gap:.2em;
@@ -326,11 +329,19 @@
     mask-image: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.12) 60%, rgba(0,0,0,0) 100%);
   }
   @media(max-width:720px){
+    .hero{ padding-top:64px; }
+    .hero h1{ font-size:clamp(36px,10.5vw,42px); line-height:1; }
     .hero-h1-reflect{
-      display:flex; top:calc(100% + 7px); font-size:32px; gap:.18em; opacity:.62;
+      display:flex; top:calc(100% + 7px); font-size:26px; gap:.18em; opacity:.58;
       -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
       mask-image:linear-gradient(to bottom,rgba(0,0,0,.38),transparent 88%);
     }
+  }
+
+  @media(max-height:600px) and (pointer:coarse){
+    .hero{ padding-top:38px; padding-bottom:72px; }
+    .hero h1{ font-size:clamp(40px,5.4vw,58px); line-height:.98; }
+    .hero-h1-reflect{ font-size:clamp(26px,3.5vw,38px); top:calc(100% + 5px); }
   }
 
   .hero h1 .accent, .hero-h1-reflect .accent {
@@ -346,6 +357,7 @@
   
   .hero p.lead{ max-width:540px; margin-top:38px; color:var(--text); opacity:0.9; font-size:17.5px; line-height:1.65; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   @media(max-width:720px){ .hero p.lead{ margin-top:64px; } }
+  @media(max-height:600px) and (pointer:coarse){ .hero p.lead{ margin-top:54px; max-width:620px; } }
   .hero-cta{ display:flex; gap:14px; margin-top:42px; flex-wrap:wrap; }
   
   .btn{
@@ -1078,7 +1090,7 @@
   .rule-signature .stat:nth-child(4) .n{ animation-delay:.6s; }
 
   @media (prefers-reduced-motion: reduce){
-    .logo, .hero h1 .accent, .hero-eyebrow::before, .burger, .feature-card .num, .rule-signature .stat .n, body::before{ animation:none !important; }
+    .hero-eyebrow::before, .burger, .feature-card .num, .rule-signature .stat .n, body::before{ animation:none !important; }
   }
   @media (max-width: 720px){
     body::before{ animation: none; }
@@ -1759,7 +1771,7 @@
   })();
 
   /* ============ 🪞 ОТРАЖЕНИЕ ЗАГОЛОВКА ============
-     Собираем декоративную строку «СДЕЛАЙ ШАГ» и отражаем её через CSS
+     Собираем декоративную строку «СДЕЛАЙ ПЕРВЫЙ» и отражаем её через CSS
      (transform: scaleY(-1) + mask-image),
      это замена -webkit-box-reflect: обычный DOM-узел на GPU-слое, без потолка fps
      и без багов box-reflect в мобильных webview. Пересобираем клон после того,
@@ -1777,19 +1789,19 @@
       reflect.className = "hero-h1-reflect";
       reflect.setAttribute("aria-hidden", "true");
 
-      /* Отражаем только «СДЕЛАЙ» и «ШАГ». Слово «ПЕРВЫЙ» намеренно
-         отсутствует, а «ШАГ» находится на одной строке с «СДЕЛАЙ». */
+      /* В отражении показываем первые два слова на одной строке. Акцентное
+         «ШАГ» остаётся только в основном заголовке и продолжает покачиваться. */
       var line1 = h1.querySelector("#hpTitleLine1");
-      var accent = h1.querySelector("#hpTitleAccent");
+      var line2 = h1.querySelector("#hpTitleLine2");
       if(line1){
         var line1Clone = line1.cloneNode(true);
         line1Clone.removeAttribute("id");
         reflect.appendChild(line1Clone);
       }
-      if(accent){
-        var accentClone = accent.cloneNode(true);
-        accentClone.removeAttribute("id");
-        reflect.appendChild(accentClone);
+      if(line2){
+        var line2Clone = line2.cloneNode(true);
+        line2Clone.removeAttribute("id");
+        reflect.appendChild(line2Clone);
       }
 
       titleWrap.appendChild(reflect);

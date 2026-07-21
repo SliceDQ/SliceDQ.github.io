@@ -220,6 +220,9 @@
           <input type="text" id="newLinkLabel" placeholder="Надпись, например: Видео с занятия" maxlength="60">
           <input type="text" id="newLinkUrl" placeholder="https://...">
         </div>
+        <label for="newVideoUrl">Видео внутри объявления (необязательно)</label>
+        <input type="text" id="newVideoUrl" placeholder="Ссылка YouTube, VK Video или Rutube">
+        <p class="sub">Плеер откроется прямо внутри объявления. Вставляйте обычную ссылку на страницу видео.</p>
         <div class="add-form-actions">
           <button class="btn-primary" id="addBtn">Опубликовать</button>
         </div>
@@ -365,6 +368,25 @@
           <h3>Блок контактов</h3>
           <label for="hContactsTitle">Заголовок блока</label>
           <input type="text" id="hContactsTitle" placeholder="Связаться с нами">
+        </div>
+        <div class="group">
+          <h3>Видео на главной странице</h3>
+          <p class="sub">YouTube, VK Video или Rutube. Пустое поле скрывает видеоблок. Каждый блок появляется между указанными разделами.</p>
+          <label for="hVideo1Title">1. После первого экрана — подпись</label>
+          <input type="text" id="hVideo1Title" placeholder="Почувствуйте атмосферу KSTYLE">
+          <input type="text" id="hVideo1Url" placeholder="Ссылка на видео">
+          <label for="hVideo2Title">2. После блока «Педагоги / Направления / Стоимость»</label>
+          <input type="text" id="hVideo2Title" placeholder="Как проходят занятия">
+          <input type="text" id="hVideo2Url" placeholder="Ссылка на видео">
+          <label for="hVideo3Title">3. После блока «Почему мы?»</label>
+          <input type="text" id="hVideo3Title" placeholder="Выступления учеников">
+          <input type="text" id="hVideo3Url" placeholder="Ссылка на видео">
+          <label for="hVideo4Title">4. После каталога разделов</label>
+          <input type="text" id="hVideo4Title" placeholder="Жизнь студии">
+          <input type="text" id="hVideo4Url" placeholder="Ссылка на видео">
+          <label for="hVideo5Title">5. Перед картой</label>
+          <input type="text" id="hVideo5Title" placeholder="Добро пожаловать в нашу студию">
+          <input type="text" id="hVideo5Url" placeholder="Ссылка на видео">
         </div>
         <div class="save-bar">
           <button class="btn-primary" id="saveHomepageBtn">Сохранить главную</button>
@@ -704,6 +726,7 @@
   // ============ 🔗 ССЫЛКА ВНУТРИ ПОСТА ============
   var newLinkLabelEl = document.getElementById("newLinkLabel");
   var newLinkUrlEl = document.getElementById("newLinkUrl");
+  var newVideoUrlEl = document.getElementById("newVideoUrl");
 
   function normalizeUrl(url){
     url = url.trim();
@@ -785,7 +808,12 @@
     feature5Title: "hFeature5Title", feature5Text: "hFeature5Text",
     catStripTitle: "hCatStripTitle",
     catStripText: "hCatStripText",
-    contactsTitle: "hContactsTitle"
+    contactsTitle: "hContactsTitle",
+    video1Title: "hVideo1Title", video1Url: "hVideo1Url",
+    video2Title: "hVideo2Title", video2Url: "hVideo2Url",
+    video3Title: "hVideo3Title", video3Url: "hVideo3Url",
+    video4Title: "hVideo4Title", video4Url: "hVideo4Url",
+    video5Title: "hVideo5Title", video5Url: "hVideo5Url"
   };
 
   var homepageLoaded = false;
@@ -983,6 +1011,12 @@
     linkUrlInput.value = data.linkUrl || "";
     linkUrlInput.style.marginBottom = "10px";
 
+    var videoUrlInput = document.createElement("input");
+    videoUrlInput.type = "text";
+    videoUrlInput.placeholder = "Видео: ссылка YouTube, VK Video или Rutube";
+    videoUrlInput.value = data.videoUrl || "";
+    videoUrlInput.style.marginBottom = "10px";
+
     var cardImgLabel = document.createElement("label");
     cardImgLabel.textContent = "Фото карточки (обложка на главной странице)";
     cardImgLabel.style.marginTop = "6px";
@@ -1086,6 +1120,7 @@
       if(!titleVal || !textVal) return;
       var linkLabelVal = linkLabelInput.value.trim();
       var linkUrlVal = normalizeUrl(linkUrlInput.value);
+      var videoUrlVal = normalizeUrl(videoUrlInput.value);
       if(mediaPayloadTooLarge(editPhotos, editCardImage, editBgImage)){
         alert("Суммарный размер изображений слишком большой. Удалите часть фото, обложку или фон.");
         return;
@@ -1099,7 +1134,8 @@
         bgImage: editBgImage,
         bgDim: Number(bgDimInput.value),
         linkLabel: (linkLabelVal && linkUrlVal) ? linkLabelVal : "",
-        linkUrl: (linkLabelVal && linkUrlVal) ? linkUrlVal : ""
+        linkUrl: (linkLabelVal && linkUrlVal) ? linkUrlVal : "",
+        videoUrl: videoUrlVal
       }).catch(function(e){ alert("Ошибка сохранения"); console.error(e); });
     });
 
@@ -1134,6 +1170,7 @@
     body.appendChild(bgDimInput);
     body.appendChild(linkLabelInput);
     body.appendChild(linkUrlInput);
+    body.appendChild(videoUrlInput);
     body.appendChild(row);
     itemEl.appendChild(body);
   }
@@ -1155,6 +1192,7 @@
     }
     var linkLabel = newLinkLabelEl.value.trim();
     var linkUrl = normalizeUrl(newLinkUrlEl.value);
+    var videoUrl = normalizeUrl(newVideoUrlEl.value);
     if(mediaPayloadTooLarge(newPhotos, newCardImage, newBgImage)){
       addError.textContent = "Суммарный размер изображений слишком большой. Удалите часть фото, обложку или фон.";
       return;
@@ -1170,12 +1208,14 @@
       bgDim: Number(newBgDimInput.value),
       linkLabel: (linkLabel && linkUrl) ? linkLabel : "",
       linkUrl: (linkLabel && linkUrl) ? linkUrl : "",
+      videoUrl: videoUrl,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function(){
       newTitleEl.value = "";
       newTextEl.value = "";
       newLinkLabelEl.value = "";
       newLinkUrlEl.value = "";
+      newVideoUrlEl.value = "";
       newPhotos = [];
       renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);
       newCardImage = "";

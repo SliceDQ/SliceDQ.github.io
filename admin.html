@@ -133,6 +133,7 @@
 
   #contactsPanel{ display:none; }
   #homepagePanel{ display:none; }
+  #videosPanel{ display:none; }
   .contacts-form .group{ margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--border); }
   .contacts-form .group:last-of-type{ border-bottom:none; }
   .contacts-form .group h3{ font-size:14px; margin-bottom:12px; color:var(--accent); }
@@ -173,6 +174,7 @@
       <button class="active" id="modeAnnouncementsBtn">Объявления и ссылки</button>
       <button id="modeContactsBtn">Контакты</button>
       <button id="modeHomepageBtn">Главная страница</button>
+      <button id="modeVideosBtn">Видео</button>
     </div>
 
     <div id="announcementsPanel">
@@ -222,12 +224,12 @@
         </div>
         <label for="newVideoUrl">Видео внутри объявления (необязательно)</label>
         <input type="text" id="newVideoUrl" placeholder="Ссылка на видеосервис или прямой адрес видео">
-        <label for="newVideoPosition">Расположение медиа в объявлении</label>
+        <label for="newVideoPosition">Расположение отдельных блоков «Видео» и «Фото»</label>
         <select id="newVideoPosition">
           <option value="after" selected>После текста</option>
           <option value="before">Перед текстом</option>
         </select>
-        <p class="sub">Поддерживаются YouTube, VK, Rutube, Vimeo, Dailymotion, OK и прямые ссылки на видео.</p>
+        <p class="sub">Поддерживаются Cloudflare Stream, YouTube, VK, Rutube, Vimeo, TikTok, Twitch, Streamable, Dailymotion, OK, Google Drive и прямые MP4/WebM/MOV-ссылки.</p>
         <div class="add-form-actions">
           <button class="btn-primary" id="addBtn">Опубликовать</button>
         </div>
@@ -374,9 +376,19 @@
           <label for="hContactsTitle">Заголовок блока</label>
           <input type="text" id="hContactsTitle" placeholder="Связаться с нами">
         </div>
+        <div class="save-bar">
+          <button class="btn-primary" id="saveHomepageBtn">Сохранить главную</button>
+          <span class="save-note" id="homepageSaveNote"></span>
+        </div>
+        <div class="error" id="homepageError"></div>
+      </div>
+    </div>
+
+    <div id="videosPanel">
+      <div class="contacts-form">
         <div class="group">
           <h3>Видео на главной странице</h3>
-          <p class="sub">YouTube, VK, Rutube, Vimeo, Dailymotion, OK или прямая ссылка на видео. Формат плеера подстроится автоматически.</p>
+          <p class="sub">Вставьте ссылку и подпись. Пустая ссылка полностью скрывает соответствующий видеоблок на сайте.</p>
           <label for="hVideo1Title">1. После первого экрана — подпись</label>
           <input type="text" id="hVideo1Title" placeholder="Почувствуйте атмосферу KSTYLE">
           <input type="text" id="hVideo1Url" placeholder="Ссылка на видео">
@@ -392,12 +404,13 @@
           <label for="hVideo5Title">5. Перед картой</label>
           <input type="text" id="hVideo5Title" placeholder="Добро пожаловать в нашу студию">
           <input type="text" id="hVideo5Url" placeholder="Ссылка на видео">
+          <p class="sub">Поддерживаются Cloudflare Stream, YouTube, VK, Rutube, Vimeo, TikTok, Twitch, Streamable, Dailymotion, OK, Google Drive и прямые MP4/WebM/MOV-ссылки.</p>
         </div>
         <div class="save-bar">
-          <button class="btn-primary" id="saveHomepageBtn">Сохранить главную</button>
-          <span class="save-note" id="homepageSaveNote"></span>
+          <button class="btn-primary" id="saveVideosBtn">Сохранить видео</button>
+          <span class="save-note" id="videosSaveNote"></span>
         </div>
-        <div class="error" id="homepageError"></div>
+        <div class="error" id="videosError"></div>
       </div>
     </div>
   </div>
@@ -444,18 +457,22 @@
   var announcementsPanel = document.getElementById("announcementsPanel");
   var contactsPanel = document.getElementById("contactsPanel");
   var homepagePanel = document.getElementById("homepagePanel");
+  var videosPanel = document.getElementById("videosPanel");
   var modeAnnouncementsBtn = document.getElementById("modeAnnouncementsBtn");
   var modeContactsBtn = document.getElementById("modeContactsBtn");
   var modeHomepageBtn = document.getElementById("modeHomepageBtn");
+  var modeVideosBtn = document.getElementById("modeVideosBtn");
   var panelTitle = document.getElementById("panelTitle");
 
   function showPanel(which){
     announcementsPanel.style.display = which === "announcements" ? "block" : "none";
     contactsPanel.style.display = which === "contacts" ? "block" : "none";
     homepagePanel.style.display = which === "homepage" ? "block" : "none";
+    videosPanel.style.display = which === "videos" ? "block" : "none";
     modeAnnouncementsBtn.classList.toggle("active", which === "announcements");
     modeContactsBtn.classList.toggle("active", which === "contacts");
     modeHomepageBtn.classList.toggle("active", which === "homepage");
+    modeVideosBtn.classList.toggle("active", which === "videos");
   }
   modeAnnouncementsBtn.addEventListener("click", function(){
     showPanel("announcements");
@@ -469,6 +486,11 @@
   modeHomepageBtn.addEventListener("click", function(){
     showPanel("homepage");
     panelTitle.textContent = "Главная страница";
+    loadHomepageText();
+  });
+  modeVideosBtn.addEventListener("click", function(){
+    showPanel("videos");
+    panelTitle.textContent = "Видео";
     loadHomepageText();
   });
 
@@ -814,7 +836,10 @@
     feature5Title: "hFeature5Title", feature5Text: "hFeature5Text",
     catStripTitle: "hCatStripTitle",
     catStripText: "hCatStripText",
-    contactsTitle: "hContactsTitle",
+    contactsTitle: "hContactsTitle"
+  };
+
+  var VIDEO_FIELDS = {
     video1Title: "hVideo1Title", video1Url: "hVideo1Url",
     video2Title: "hVideo2Title", video2Url: "hVideo2Url",
     video3Title: "hVideo3Title", video3Url: "hVideo3Url",
@@ -831,8 +856,10 @@
       homepageLoading = false;
       homepageLoaded = true;
       var data = doc.exists ? doc.data() : {};
-      Object.keys(HOMEPAGE_FIELDS).forEach(function(key){
-        document.getElementById(HOMEPAGE_FIELDS[key]).value = data[key] || "";
+      [HOMEPAGE_FIELDS, VIDEO_FIELDS].forEach(function(fields){
+        Object.keys(fields).forEach(function(key){
+          document.getElementById(fields[key]).value = data[key] || "";
+        });
       });
     }).catch(function(e){
       homepageLoading = false;
@@ -856,6 +883,24 @@
       setTimeout(function(){ noteEl.textContent = ""; }, 3000);
     }).catch(function(e){
       errEl.textContent = "Не удалось сохранить текст главной.";
+      console.error(e);
+    });
+  });
+
+  document.getElementById("saveVideosBtn").addEventListener("click", function(){
+    var errEl = document.getElementById("videosError");
+    var noteEl = document.getElementById("videosSaveNote");
+    errEl.textContent = "";
+    noteEl.textContent = "";
+    var payload = {};
+    Object.keys(VIDEO_FIELDS).forEach(function(key){
+      payload[key] = document.getElementById(VIDEO_FIELDS[key]).value.trim();
+    });
+    db.collection("settings").doc("homepage").set(payload, { merge: true }).then(function(){
+      noteEl.textContent = "Сохранено ✓";
+      setTimeout(function(){ noteEl.textContent = ""; }, 3000);
+    }).catch(function(e){
+      errEl.textContent = "Не удалось сохранить видео.";
       console.error(e);
     });
   });
@@ -888,6 +933,13 @@
         photoCount.className = "photo-count";
         photoCount.textContent = "📷 " + data.photos.length + " фото";
         body.appendChild(photoCount);
+      }
+
+      if(data.videoUrl){
+        var videoBadge = document.createElement("span");
+        videoBadge.className = "photo-count";
+        videoBadge.textContent = "▶ видео";
+        body.appendChild(videoBadge);
       }
 
       if(data.linkUrl){
@@ -1024,7 +1076,7 @@
     videoUrlInput.style.marginBottom = "10px";
 
     var videoPositionInput = document.createElement("select");
-    videoPositionInput.innerHTML = '<option value="after">Медиа после текста</option><option value="before">Медиа перед текстом</option>';
+    videoPositionInput.innerHTML = '<option value="after">Видео и фото после текста</option><option value="before">Видео и фото перед текстом</option>';
     videoPositionInput.value = data.videoPosition === "before" ? "before" : "after";
     videoPositionInput.style.marginBottom = "10px";
 

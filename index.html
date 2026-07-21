@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-mode="night">
+<html lang="ru" data-mode="night" data-icon-palette="site">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
@@ -44,7 +44,11 @@
     --header-glass: rgba(7, 7, 9, 0.9);
     --border: rgba(255, 255, 255, 0.15); 
     --text: #ffffff;        
-    --muted: #8e8e93;       
+    --muted: #8e8e93;
+    --brand-max: #6E1AFF;
+    --brand-whatsapp: #25D366;
+    --brand-telegram: #229ED9;
+    --brand-vk: #0077FF;
     --shadow-3d: 
       0 30px 70px -10px rgba(0,0,0,0.9), 
       0 15px 30px -15px rgba(0,0,0,0.8),
@@ -56,6 +60,13 @@
       0 14px 30px -8px rgba(0,0,0,0.7), 
       0 6px 14px -8px rgba(0,0,0,0.6),
       inset 0 1px 1px rgba(255,255,255,0.15);
+  }
+
+  html[data-icon-palette="site"]{
+    --brand-max:var(--accent);
+    --brand-whatsapp:var(--accent);
+    --brand-telegram:var(--accent);
+    --brand-vk:var(--accent);
   }
 
   body {
@@ -118,7 +129,34 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
   
-  .header-actions{ display:flex; align-items:center; gap:20px; }
+  .header-actions{ display:flex; align-items:center; gap:10px; }
+  .header-contact-links{
+    display:flex; align-items:center; gap:2px; padding:3px;
+    border:1px solid rgba(255,255,255,.1); border-radius:999px;
+    background:rgba(255,255,255,.035);
+  }
+  .header-contact-link{
+    width:34px; height:34px; border-radius:50%; display:grid; place-items:center;
+    color:var(--accent); background:transparent;
+    transition:background .18s, color .18s;
+  }
+  .header-contact-link:hover{ background:color-mix(in srgb, var(--accent) 16%, transparent); }
+  .header-contact-link svg{ width:18px; height:18px; fill:currentColor; }
+  .header-contact-link.phone svg{ fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  @media(max-width:560px){
+    .header-inner{ padding:12px 14px; }
+    .header-actions{ gap:6px; }
+    .header-contact-links{ gap:0; padding:2px; }
+    .header-contact-link{ width:29px; height:29px; }
+    .header-contact-link svg{ width:15px; height:15px; }
+    .accent-picker{ padding:4px; }
+    .burger{ width:40px; height:40px; }
+    .logo{ font-size:21px; }
+  }
+  @media(max-width:380px){
+    .header-contact-link{ width:27px; height:27px; }
+    .header-actions{ gap:4px; }
+  }
   .accent-picker{
     position:relative; display:flex; flex-direction:column; align-items:center;
     padding:6px; border:1px solid transparent; border-radius:20px;
@@ -258,11 +296,19 @@
   }
   .signup-choice-opt:hover{ border-color:var(--accent); background: rgba(255,255,255,0.1); transform:translateY(-2px); }
   .signup-choice-opt .ico{
-    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    width:46px; height:46px; border-radius:50%; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
   }
   .signup-choice-opt .ico svg{ width:22px; height:22px; fill:var(--accent); }
+  .signup-choice-opt .ico .max-logo-bg{ fill:transparent; }
+  .signup-choice-opt .ico .max-logo path{ fill:var(--accent); }
+  .brand-max{ --brand-color:var(--brand-max); }
+  .brand-whatsapp{ --brand-color:var(--brand-whatsapp); }
+  .brand-telegram{ --brand-color:var(--brand-telegram); }
+  .brand-vk{ --brand-color:var(--brand-vk); }
   .signup-choice-opt .txt{ display:flex; flex-direction:column; gap:2px; }
   .signup-choice-opt .txt .name{ font-weight:700; font-size:16px; }
   .signup-choice-opt .txt .desc{ font-size:13px; color:var(--muted); }
@@ -604,7 +650,27 @@
   .contacts-grid { display: flex; flex-wrap: wrap; gap: 18px; }
   
   .contact-tile { justify-content: flex-start; gap: 16px; text-align: left; cursor: pointer; position: relative; flex: 1 1 220px; min-width: 260px; }
-  .contact-tile svg { width: 24px; height: 24px; fill: var(--accent); flex-shrink: 0; transition: transform 0.3s; }
+  .contact-tile > svg:not(.max-logo),
+  .phone-trigger-area > svg{
+    width:46px; height:46px; padding:11px; border-radius:50%;
+    fill:var(--brand-color, var(--accent)); flex-shrink:0;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 8px 20px -14px var(--brand-color, var(--accent));
+    transition:border-color .2s, background .2s;
+  }
+  .phone-trigger-area > svg.contact-phone-icon{
+    fill:none; stroke:var(--accent); stroke-width:1.9;
+    stroke-linecap:round; stroke-linejoin:round;
+  }
+  .contact-tile .max-logo{
+    width:46px; height:46px; padding:10px; border-radius:50%;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 8px 20px -14px var(--accent);
+  }
+  .contact-tile .max-logo .max-logo-bg{ fill:transparent; }
+  .contact-tile .max-logo path{ fill:var(--accent); }
   .contact-tile:hover svg { transform: scale(1.1); }
   
   .contact-info { display: flex; flex-direction: column; flex: 1; }
@@ -637,7 +703,7 @@
     .contact-tile:hover{ transform: none; box-shadow: none; }
     .contacts-section h2{ margin-bottom: 16px; }
     .contacts-grid{ gap: 8px; }
-    .contact-tile svg{ width: 24px; height: 24px; }
+    .contact-tile > svg:not(.max-logo), .phone-trigger-area > svg, .contact-tile .max-logo{ width:42px; height:42px; }
     .contact-info .title{ font-size: 14.5px; font-weight:700; }
     .contact-info .desc{ font-size: 12px; }
     .phone-link{ flex-wrap: wrap; white-space: normal; padding: 10px 12px; }
@@ -846,7 +912,7 @@
   .announce-text .in-text-link:hover{ opacity:0.8; }
   .announce-photos{
     --announce-media-size:min(78vw,360px);
-    display:flex; gap:14px; margin-top:22px; padding:2px 2px 10px;
+    display:flex; gap:14px; padding:2px 2px 10px;
     overflow-x:auto; overscroll-behavior-inline:contain; scroll-snap-type:x mandatory;
     scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
@@ -856,21 +922,13 @@
     object-fit:cover; border-radius:var(--radius); border:1px solid var(--border); scroll-snap-align:start;
     cursor:zoom-in; box-shadow: var(--shadow-3d);
   }
-  .announce-photos .announce-video{
-    flex:0 0 var(--announce-media-size); width:var(--announce-media-size); aspect-ratio:1;
-    margin:0; border-radius:var(--radius); scroll-snap-align:start; box-shadow:var(--shadow-3d);
+  .announce-media{ display:flex; flex-direction:column; gap:24px; margin-top:24px; }
+  .announce-media-title{
+    margin-bottom:10px; color:var(--muted); font-size:11px; font-weight:800;
+    letter-spacing:.14em; text-transform:uppercase;
   }
-  .announce-video-card{
-    flex:0 0 var(--announce-media-size); width:var(--announce-media-size); height:var(--announce-media-size);
-    display:grid; place-items:center; border:1px solid var(--border); border-radius:var(--radius);
-    color:var(--text); scroll-snap-align:start; box-shadow:var(--shadow-3d);
-    background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 42%),#09090c;
-  }
-  .announce-video-card:hover .site-video-play{ transform:scale(1.08); background:var(--accent); }
-  .announce-photos .site-video-title,
-  .announce-photos .site-video-hint,
-  .announce-photos .site-video-open{ display:none; }
-  .announce-photos + .announce-text{ margin-top:22px; }
+  .announce-video-section .site-video{ margin:0; width:min(100%,820px); }
+  .announce-media + .announce-text{ margin-top:24px; }
   .home-video-slot{ display:none; padding:20px 0 70px; }
   .home-video-slot.has-video{ display:block; }
   .site-video{
@@ -885,34 +943,23 @@
     content:""; position:absolute; inset:0; pointer-events:none;
     box-shadow:inset 0 0 70px rgba(0,0,0,.35); border-radius:inherit;
   }
-  .site-video-cover{
-    position:absolute; inset:0; z-index:1; width:100%; height:100%;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
-    padding:28px; color:var(--text); text-align:center;
-    background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 42%),#09090c;
-  }
-  .site-video-play{
-    width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
-    border:1px solid color-mix(in srgb,var(--accent) 55%,white 10%);
-    background:color-mix(in srgb,var(--accent) 18%,rgba(255,255,255,.04));
-    box-shadow:0 12px 34px color-mix(in srgb,var(--accent) 20%,transparent);
-    transition:transform .25s var(--ease), background .25s;
-  }
-  .site-video-cover:hover .site-video-play{ transform:scale(1.08); background:var(--accent); }
-  .site-video-play::before{ content:""; margin-left:4px; border-left:16px solid currentColor; border-top:10px solid transparent; border-bottom:10px solid transparent; }
-  .site-video-title{ font:800 clamp(17px,2.5vw,26px)/1.25 'Montserrat',sans-serif; max-width:680px; }
-  .site-video-hint{ color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
   .site-video iframe, .site-video video{ position:absolute; inset:0; width:100%; height:100%; border:0; z-index:2; }
-  .site-video video{ object-fit:contain; background:#000; }
-  .site-video-open{
-    position:absolute; right:10px; bottom:10px; z-index:3; padding:8px 11px; border-radius:9px;
-    color:#fff; background:rgba(0,0,0,.68); font-size:12px; font-weight:700; backdrop-filter:blur(8px);
+  .site-video video{ object-fit:cover; background:#000; }
+  .site-video-fullscreen{
+    position:absolute; top:10px; right:10px; z-index:4; width:40px; height:40px;
+    display:grid; place-items:center; border-radius:12px; color:#fff;
+    background:rgba(0,0,0,.68); border:1px solid rgba(255,255,255,.2);
+    backdrop-filter:blur(8px);
+  }
+  .site-video-fullscreen svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .site-video-error{
+    position:absolute; inset:0; z-index:2; padding:28px; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; gap:14px; text-align:center; background:#09090c;
   }
   @media(max-width:720px){
     .home-video-slot{ padding:8px 0 48px; }
     .site-video{ width:100%; border-radius:18px; }
     .site-video.is-vertical{ width:min(100%,380px); }
-    .site-video-play{ width:54px; height:54px; }
   }
 
   /* ============ ◀▶ ЛИСТАНИЕ ОБЪЯВЛЕНИЙ ============ */
@@ -1118,6 +1165,31 @@
   .rule-signature .stat:nth-child(3) .n{ animation-delay:.4s; }
   .rule-signature .stat:nth-child(4) .n{ animation-delay:.6s; }
 
+  /* Кликабельные элементы больше не подпрыгивают и не наклоняются. */
+  .btn:hover,
+  .signup-fab:hover,
+  .signup-choice-opt:hover,
+  .feature-card:hover,
+  .cat-tile:hover,
+  .contact-tile:hover,
+  .mini-card:hover .mini-card-img,
+  .showcase-tabs button:hover,
+  .drawer-list li button:hover,
+  .drawer-back:hover,
+  .link-tile:hover,
+  .announcement-item:hover,
+  .location-info .addr-link:hover,
+  .icon-btn:hover,
+  .burger:hover{
+    transform:none !important;
+    animation:none !important;
+  }
+  .cat-tile:hover .arrow,
+  .contact-tile:hover svg{
+    transform:none !important;
+    animation:none !important;
+  }
+
   @media (prefers-reduced-motion: reduce){
     .hero-eyebrow::before, .burger, .feature-card .num, .rule-signature .stat .n, body::before{ animation:none !important; }
     .hero-title-wrap, .hero-title-reflection{ transition:none !important; transform:none !important; }
@@ -1158,6 +1230,23 @@
   <div class="header-inner">
     <div class="logo">KSTYLE</div>
     <div class="header-actions">
+      <div class="header-contact-links" aria-label="Быстрые контакты">
+        <a class="header-contact-link" id="headerMax" href="#" target="_blank" rel="noopener" aria-label="Написать в MAX" title="MAX">
+          <svg viewBox="0 0 1000 1000" aria-hidden="true"><path d="M508.211 878.328c-75.007 0-109.864-10.95-170.453-54.75-38.325 49.275-159.686 87.783-164.979 21.9 0-49.456-10.95-91.248-23.36-136.873-14.782-56.21-31.572-118.807-31.572-209.508 0-216.626 177.754-379.597 388.357-379.597 210.785 0 375.947 171.001 375.947 381.604.707 207.346-166.595 376.118-373.94 377.224m3.103-571.585c-102.564-5.292-182.499 65.7-200.201 177.024-14.6 92.162 11.315 204.398 33.397 210.238 10.585 2.555 37.23-18.98 53.837-35.587a189.8 189.8 0 0 0 92.71 33.032c106.273 5.112 197.08-75.794 204.215-181.95 4.154-106.382-77.67-196.486-183.958-202.574Z"/></svg>
+        </a>
+        <a class="header-contact-link" id="headerWhatsapp" href="https://wa.me/79250452166" target="_blank" rel="noopener" aria-label="Написать в WhatsApp" title="WhatsApp">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403a9.87 9.87 0 0 1-5.035-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 5.45 0 9.88 4.438 9.878 9.892-.003 5.45-4.437 9.884-9.882 9.884"/></svg>
+        </a>
+        <a class="header-contact-link" id="headerTelegram" href="https://t.me/your_studio" target="_blank" rel="noopener" aria-label="Написать в Telegram" title="Telegram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 1 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14.104.085.161.2.171.325.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </a>
+        <a class="header-contact-link" id="headerVk" href="https://vk.ru/club116263150" target="_blank" rel="noopener" aria-label="Открыть группу ВКонтакте" title="ВКонтакте">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.162 18.994c.609 0 .858-.406.851-.915-.031-1.917.714-2.949 2.117-1.546 1.597 1.9 2.442 2.461 3.937 2.461h1.583c.809 0 1.161-.293 1.161-.804 0-.723-.828-1.86-2.021-3.239-.601-.702-.972-1.293-.972-1.708 0-.556.363-1.049 1.104-2.081 1.443-2 2.021-3.257 2.021-3.831 0-.523-.371-.858-.987-.858h-1.583c-.657 0-.973.351-1.161.865 0 0-1.371 3.339-3.174 4.502-.606.393-.878.517-1.208.517-.353 0-.517-.246-.517-.858v-2.98c0-.815-.239-1.181-.998-1.181h-2.516c-.556 0-.888.377-.888.735 0 .77.939.913 1.036 2.995v2.267c0 .965-.174 1.14-.554 1.14-.998 0-3.174-2.815-4.51-6.036-.264-.634-.529-.876-1.192-.876H2.5c-.727 0-.869.351-.869.735 0 .698.858 3.784 3.938 7.878 2.05 2.774 4.937 4.278 7.593 4.278z"/></svg>
+        </a>
+        <a class="header-contact-link phone" id="headerPhone" href="tel:+79250452166" aria-label="Позвонить" title="Позвонить">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2C9 21 3 15 2 6a2 2 0 0 1 2-2z"/></svg>
+        </a>
+      </div>
       <div class="accent-picker" id="accentPicker">
         <button class="accent-trigger" id="accentTrigger" type="button" aria-label="Выбрать цвет сайта" aria-expanded="false" aria-controls="accentMenu"></button>
         <div class="accent-menu" id="accentMenu" role="dialog" aria-label="Быстрые действия и цвет сайта">
@@ -1194,9 +1283,9 @@
       </div>
       <div class="rule-signature reveal" style="--rd:320ms">
         <div class="stat"><span class="n" id="hpStat1n">2024</span><span class="cap" id="hpStat1cap">Работаем с</span></div>
-        <div class="stat"><span class="n" id="hpStat2n">15</span><span class="cap" id="hpStat2cap">Направлений</span></div>
-        <div class="stat"><span class="n" id="hpStat3n">5</span><span class="cap" id="hpStat3cap">Педагогов</span></div>
-        <div class="stat"><span class="n" id="hpStat4n">150+</span><span class="cap" id="hpStat4cap">Постановок</span></div>
+        <div class="stat"><span class="n" id="hpStat2n">20</span><span class="cap" id="hpStat2cap">Направлений</span></div>
+        <div class="stat"><span class="n" id="hpStat3n">6</span><span class="cap" id="hpStat3cap">Педагогов</span></div>
+        <div class="stat"><span class="n" id="hpStat4n">180</span><span class="cap" id="hpStat4cap">Учеников</span></div>
       </div>
     </div>
   </section>
@@ -1264,9 +1353,11 @@
       <h2 class="reveal" id="hpContactsTitle">Связаться с нами</h2>
       <div class="contacts-grid">
         
-        <a href="#" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:0ms" id="contactChat">
-          <svg viewBox="0 0 24 24" fill-rule="evenodd" clip-rule="evenodd">
-            <path d="M12 2C6.48 2 2 6.48 2 12c0 2.5 0.9 4.8 2.4 6.6l-1.3 2.9c-.2 0.5 0.3 1 0.8 0.8l2.9-1.3c1.5 0.6 3.3 1 5.2 1 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 5c2.76 0 5 2.24 5 5s-2.24 5-5 5c-1.2 0-2.3-.4-3.2-1.1l-1.3 0.6 0.4-1.3C7.3 14.3 7 13.2 7 12c0-2.76 2.24-5 5-5z"/>
+        <a href="#" target="_blank" rel="noopener" class="cat-tile contact-tile brand-max reveal" style="--rd:0ms" id="contactChat">
+          <svg class="max-logo" viewBox="0 0 1000 1000" aria-hidden="true">
+            <defs><linearGradient id="maxContactGradient" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#44ccff"/><stop offset=".66" stop-color="#5533ee"/><stop offset="1" stop-color="#9933dd"/></linearGradient></defs>
+            <rect class="max-logo-bg" width="1000" height="1000" rx="250" fill="url(#maxContactGradient)"/>
+            <path fill="#fff" fill-rule="evenodd" d="M508.211 878.328c-75.007 0-109.864-10.95-170.453-54.75-38.325 49.275-159.686 87.783-164.979 21.9 0-49.456-10.95-91.248-23.36-136.873-14.782-56.21-31.572-118.807-31.572-209.508 0-216.626 177.754-379.597 388.357-379.597 210.785 0 375.947 171.001 375.947 381.604.707 207.346-166.595 376.118-373.94 377.224m3.103-571.585c-102.564-5.292-182.499 65.7-200.201 177.024-14.6 92.162 11.315 204.398 33.397 210.238 10.585 2.555 37.23-18.98 53.837-35.587a189.8 189.8 0 0 0 92.71 33.032c106.273 5.112 197.08-75.794 204.215-181.95 4.154-106.382-77.67-196.486-183.958-202.574Z"/>
           </svg>
           <div class="contact-info">
             <span class="title" id="contactChatTitle">Макс</span>
@@ -1274,7 +1365,7 @@
           </div>
         </a>
 
-        <a href="https://wa.me/79250452166" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:60ms" id="contactWhatsapp">
+        <a href="https://wa.me/79250452166" target="_blank" rel="noopener" class="cat-tile contact-tile brand-whatsapp reveal" style="--rd:60ms" id="contactWhatsapp">
           <svg viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.002-2.633-1.019-5.101-2.875-6.959-1.856-1.857-4.321-2.879-6.961-2.88-5.441 0-9.866 4.412-9.87 9.849-.002 1.698.443 3.356 1.29 4.828l-.995 3.635 3.718-.977zm11.447-6.17c-.328-.164-1.94-.957-2.242-1.068-.301-.11-.522-.164-.743.164-.221.328-.855 1.068-1.047 1.287-.193.219-.386.246-.714.082-.328-.164-1.386-.51-2.64-1.627-.977-.872-1.637-1.95-1.829-2.278-.193-.328-.021-.506.143-.669.148-.147.328-.382.492-.574.164-.192.219-.328.328-.547.11-.219.055-.411-.027-.574-.082-.164-.743-1.792-1.019-2.459-.27-.65-.542-.56-.743-.57l-.633-.01c-.221 0-.58.082-.884.411-.304.328-1.161 1.135-1.161 2.767 0 1.632 1.189 3.203 1.354 3.422.165.219 2.34 3.574 5.67 5.014.792.341 1.41.546 1.893.7.796.253 1.52.217 2.092.131.638-.096 1.94-.793 2.214-1.559.273-.766.273-1.422.192-1.559-.081-.137-.301-.219-.629-.383z"/>
           </svg>
@@ -1284,7 +1375,7 @@
           </div>
         </a>
 
-        <a href="https://t.me/your_studio" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:120ms" id="contactTelegram">
+        <a href="https://t.me/your_studio" target="_blank" rel="noopener" class="cat-tile contact-tile brand-telegram reveal" style="--rd:120ms" id="contactTelegram">
           <svg viewBox="0 0 24 24">
             <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.87 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.46c.536-.196 1.006.128.832.941z"/>
           </svg>
@@ -1294,7 +1385,7 @@
           </div>
         </a>
 
-        <a href="https://vk.ru/club116263150" target="_blank" rel="noopener" class="cat-tile contact-tile reveal" style="--rd:180ms" id="contactVk">
+        <a href="https://vk.ru/club116263150" target="_blank" rel="noopener" class="cat-tile contact-tile brand-vk reveal" style="--rd:180ms" id="contactVk">
           <svg viewBox="0 0 24 24">
             <path d="M13.162 18.994c.609 0 .858-.406.851-.915-.031-1.917.714-2.949 2.117-1.546 1.597 1.9 2.442 2.461 3.937 2.461h1.583c.809 0 1.161-.293 1.161-.804 0-.723-.828-1.86-2.021-3.239-.601-.702-.972-1.293-.972-1.708 0-.556.363-1.049 1.104-2.081 1.443-2 2.021-3.257 2.021-3.831 0-.523-.371-.858-.987-.858h-1.583c-.657 0-.973.351-1.161.865 0 0-1.371 3.339-3.174 4.502-.606.393-.878.517-1.208.517-.353 0-.517-.246-.517-.858v-2.98c0-.815-.239-1.181-.998-1.181h-2.516c-.556 0-.888.377-.888.735 0 .77.939.913 1.036 2.995v2.267c0 .965-.174 1.14-.554 1.14-.998 0-3.174-2.815-4.51-6.036-.264-.634-.529-.876-1.192-.876H2.5c-.727 0-.869.351-.869.735 0 .698.858 3.784 3.938 7.878 2.05 2.774 4.937 4.278 7.593 4.278z"/>
           </svg>
@@ -1307,8 +1398,8 @@
         <div class="cat-tile contact-tile reveal" style="--rd:240ms" id="phoneTile" onclick="togglePhones(event)">
           <div class="phone-dropdown-wrapper">
             <div class="phone-trigger-area">
-              <svg viewBox="0 0 24 24">
-                <path d="M21.384 17.791c-1.423-1.423-3.342-1.843-4.993-1.03 l-1.814 1.814c-3.078-1.504-5.634-4.06-7.138-7.138l1.814-1.814c.813-1.65.393-3.569-1.03-4.993l-4.707-4.708c-.751-.751-1.982-.751-2.733 0l-2.696 2.697c-.818.818-1.108 2.012-.738 3.107 1.972 5.858 6.558 10.443 12.415 12.415 1.096.37 2.29.079 3.107-.738l2.697-2.697c.751-.752.751-1.983 0-2.733l-4.707-4.707z"/>
+              <svg class="contact-phone-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 4h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2C9 21 3 15 2 6a2 2 0 0 1 2-2z"/>
               </svg>
               <div class="contact-info">
                 <span class="title">Позвонить нам</span>
@@ -1379,10 +1470,12 @@
     <div class="signup-choice-title">Записаться на занятие</div>
     <div class="signup-choice-sub">Выберите, куда написать</div>
     <div class="signup-choice-options">
-      <a href="#" target="_blank" rel="noopener" class="signup-choice-opt" id="signupChoiceMax">
+      <a href="#" target="_blank" rel="noopener" class="signup-choice-opt brand-max" id="signupChoiceMax">
         <span class="ico">
-          <svg viewBox="0 0 24 24" fill-rule="evenodd" clip-rule="evenodd">
-            <path d="M12 2C6.48 2 2 6.48 2 12c0 2.5 0.9 4.8 2.4 6.6l-1.3 2.9c-.2 0.5 0.3 1 0.8 0.8l2.9-1.3c1.5 0.6 3.3 1 5.2 1 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 5c2.76 0 5 2.24 5 5s-2.24 5-5 5c-1.2 0-2.3-.4-3.2-1.1l-1.3 0.6 0.4-1.3C7.3 14.3 7 13.2 7 12c0-2.76 2.24-5 5-5z"/>
+          <svg class="max-logo" viewBox="0 0 1000 1000" aria-hidden="true">
+            <defs><linearGradient id="maxSignupGradient" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#44ccff"/><stop offset=".66" stop-color="#5533ee"/><stop offset="1" stop-color="#9933dd"/></linearGradient></defs>
+            <rect class="max-logo-bg" width="1000" height="1000" rx="250" fill="url(#maxSignupGradient)"/>
+            <path fill="#fff" fill-rule="evenodd" d="M508.211 878.328c-75.007 0-109.864-10.95-170.453-54.75-38.325 49.275-159.686 87.783-164.979 21.9 0-49.456-10.95-91.248-23.36-136.873-14.782-56.21-31.572-118.807-31.572-209.508 0-216.626 177.754-379.597 388.357-379.597 210.785 0 375.947 171.001 375.947 381.604.707 207.346-166.595 376.118-373.94 377.224m3.103-571.585c-102.564-5.292-182.499 65.7-200.201 177.024-14.6 92.162 11.315 204.398 33.397 210.238 10.585 2.555 37.23-18.98 53.837-35.587a189.8 189.8 0 0 0 92.71 33.032c106.273 5.112 197.08-75.794 204.215-181.95 4.154-106.382-77.67-196.486-183.958-202.574Z"/>
           </svg>
         </span>
         <span class="txt">
@@ -1390,7 +1483,7 @@
           <span class="desc">Написать в личный чат</span>
         </span>
       </a>
-      <a href="#" target="_blank" rel="noopener" class="signup-choice-opt" id="signupChoiceWhatsapp">
+      <a href="#" target="_blank" rel="noopener" class="signup-choice-opt brand-whatsapp" id="signupChoiceWhatsapp">
         <span class="ico">
           <svg viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.002-2.633-1.019-5.101-2.875-6.959-1.856-1.857-4.321-2.879-6.961-2.88-5.441 0-9.866 4.412-9.87 9.849-.002 1.698.443 3.356 1.29 4.828l-.995 3.635 3.718-.977zm11.447-6.17c-.328-.164-1.94-.957-2.242-1.068-.301-.11-.522-.164-.743.164-.221.328-.855 1.068-1.047 1.287-.193.219-.386.246-.714.082-.328-.164-1.386-.51-2.64-1.627-.977-.872-1.637-1.95-1.829-2.278-.193-.328-.021-.506.143-.669.148-.147.328-.382.492-.574.164-.192.219-.328.328-.547.11-.219.055-.411-.027-.574-.082-.164-.743-1.792-1.019-2.459-.27-.65-.542-.56-.743-.57l-.633-.01c-.221 0-.58.082-.884.411-.304.328-1.161 1.135-1.161 2.767 0 1.632 1.189 3.203 1.354 3.422.165.219 2.34 3.574 5.67 5.014.792.341 1.41.546 1.893.7.796.253 1.52.217 2.092.131.638-.096 1.94-.793 2.214-1.559.273-.766.273-1.422.192-1.559-.081-.137-.301-.219-.629-.383z"/>
@@ -1401,7 +1494,7 @@
           <span class="desc">Написать в личный чат</span>
         </span>
       </a>
-      <a href="https://vk.ru/club116263150" target="_blank" rel="noopener" class="signup-choice-opt" id="signupChoiceVk">
+      <a href="https://vk.ru/club116263150" target="_blank" rel="noopener" class="signup-choice-opt brand-vk" id="signupChoiceVk">
         <span class="ico">
           <svg viewBox="0 0 24 24">
             <path d="M13.162 18.994c.609 0 .858-.406.851-.915-.031-1.917.714-2.949 2.117-1.546 1.597 1.9 2.442 2.461 3.937 2.461h1.583c.809 0 1.161-.293 1.161-.804 0-.723-.828-1.86-2.021-3.239-.601-.702-.972-1.293-.972-1.708 0-.556.363-1.049 1.104-2.081 1.443-2 2.021-3.257 2.021-3.831 0-.523-.371-.858-.987-.858h-1.583c-.657 0-.973.351-1.161.865 0 0-1.371 3.339-3.174 4.502-.606.393-.878.517-1.208.517-.353 0-.517-.246-.517-.858v-2.98c0-.815-.239-1.181-.998-1.181h-2.516c-.556 0-.888.377-.888.735 0 .77.939.913 1.036 2.995v2.267c0 .965-.174 1.14-.554 1.14-.998 0-3.174-2.815-4.51-6.036-.264-.634-.529-.876-1.192-.876H2.5c-.727 0-.869.351-.869.735 0 .698.858 3.784 3.938 7.878 2.05 2.774 4.937 4.278 7.593 4.278z"/>
@@ -1409,7 +1502,7 @@
         </span>
         <span class="txt">
           <span class="name">ВКонтакте</span>
-          <span class="desc">Написать в личный чат</span>
+          <span class="desc">Написать в группу</span>
         </span>
       </a>
     </div>
@@ -1581,6 +1674,7 @@
 
       if(data.chatUrl){
         document.getElementById("contactChat").href = data.chatUrl;
+        document.getElementById("headerMax").href = data.chatUrl;
         maxChatUrl = data.chatUrl;
         updateSignupLinks();
       }
@@ -1589,12 +1683,17 @@
 
       if(data.whatsapp){
         document.getElementById("contactWhatsapp").href = data.whatsapp;
+        document.getElementById("headerWhatsapp").href = data.whatsapp;
         whatsappBaseUrl = data.whatsapp;
         updateSignupLinks();
       }
-      if(data.telegram){ document.getElementById("contactTelegram").href = data.telegram; }
+      if(data.telegram){
+        document.getElementById("contactTelegram").href = data.telegram;
+        document.getElementById("headerTelegram").href = data.telegram;
+      }
       if(data.vk){
         document.getElementById("contactVk").href = data.vk;
+        document.getElementById("headerVk").href = data.vk;
         vkUrl = data.vk;
         updateSignupLinks();
       }
@@ -1602,6 +1701,7 @@
       if(data.phone1){
         document.getElementById("phoneLink1").href = "tel:" + data.phone1.replace(/[^\d+]/g, "");
         document.getElementById("phoneLink1Text").textContent = data.phone1;
+        document.getElementById("headerPhone").href = "tel:" + data.phone1.replace(/[^\d+]/g, "");
       }
       var phoneLink2El = document.getElementById("phoneLink2");
       if(data.phone2){
@@ -1633,7 +1733,7 @@
   // Пока maxChatUrl не пришёл из Firestore, у этих ссылок href="#" — клик по ним
   // раньше всё равно открывал пустую вкладку (из-за target="_blank"). Блокируем
   // переход, пока реальная ссылка ещё не подгрузилась.
-  ["contactChat", "signupChoiceMax"].forEach(function(id){
+  ["contactChat", "signupChoiceMax", "headerMax"].forEach(function(id){
     var el = document.getElementById(id);
     if(!el) return;
     el.addEventListener("click", function(e){
@@ -1685,34 +1785,65 @@
         videoId = url.searchParams.get("v") || "";
         if(!videoId && /^\/(shorts|embed|live)\//.test(url.pathname)) videoId = url.pathname.split("/")[2] || "";
       }
-      if(videoId && /^[\w-]{6,20}$/.test(videoId)) return "https://www.youtube.com/embed/" + videoId + "?autoplay=1&rel=0&playsinline=1";
+      if(videoId && /^[\w-]{6,20}$/.test(videoId)) return "https://www.youtube.com/embed/" + videoId + "?autoplay=0&rel=0&playsinline=1";
 
       var rutubeMatch = url.pathname.match(/\/(?:video|shorts)\/([a-zA-Z0-9-]+)/);
       if((host === "rutube.ru" || host === "rutube.com") && rutubeMatch){
-        return "https://rutube.ru/play/embed/" + rutubeMatch[1] + "?autoplay=1";
+        return "https://rutube.ru/play/embed/" + rutubeMatch[1] + "?autoplay=0";
       }
 
       if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && url.pathname.indexOf("video_ext.php") !== -1){
+        url.searchParams.set("autoplay", "0");
         return url.href;
       }
       var vkMatch = (url.pathname + url.search).match(/(?:video|clip)(-?\d+)_([0-9]+)/);
       if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && vkMatch){
-        return "https://vk.com/video_ext.php?oid=" + vkMatch[1] + "&id=" + vkMatch[2] + "&hd=2&autoplay=1";
+        return "https://vk.com/video_ext.php?oid=" + vkMatch[1] + "&id=" + vkMatch[2] + "&hd=2&autoplay=0";
       }
 
       var vimeoMatch = url.pathname.match(/^\/(?:video\/)?(\d+)/);
       if((host === "vimeo.com" || host === "player.vimeo.com") && vimeoMatch){
-        return "https://player.vimeo.com/video/" + vimeoMatch[1] + "?autoplay=1";
+        return "https://player.vimeo.com/video/" + vimeoMatch[1] + "?autoplay=0";
       }
 
       var dailyMatch = host === "dai.ly" ? url.pathname.match(/^\/([\w-]+)/) : url.pathname.match(/\/(?:video|embed\/video)\/([\w-]+)/);
       if((host === "dailymotion.com" || host === "dai.ly") && dailyMatch){
-        return "https://www.dailymotion.com/embed/video/" + dailyMatch[1] + "?autoplay=1";
+        return "https://www.dailymotion.com/embed/video/" + dailyMatch[1] + "?autoplay=0";
       }
 
       var okMatch = url.pathname.match(/\/(?:video|videoembed)\/(\d+)/);
       if(host === "ok.ru" && okMatch){
-        return "https://ok.ru/videoembed/" + okMatch[1] + "?autoplay=1";
+        return "https://ok.ru/videoembed/" + okMatch[1] + "?autoplay=0";
+      }
+
+      var tiktokMatch = url.pathname.match(/\/video\/(\d+)/);
+      if((host === "tiktok.com" || host === "m.tiktok.com") && tiktokMatch){
+        return "https://www.tiktok.com/player/v1/" + tiktokMatch[1] + "?autoplay=0&controls=1&progress_bar=1&play_button=1&volume_control=1&fullscreen_button=1";
+      }
+
+      var streamableMatch = url.pathname.match(/^\/(?:e\/)?([a-zA-Z0-9]+)$/);
+      if(host === "streamable.com" && streamableMatch){
+        return "https://streamable.com/e/" + streamableMatch[1] + "?autoplay=0";
+      }
+
+      var twitchVideoMatch = url.pathname.match(/^\/videos\/(\d+)/);
+      if((host === "twitch.tv" || host === "m.twitch.tv") && twitchVideoMatch){
+        return "https://player.twitch.tv/?video=" + twitchVideoMatch[1] + "&parent=" + encodeURIComponent(location.hostname) + "&autoplay=false";
+      }
+      var twitchClipMatch = url.pathname.match(/^\/(?:[^/]+\/clip\/|clip\/)?([A-Za-z0-9_-]+)$/);
+      if((host === "clips.twitch.tv" || host === "twitch.tv") && twitchClipMatch && (host === "clips.twitch.tv" || url.pathname.indexOf("/clip/") !== -1)){
+        return "https://clips.twitch.tv/embed?clip=" + twitchClipMatch[1] + "&parent=" + encodeURIComponent(location.hostname) + "&autoplay=false";
+      }
+
+      var driveMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
+      if(host === "drive.google.com" && driveMatch){
+        return "https://drive.google.com/file/d/" + driveMatch[1] + "/preview";
+      }
+
+      var cloudflareMatch = url.pathname.match(/^\/([a-zA-Z0-9_-]+)\/iframe\/?$/);
+      if(/\.cloudflarestream\.com$/.test(host) && cloudflareMatch){
+        url.searchParams.set("autoplay", "false");
+        return url.href;
       }
     } catch(e){ return ""; }
     return "";
@@ -1724,69 +1855,71 @@
     try{
       var url = new URL(value.indexOf("http") === 0 ? value : "https://" + value);
       if(url.protocol !== "http:" && url.protocol !== "https:") return "";
-      return url.href;
+      var path = url.pathname.toLowerCase();
+      var directExt = /\.(mp4|webm|ogg|ogv|mov|m4v)(?:$|\?)/i.test(path + url.search);
+      var mediaHost = /(^|\.)(firebasestorage\.googleapis\.com|storage\.googleapis\.com|res\.cloudinary\.com)$/.test(url.hostname.toLowerCase());
+      return (directExt || mediaHost) ? url.href : "";
     } catch(e){ return ""; }
+  }
+
+  function addVideoFullscreenButton(frame){
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "site-video-fullscreen";
+    button.setAttribute("aria-label", "Открыть видео на весь экран");
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path></svg>';
+    button.addEventListener("click", function(event){
+      event.stopPropagation();
+      var target = frame.querySelector("video") || frame;
+      var request = target.requestFullscreen || target.webkitRequestFullscreen;
+      if(request) request.call(target);
+      else if(target.webkitEnterFullscreen) target.webkitEnterFullscreen();
+    });
+    frame.appendChild(button);
   }
 
   function createSiteVideo(rawUrl, title, extraClass){
     var embedUrl = buildVideoEmbedUrl(rawUrl);
     var directUrl = embedUrl ? "" : buildDirectVideoUrl(rawUrl);
-    if(!embedUrl && !directUrl) return null;
+    var externalUrl = buildDirectVideoUrl(rawUrl) || (function(){
+      try{ return new URL((rawUrl || "").match(/^https?:\/\//i) ? rawUrl : "https://" + rawUrl).href; }
+      catch(e){ return ""; }
+    })();
+    if(!embedUrl && !directUrl && !externalUrl) return null;
     var frame = document.createElement("div");
     frame.className = "site-video" + (extraClass ? " " + extraClass : "");
     if(/(?:\/shorts\/|(?:^|[\/?=&])clip-?\d+_\d+)/i.test(rawUrl || "")) frame.classList.add("is-vertical");
-    var cover = document.createElement("button");
-    cover.type = "button";
-    cover.className = "site-video-cover";
-    cover.setAttribute("aria-label", "Воспроизвести видео" + (title ? ": " + title : ""));
-    var play = document.createElement("span");
-    play.className = "site-video-play";
-    var titleEl = document.createElement("span");
-    titleEl.className = "site-video-title";
-    titleEl.textContent = title || "Смотреть видео";
-    var hint = document.createElement("span");
-    hint.className = "site-video-hint";
-    hint.textContent = "Смотреть на сайте";
-    cover.appendChild(play);
-    cover.appendChild(titleEl);
-    cover.appendChild(hint);
-    cover.addEventListener("click", function(event){
-      event.stopPropagation();
-      if(directUrl){
-        var video = document.createElement("video");
-        video.src = directUrl;
-        video.controls = true;
-        video.autoplay = true;
-        video.playsInline = true;
-        video.preload = "metadata";
-        video.setAttribute("controlsList", "nodownload");
-        video.addEventListener("loadedmetadata", function(){
-          if(!video.videoWidth || !video.videoHeight) return;
-          var ratio = video.videoWidth / video.videoHeight;
-          frame.style.aspectRatio = video.videoWidth + " / " + video.videoHeight;
-          frame.classList.toggle("is-vertical", ratio < .82);
-          frame.classList.toggle("is-square", ratio >= .82 && ratio <= 1.18);
-        }, { once:true });
-        frame.appendChild(video);
-      } else {
-        var iframe = document.createElement("iframe");
-        iframe.src = embedUrl;
-        iframe.title = title || "Видео KSTYLE";
-        iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
-        iframe.allowFullscreen = true;
-        iframe.referrerPolicy = "strict-origin-when-cross-origin";
-        frame.appendChild(iframe);
-      }
-      var external = document.createElement("a");
-      external.className = "site-video-open";
-      external.href = buildDirectVideoUrl(rawUrl);
-      external.target = "_blank";
-      external.rel = "noopener noreferrer";
-      external.textContent = "Открыть отдельно";
-      frame.appendChild(external);
-      cover.remove();
-    }, { once:true });
-    frame.appendChild(cover);
+    if(directUrl){
+      var video = document.createElement("video");
+      video.src = directUrl;
+      video.controls = true;
+      video.autoplay = false;
+      video.playsInline = true;
+      video.preload = "metadata";
+      video.setAttribute("controlsList", "nodownload");
+      video.addEventListener("error", function(){
+        frame.innerHTML = '<div class="site-video-error"><strong>Видео не удалось загрузить</strong></div>';
+      }, { once:true });
+      video.addEventListener("loadedmetadata", function(){
+        if(!video.videoWidth || !video.videoHeight) return;
+        var ratio = video.videoWidth / video.videoHeight;
+        frame.style.aspectRatio = video.videoWidth + " / " + video.videoHeight;
+        frame.classList.toggle("is-vertical", ratio < .82);
+        frame.classList.toggle("is-square", ratio >= .82 && ratio <= 1.18);
+      }, { once:true });
+      frame.appendChild(video);
+    } else if(embedUrl){
+      var iframe = document.createElement("iframe");
+      iframe.src = embedUrl;
+      iframe.title = title || "Видео KSTYLE";
+      iframe.allow = "encrypted-media; picture-in-picture; fullscreen";
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      frame.appendChild(iframe);
+    } else {
+      return null;
+    }
+    addVideoFullscreenButton(frame);
     return frame;
   }
 
@@ -1796,7 +1929,9 @@
       if(!slot) continue;
       var wrap = slot.firstElementChild;
       wrap.innerHTML = "";
-      var player = createSiteVideo(data["video" + i + "Url"], data["video" + i + "Title"]);
+      var videoUrl = data["video" + i + "Url"] || "";
+      var playable = buildVideoEmbedUrl(videoUrl) || buildDirectVideoUrl(videoUrl);
+      var player = playable ? createSiteVideo(videoUrl, data["video" + i + "Title"]) : null;
       slot.classList.toggle("has-video", !!player);
       if(player) wrap.appendChild(player);
     }
@@ -2121,7 +2256,7 @@ function togglePhones(event) {
   })();
 
   var SHOWCASE = [
-    { key: "teachers", num: "01", label: "Педагоги", title: "Перенимайте опыт у тех, кто знает сцену изнутри.", text: "Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },
+    { key: "teachers", num: "01", label: "Педагоги", title: "Учат те, кто сам выступает", text: "Hip-hop, k-Pop, jazz-fank, Вог, модерн, латина mix, бачата, фламенко, LifeStyle, HighHeels, frame up, зумба, ирландский степ, танго соло, свадебный танец, стретчинг, здоровая спина, здоровые суставы.", cta: "Познакомиться" },
     { key: "directions", num: "02", label: "Направления", title: "Выбирайте свой стиль", text: "Latina mix, frame up, modern, high heels, flamenco, hip-hop, life style, jazz-fank, tango-solo, bachata, zumba, ирландский степ, стретчинг, здоровая спина, здоровые суставы.", cta: "Смотреть направления" },
     { key: "prices", num: "03", label: "Стоимость", title: "Стоимость занятий", text: "Разовые занятия, абонементы и специальные предложения.", cta: "Смотреть цены" }
   ];
@@ -2346,12 +2481,27 @@ function togglePhones(event) {
     }
   }
 
+  // Отзывы открываются сразу, без промежуточного списка.
+  async function openReviewsDirect(){
+    var drawerWasOpen = drawer.classList.contains("open");
+    if(drawerWasOpen) closeDrawerInternal();
+    var items = await getItems("reviews");
+    if(items.length > 0){
+      openAnnouncement(items, 0, "Отзывы", drawerWasOpen);
+    } else {
+      openDrawer();
+      openCategory("reviews");
+    }
+  }
+
   function handleCategoryClick(key){
     if(key === "contacts"){
       var contactsSection = document.getElementById("contacts");
       if(contactsSection) contactsSection.scrollIntoView({ behavior:"smooth", block:"start" });
     } else if(key === "schedule"){
       openScheduleDirect();
+    } else if(key === "reviews"){
+      openReviewsDirect();
     } else {
       openDrawer();
       openCategory(key);
@@ -2360,6 +2510,7 @@ function togglePhones(event) {
 
   var catGridHome = document.getElementById("catGridHome");
   CATEGORIES.forEach(function(c, i){
+    if(c.key === "contacts") return;
     var el = document.createElement("button");
     el.className = "cat-tile reveal";
     el.style.setProperty("--rd", (i * 60) + "ms");
@@ -2510,6 +2661,7 @@ function togglePhones(event) {
             if(contactsSection) contactsSection.scrollIntoView({ behavior:"smooth", block:"start" });
           }, 250);
         } else if(c.key === "schedule"){ openScheduleDirect(); }
+        else if(c.key === "reviews"){ openReviewsDirect(); }
         else { openCategory(c.key); }
       });
       li.appendChild(btn);
@@ -2839,43 +2991,49 @@ function togglePhones(event) {
     }
 
     var hasPhotos = item.photos && item.photos.length;
-    var mediaGrid = null;
+    var mediaBlock = null;
     if(item.videoUrl || hasPhotos){
-      var grid = document.createElement("div");
-      grid.className = "announce-photos";
-      var galleryItems = [];
-      if(item.videoUrl) galleryItems.push({ type:"video", url:item.videoUrl, title:item.title });
-      if(hasPhotos){
-        item.photos.forEach(function(src){ galleryItems.push({ type:"image", src:src }); });
-      }
+      var media = document.createElement("div");
+      media.className = "announce-media";
 
-      /* Video is the first card in the same swipeable strip as photos. */
       if(item.videoUrl){
-        var videoCard = document.createElement("button");
-        videoCard.type = "button";
-        videoCard.className = "announce-video-card";
-        videoCard.setAttribute("aria-label", "Открыть видео в галерее");
-        var videoPlay = document.createElement("span");
-        videoPlay.className = "site-video-play";
-        videoCard.appendChild(videoPlay);
-        videoCard.addEventListener("click", function(){ openLightbox(galleryItems, 0); });
-        grid.appendChild(videoCard);
+        var videoSection = document.createElement("div");
+        videoSection.className = "announce-video-section";
+        var videoHeading = document.createElement("div");
+        videoHeading.className = "announce-media-title";
+        videoHeading.textContent = "Видео";
+        videoSection.appendChild(videoHeading);
+        var inlinePlayer = createSiteVideo(item.videoUrl, item.title);
+        if(inlinePlayer) videoSection.appendChild(inlinePlayer);
+        if(inlinePlayer) media.appendChild(videoSection);
       }
 
       if(hasPhotos){
+        var photoSection = document.createElement("div");
+        photoSection.className = "announce-photo-section";
+        var photoHeading = document.createElement("div");
+        photoHeading.className = "announce-media-title";
+        photoHeading.textContent = "Фото";
+        photoSection.appendChild(photoHeading);
+        var grid = document.createElement("div");
+        grid.className = "announce-photos";
+        var galleryItems = item.photos.map(function(src){ return { type:"image", src:src }; });
         item.photos.forEach(function(src, photoIdx){
           var img = document.createElement("img");
           img.src = src;
           img.loading = "lazy";
-          img.addEventListener("click", function(){ openLightbox(galleryItems, photoIdx + (item.videoUrl ? 1 : 0)); });
+          img.alt = item.title ? item.title + " — фото " + (photoIdx + 1) : "Фото " + (photoIdx + 1);
+          img.addEventListener("click", function(){ openLightbox(galleryItems, photoIdx); });
           grid.appendChild(img);
         });
+        photoSection.appendChild(grid);
+        media.appendChild(photoSection);
       }
 
-      if(grid.children.length) mediaGrid = grid;
+      if(media.children.length) mediaBlock = media;
     }
 
-    if(mediaGrid && item.videoPosition === "before") announceViewInner.appendChild(mediaGrid);
+    if(mediaBlock && item.videoPosition === "before") announceViewInner.appendChild(mediaBlock);
 
     var textEl = document.createElement("div");
     textEl.className = "announce-text";
@@ -2896,7 +3054,7 @@ function togglePhones(event) {
       announceViewInner.appendChild(linkA);
     }
 
-    if(mediaGrid && item.videoPosition !== "before") announceViewInner.appendChild(mediaGrid);
+    if(mediaBlock && item.videoPosition !== "before") announceViewInner.appendChild(mediaBlock);
 
     announceViewInner.scrollTop = 0;
     announceViewScroll.scrollTop = 0;

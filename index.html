@@ -117,6 +117,31 @@
   }
   
   .header-actions{ display:flex; align-items:center; gap:20px; }
+  .accent-picker{ position:relative; display:flex; align-items:center; }
+  .accent-trigger{
+    width:18px; height:18px; border-radius:50%; background:var(--accent);
+    border:1px solid rgba(255,255,255,.45); padding:0;
+    box-shadow:0 0 0 3px rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.35);
+    transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .accent-trigger:hover, .accent-trigger[aria-expanded="true"]{
+    transform:scale(1.18); box-shadow:0 0 0 4px rgba(255,255,255,.12), 0 6px 16px rgba(0,0,0,.45);
+  }
+  .accent-menu{
+    position:absolute; top:calc(100% + 14px); right:0; z-index:80;
+    display:flex; gap:10px; padding:12px; border:1px solid var(--border);
+    border-radius:16px; background:rgba(12,12,15,.96);
+    box-shadow:0 18px 45px rgba(0,0,0,.55);
+    opacity:0; visibility:hidden; transform:translateY(-6px) scale(.96);
+    transform-origin:top right; transition:opacity .18s ease, transform .18s var(--ease), visibility .18s;
+  }
+  .accent-menu.open{ opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+  .accent-option{
+    width:24px; height:24px; border-radius:50%; padding:0;
+    border:2px solid transparent; transition:transform .18s var(--ease), box-shadow .18s;
+  }
+  .accent-option:hover{ transform:scale(1.18); }
+  .accent-option.active{ box-shadow:0 0 0 2px #0c0c0f, 0 0 0 4px #fff; }
   .icon-btn{
     width:42px; height:42px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
@@ -1025,6 +1050,16 @@
   <div class="header-inner">
     <div class="logo">KSTYLE</div>
     <div class="header-actions">
+      <div class="accent-picker" id="accentPicker">
+        <button class="accent-trigger" id="accentTrigger" type="button" aria-label="Выбрать цвет сайта" aria-expanded="false" aria-controls="accentMenu"></button>
+        <div class="accent-menu" id="accentMenu" role="menu" aria-label="Цвет сайта">
+          <button class="accent-option" type="button" data-color="#ff6b2b" style="background:#ff6b2b" aria-label="Оранжевый" role="menuitem"></button>
+          <button class="accent-option" type="button" data-color="#8B5CF6" style="background:#8B5CF6" aria-label="Фиолетовый" role="menuitem"></button>
+          <button class="accent-option" type="button" data-color="#1E69FF" style="background:#1E69FF" aria-label="Синий" role="menuitem"></button>
+          <button class="accent-option" type="button" data-color="#22c55e" style="background:#22c55e" aria-label="Зелёный" role="menuitem"></button>
+          <button class="accent-option" type="button" data-color="#ec4899" style="background:#ec4899" aria-label="Розовый" role="menuitem"></button>
+        </div>
+      </div>
       <button class="burger" id="drawerOpenBtn" aria-label="Открыть меню разделов">
         <span></span><span></span><span></span>
       </button>
@@ -1740,6 +1775,56 @@ function togglePhones(event) {
     });
   }
   bindReveal();
+
+  // ============ 🎨 ВЫБОР АКЦЕНТНОГО ЦВЕТА ============
+  (function setupAccentPicker(){
+    var root = document.documentElement;
+    var picker = document.getElementById("accentPicker");
+    var trigger = document.getElementById("accentTrigger");
+    var menu = document.getElementById("accentMenu");
+    var options = menu.querySelectorAll(".accent-option");
+    var storageKey = "kstyle-accent-color";
+    var allowedColors = Array.prototype.map.call(options, function(option){
+      return option.getAttribute("data-color").toLowerCase();
+    });
+
+    function applyColor(color){
+      if(allowedColors.indexOf(color.toLowerCase()) === -1) color = "#ff6b2b";
+      root.style.setProperty("--accent", color);
+      trigger.style.backgroundColor = color;
+      options.forEach(function(option){
+        option.classList.toggle("active", option.getAttribute("data-color").toLowerCase() === color.toLowerCase());
+      });
+      localStorage.setItem(storageKey, color);
+    }
+
+    function closeMenu(){
+      menu.classList.remove("open");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+
+    var savedColor = localStorage.getItem(storageKey) || "#ff6b2b";
+    applyColor(savedColor);
+
+    trigger.addEventListener("click", function(event){
+      event.stopPropagation();
+      var willOpen = !menu.classList.contains("open");
+      menu.classList.toggle("open", willOpen);
+      trigger.setAttribute("aria-expanded", String(willOpen));
+    });
+    options.forEach(function(option){
+      option.addEventListener("click", function(){
+        applyColor(option.getAttribute("data-color"));
+        closeMenu();
+      });
+    });
+    document.addEventListener("click", function(event){
+      if(!picker.contains(event.target)) closeMenu();
+    });
+    document.addEventListener("keydown", function(event){
+      if(event.key === "Escape") closeMenu();
+    });
+  })();
 
   var SHOWCASE = [
     { key: "teachers", num: "01", label: "Педагоги", title: "Перенимайте опыт у тех, кто знает сцену изнутри.", text: "Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },

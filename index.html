@@ -36,7 +36,7 @@
   html[data-mode="night"] {
     --ease: cubic-bezier(.22, 1, .36, 1);
     --radius: 14px;
-    --accent: #8B5CF6; 
+    --accent: #ff6b2b;
     --bg: #050507;          
     --card-glass: rgba(15, 15, 19, 0.88); 
     --header-glass: rgba(7, 7, 9, 0.9);
@@ -117,15 +117,6 @@
   }
   
   .header-actions{ display:flex; align-items:center; gap:20px; }
-  .color-dots { display: flex; gap: 10px; align-items: center; }
-  .dot-btn {
-    width: 14px; height: 14px; border-radius: 50%;
-    transition: transform 0.2s var(--ease), box-shadow 0.2s;
-    border: 1px solid rgba(255,255,255,0.3);
-  }
-  .dot-btn:hover { transform: scale(1.3); }
-  .dot-btn.active { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
-
   .icon-btn{
     width:42px; height:42px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
@@ -235,7 +226,7 @@
   .hero{ padding-top:100px; padding-bottom:140px; position:relative; }
   .hero-eyebrow{
     font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent);
-    margin-bottom:24px; font-weight:700; text-shadow: 0 2px 8px rgba(30,105,255,0.3);
+    margin-bottom:24px; font-weight:700; text-shadow: 0 2px 8px rgba(255,107,43,0.3);
   }
   
   .hero h1 {
@@ -259,14 +250,19 @@
   
   /* ============ 🪞 ОТРАЖЕНИЕ ЗАГОЛОВКА (замена -webkit-box-reflect) ============
      Вместо нестандартного box-reflect (даёт потолок ~60fps в части WebKit-рендереров)
-     используем обычный клон h1 (создаётся в JS ниже), отражённый через
+     используем отдельный декоративный span внутри h1 (создаётся в JS ниже), отражённый через
      transform: scaleY(-1) — это чисто композитная операция (GPU layer),
      плюс mask-image для плавного затухания вниз. */
   .hero-h1-reflect{
     position: absolute;
     left: 0;
-    top: 100%;
-    width: 100%;
+    top: calc(100% + 8px);
+    width: max-content;
+    max-width: 100%;
+    display:flex;
+    align-items:baseline;
+    gap:.2em;
+    white-space:nowrap;
     pointer-events: none;
     user-select: none;
     /* origin: center — блок остаётся строго под h1, переворачивается только
@@ -332,7 +328,7 @@
   }
   .rule-signature .stat{ flex:1; padding:24px; text-align: center; min-width:0; }
   .rule-signature .stat + .stat{ border-left:1px solid var(--border); }
-  .rule-signature .stat .n{ font-size:34px; font-weight:800; color:var(--accent); letter-spacing:-.02em; text-shadow: 0 2px 10px rgba(30,105,255,0.2); }
+  .rule-signature .stat .n{ font-size:34px; font-weight:800; color:var(--accent); letter-spacing:-.02em; text-shadow: 0 2px 10px rgba(255,107,43,0.2); }
   .rule-signature .stat .cap{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:6px; display:block; font-weight:600; }
   @media(max-width:640px){
     .rule-signature{ flex-wrap: wrap; }
@@ -962,9 +958,6 @@
   .hero-eyebrow{ display:inline-block; }
   .hero-eyebrow::before{ content:""; }
 
-  .dot-btn:hover{ transform: scale(1.4) rotate(20deg) !important; }
-  .dot-btn.active{ animation: floatyPulse 2.4s ease-in-out infinite; will-change: transform, box-shadow; }
-
   .burger:not(.is-open){ animation: idleWiggle 5s ease-in-out infinite; will-change: transform; }
 
   .icon-btn:hover, .burger:hover{ transform: translateY(-3px) rotate(-10deg); }
@@ -994,7 +987,7 @@
   .rule-signature .stat:nth-child(4) .n{ animation-delay:.6s; }
 
   @media (prefers-reduced-motion: reduce){
-    .logo, .hero h1 .accent, .hero-eyebrow::before, .dot-btn, .burger, .feature-card .num, .rule-signature .stat .n, body::before{ animation:none !important; }
+    .logo, .hero h1 .accent, .hero-eyebrow::before, .burger, .feature-card .num, .rule-signature .stat .n, body::before{ animation:none !important; }
   }
   @media (max-width: 720px){
     body::before{ animation: none; }
@@ -1032,11 +1025,6 @@
   <div class="header-inner">
     <div class="logo">KSTYLE</div>
     <div class="header-actions">
-      <div class="color-dots" role="group" aria-label="Выбор акцентного цвета">
-        <button class="dot-btn active" data-color="#8B5CF6" style="background-color: #8B5CF6;" aria-label="Фиолетовый"></button>
-        <button class="dot-btn" data-color="#ff6b2b" style="background-color: #ff6b2b;" aria-label="Оранжевый"></button>
-        <button class="dot-btn" data-color="#1E69FF" style="background-color: #1E69FF;" aria-label="Синий"></button>
-      </div>
       <button class="burger" id="drawerOpenBtn" aria-label="Открыть меню разделов">
         <span></span><span></span><span></span>
       </button>
@@ -1113,7 +1101,7 @@
   </section>
 
 
-  <section class="contacts-section">
+  <section class="contacts-section" id="contacts">
     <div class="wrap">
       <h2 class="reveal" id="hpContactsTitle">Связаться с нами</h2>
       <div class="contacts-grid">
@@ -1393,7 +1381,7 @@
       var raw = localStorage.getItem("kstyle_settings_" + key);
       if(!raw) return null;
       var parsed = JSON.parse(raw);
-      if(!parsed || (Date.now() - parsed.ts) > 10*60*1000) return null;
+      if(!parsed || (Date.now() - parsed.ts) > 5*60*1000) return null;
       return parsed.data;
     } catch(e){ return null; }
   }
@@ -1406,13 +1394,16 @@
       if(!raw) return null;
       var parsed = JSON.parse(raw);
       if(!parsed || !parsed.data) return null;
-      return { data: parsed.data, fresh: (Date.now() - parsed.ts) <= 10*60*1000 };
+      return { data: parsed.data, fresh: (Date.now() - parsed.ts) <= 5*60*1000 };
     } catch(e){ return null; }
   }
   function writeSettingsCache(key, data){
     try{ localStorage.setItem("kstyle_settings_" + key, JSON.stringify({ ts: Date.now(), data: data })); }
     catch(e){}
   }
+
+  var maxChatUrl = "#";
+  var vkUrl = "https://vk.ru/club116263150";
 
   (function loadContactsIntoPage(){
     var swr = readSettingsCacheSWR("contacts");
@@ -1465,8 +1456,6 @@
   }
 
   // ============ ✅ КНОПКА "ЗАПИСАТЬСЯ" ============
-  var maxChatUrl = "#";
-  var vkUrl = "https://vk.ru/club116263150";
   function buildSignupUrl(){
     var message = "Здравствуйте! Хочу записаться на занятия в KSTYLE.";
     var sep = whatsappBaseUrl.indexOf("?") === -1 ? "?" : "&";
@@ -1574,7 +1563,8 @@
   })();
 
   /* ============ 🪞 ОТРАЖЕНИЕ ЗАГОЛОВКА ============
-     Клонируем h1 и отражаем клон через CSS (transform: scaleY(-1) + mask-image),
+     Собираем декоративную строку «СДЕЛАЙ ШАГ» и отражаем её через CSS
+     (transform: scaleY(-1) + mask-image),
      это замена -webkit-box-reflect: обычный DOM-узел на GPU-слое, без потолка fps
      и без багов box-reflect в мобильных webview. Пересобираем клон после того,
      как текст h1 подтянется из Firestore, чтобы отражение не разъехалось со
@@ -1586,26 +1576,26 @@
 
     function build(){
       if(reflect) reflect.remove();
-      reflect = h1.cloneNode(true);
-      reflect.classList.add("hero-h1-reflect");
-      reflect.removeAttribute("id");
-      reflect.removeAttribute("style");
+      reflect = document.createElement("span");
+      reflect.className = "hero-h1-reflect";
       reflect.setAttribute("aria-hidden", "true");
-      // Удаляем ВСЕ id у дочерних элементов, чтобы Firebase не путался
-      // при обновлении текста (getElementById находил бы клон вместо оригинала)
-      var allIds = reflect.querySelectorAll("[id]");
-      for(var i = 0; i < allIds.length; i++) allIds[i].removeAttribute("id");
 
-      /* В отражении убираем вторую строку ("ПЕРВЫЙ") и перенос строки —
-         остаётся только первая строка ("СДЕЛАЙ") и акцент ("ШАГ"),
-         которые оказываются на одной строке. Так акцент в зеркале
-         поднимается и стоит на одном уровне с "СДЕЛАЙ", без разрыва. */
-      var br = reflect.querySelector("br");
-      if(br) br.remove();
-      var line2 = reflect.querySelector("#hpTitleLine2, [id$='TitleLine2']");
-      if(line2) line2.remove();
+      /* Отражаем только «СДЕЛАЙ» и «ШАГ». Слово «ПЕРВЫЙ» намеренно
+         отсутствует, а «ШАГ» находится на одной строке с «СДЕЛАЙ». */
+      var line1 = h1.querySelector("#hpTitleLine1");
+      var accent = h1.querySelector("#hpTitleAccent");
+      if(line1){
+        var line1Clone = line1.cloneNode(true);
+        line1Clone.removeAttribute("id");
+        reflect.appendChild(line1Clone);
+      }
+      if(accent){
+        var accentClone = accent.cloneNode(true);
+        accentClone.removeAttribute("id");
+        reflect.appendChild(accentClone);
+      }
 
-      h1.insertAdjacentElement("afterend", reflect);
+      h1.appendChild(reflect);
     }
 
     build();
@@ -1629,23 +1619,25 @@ function togglePhones(event) {
     { key:"prices",     label:"Прайс" },
     { key:"discounts",  label:"Скидки" },
     { key:"rental",     label:"Аренда зала" },
-    { key:"reviews",    label:"Отзывы" }
+    { key:"reviews",    label:"Отзывы" },
+    { key:"contacts",   label:"Контакты" }
   ];
 
-  var itemsCache = {}; // кэш уже загруженных разделов в памяти вкладки, чтобы повторное открытие было мгновенным
+  var itemsCache = {}; // данные категорий в памяти вкладки
+  var itemsCacheTimes = {}; // время загрузки — память подчиняется тому же TTL, что localStorage
 
   // Персистентный кэш в localStorage: переживает перезагрузку страницы и новые визиты.
   // Пока кэшу меньше CACHE_TTL_MS — отдаём его мгновенно без обращения к Firestore.
   // Как только он устарел — данные обязательно перечитываются с сервера, чтобы не
   // показать старую версию вместо новой (см. getItems ниже).
-  var CACHE_TTL_MS = 10 * 60 * 1000;
+  var CACHE_TTL_MS = 5 * 60 * 1000;
   function readPersistentCacheSWR(catKey){
     try{
       var raw = localStorage.getItem("kstyle_ann_" + catKey);
       if(!raw) return null;
       var parsed = JSON.parse(raw);
       if(!parsed || !parsed.data) return null;
-      return { data: parsed.data, fresh: (Date.now() - parsed.ts) <= CACHE_TTL_MS };
+      return { data: parsed.data, ts: parsed.ts, fresh: (Date.now() - parsed.ts) <= CACHE_TTL_MS };
     } catch(e){ return null; }
   }
   function writePersistentCache(catKey, data){
@@ -1687,15 +1679,18 @@ function togglePhones(event) {
   var pendingFetches = {}; // защита от дублирующих чтений одной категории при повторных кликах/автопрокрутке
 
   async function getItems(catKey){
-    if(itemsCache[catKey]){
+    if(itemsCache[catKey] && (Date.now() - (itemsCacheTimes[catKey] || 0)) <= CACHE_TTL_MS){
       return itemsCache[catKey];
     }
+    delete itemsCache[catKey];
+    delete itemsCacheTimes[catKey];
     // Кэш отдаём мгновенно (без обращения к Firebase) только пока он реально свежий.
     // Как только он устарел — ждём настоящий ответ от Firestore, чтобы не показать
     // пользователю старые данные вместо новых.
     var persisted = readPersistentCacheSWR(catKey);
     if(persisted && persisted.fresh){
       itemsCache[catKey] = persisted.data;
+      itemsCacheTimes[catKey] = persisted.ts;
       return persisted.data;
     }
     if(pendingFetches[catKey]){
@@ -1705,6 +1700,7 @@ function togglePhones(event) {
       try{
         var result = await fetchCategoryFromFirestore(catKey);
         itemsCache[catKey] = result; // сохраняем в кэш, чтобы не грузить повторно
+        itemsCacheTimes[catKey] = Date.now();
         writePersistentCache(catKey, result);
         return result;
       } catch(e){
@@ -1712,6 +1708,7 @@ function togglePhones(event) {
         // Сеть недоступна/ошибка — лучше показать хоть устаревшие данные, чем ничего.
         if(persisted){
           itemsCache[catKey] = persisted.data;
+          itemsCacheTimes[catKey] = Date.now();
           return persisted.data;
         }
         return [];
@@ -1743,29 +1740,6 @@ function togglePhones(event) {
     });
   }
   bindReveal();
-
-  var html = document.documentElement;
-
-  var ACCENT_KEY = "kstyle-accent-color";
-  var savedAccent = localStorage.getItem(ACCENT_KEY);
-  if (savedAccent) {
-    html.style.setProperty("--accent", savedAccent);
-  }
-
-  var dots = document.querySelectorAll(".dot-btn");
-  dots.forEach(function(dot) {
-    if (savedAccent && dot.getAttribute("data-color").toLowerCase() === savedAccent.toLowerCase()) {
-      dots.forEach(function(d) { d.classList.remove("active"); });
-      dot.classList.add("active");
-    }
-    dot.addEventListener("click", function() {
-      dots.forEach(function(d) { d.classList.remove("active"); });
-      dot.classList.add("active");
-      var color = dot.getAttribute("data-color");
-      html.style.setProperty("--accent", color);
-      localStorage.setItem(ACCENT_KEY, color);
-    });
-  });
 
   var SHOWCASE = [
     { key: "teachers", num: "01", label: "Педагоги", title: "Перенимайте опыт у тех, кто знает сцену изнутри.", text: "Наши педагоги — практикующие танцоры: сцена, баттлы, съёмки.", cta: "Познакомиться" },
@@ -1806,7 +1780,7 @@ function togglePhones(event) {
     var grid = document.createElement("div");
     grid.className = "mini-card-grid is-empty";
     container.appendChild(grid);
-    var alreadyCached = !!itemsCache[catKey];
+    var alreadyCached = !!itemsCache[catKey] && (Date.now() - (itemsCacheTimes[catKey] || 0)) <= CACHE_TTL_MS;
     var loading = null;
     if(!alreadyCached){
       loading = document.createElement("div");
@@ -1994,7 +1968,10 @@ function togglePhones(event) {
   }
 
   function handleCategoryClick(key){
-    if(key === "schedule"){
+    if(key === "contacts"){
+      var contactsSection = document.getElementById("contacts");
+      if(contactsSection) contactsSection.scrollIntoView({ behavior:"smooth", block:"start" });
+    } else if(key === "schedule"){
       openScheduleDirect();
     } else {
       openDrawer();
@@ -2147,7 +2124,13 @@ function togglePhones(event) {
       var btn = document.createElement("button");
       btn.innerHTML = '<span class="n">' + c.label + '</span><span class="arrow">/</span>';
       btn.addEventListener("click", function(){
-        if(c.key === "schedule"){ openScheduleDirect(); }
+        if(c.key === "contacts"){
+          closeDrawer();
+          setTimeout(function(){
+            var contactsSection = document.getElementById("contacts");
+            if(contactsSection) contactsSection.scrollIntoView({ behavior:"smooth", block:"start" });
+          }, 250);
+        } else if(c.key === "schedule"){ openScheduleDirect(); }
         else { openCategory(c.key); }
       });
       li.appendChild(btn);

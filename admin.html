@@ -10,7 +10,7 @@
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   :root{
-    --accent:#1E69FF;
+    --accent:#ff6b2b;
     --bg:#050507;
     --card:rgba(255,255,255,0.05);
     --border:rgba(255,255,255,0.15);
@@ -50,7 +50,7 @@
     padding:12px 20px; font-weight:700; font-size:14px; transition:all .2s var(--ease);
   }
   .btn-primary{ background:var(--accent); color:#fff; width:100%; }
-  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 25px -5px rgba(30,105,255,0.5); }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 25px -5px rgba(255,107,43,0.5); }
   .btn-danger{ background:rgba(255,77,79,0.15); color:var(--danger); border:1px solid rgba(255,77,79,0.3); }
   .btn-danger:hover{ background:rgba(255,77,79,0.25); }
   .btn-ghost{ background:transparent; color:var(--muted); border:1px solid var(--border); }
@@ -448,6 +448,7 @@
   var MAX_PHOTOS = 6;
   var MAX_DIM = 900;        // макс. сторона фото в пикселях после сжатия
   var JPEG_QUALITY = 0.7;
+  var MAX_MEDIA_BYTES = 850 * 1024; // оставляем запас под текст и служебные поля Firestore
 
   var newPhotos = []; // массив base64-строк для формы добавления
 
@@ -620,7 +621,7 @@
     newBgDimValue.textContent = newBgDimInput.value + "%";
   });
 
-  document.getElementById("loginBtn").addEventListener("click", function(){
+  function submitLogin(){
     var email = document.getElementById("email").value.trim();
     var pass = document.getElementById("password").value;
     loginError.textContent = "";
@@ -629,6 +630,23 @@
       loginError.textContent = "Не удалось войти: проверьте email и пароль.";
       console.error(err);
     });
+  }
+
+  function dataUrlBytes(value){
+    if(!value) return 0;
+    var comma = value.indexOf(",");
+    var base64 = comma === -1 ? value : value.slice(comma + 1);
+    return Math.ceil(base64.length * 3 / 4);
+  }
+
+  function mediaPayloadTooLarge(photos, cardImage, bgImage){
+    var total = (photos || []).reduce(function(sum, photo){ return sum + dataUrlBytes(photo); }, 0);
+    total += dataUrlBytes(cardImage) + dataUrlBytes(bgImage);
+    return total > MAX_MEDIA_BYTES;
+  }
+  document.getElementById("loginBtn").addEventListener("click", submitLogin);
+  document.getElementById("password").addEventListener("keydown", function(event){
+    if(event.key === "Enter") submitLogin();
   });
 
   document.getElementById("logoutBtn").addEventListener("click", function(){
@@ -696,10 +714,13 @@
 
   // ============ ☎️ КОНТАКТЫ ============
   var contactsLoaded = false;
+  var contactsLoading = false;
   function loadContacts(){
-    if(contactsLoaded) return;
-    contactsLoaded = true;
+    if(contactsLoaded || contactsLoading) return;
+    contactsLoading = true;
     db.collection("settings").doc("contacts").get().then(function(doc){
+      contactsLoading = false;
+      contactsLoaded = true;
       var data = doc.exists ? doc.data() : {};
       document.getElementById("cChatLabel").value = data.chatLabel || "";
       document.getElementById("cChatDesc").value = data.chatDesc || "";
@@ -710,6 +731,8 @@
       document.getElementById("cPhone1").value = data.phone1 || "";
       document.getElementById("cPhone2").value = data.phone2 || "";
     }).catch(function(e){
+      contactsLoading = false;
+      contactsLoaded = false;
       document.getElementById("contactsError").textContent = "Не удалось загрузить контакты.";
       console.error(e);
     });
@@ -766,15 +789,20 @@
   };
 
   var homepageLoaded = false;
+  var homepageLoading = false;
   function loadHomepageText(){
-    if(homepageLoaded) return;
-    homepageLoaded = true;
+    if(homepageLoaded || homepageLoading) return;
+    homepageLoading = true;
     db.collection("settings").doc("homepage").get().then(function(doc){
+      homepageLoading = false;
+      homepageLoaded = true;
       var data = doc.exists ? doc.data() : {};
       Object.keys(HOMEPAGE_FIELDS).forEach(function(key){
         document.getElementById(HOMEPAGE_FIELDS[key]).value = data[key] || "";
       });
     }).catch(function(e){
+      homepageLoading = false;
+      homepageLoaded = false;
       document.getElementById("homepageError").textContent = "Не удалось загрузить текст главной.";
       console.error(e);
     });
@@ -1058,6 +1086,10 @@
       if(!titleVal || !textVal) return;
       var linkLabelVal = linkLabelInput.value.trim();
       var linkUrlVal = normalizeUrl(linkUrlInput.value);
+      if(mediaPayloadTooLarge(editPhotos, editCardImage, editBgImage)){
+        alert("Суммарный размер изображений слишком большой. Удалите часть фото, обложку или фон.");
+        return;
+      }
       db.collection("announcements").doc(docId).update({
         title: titleVal,
         text: textVal,
@@ -1123,6 +1155,10 @@
     }
     var linkLabel = newLinkLabelEl.value.trim();
     var linkUrl = normalizeUrl(newLinkUrlEl.value);
+    if(mediaPayloadTooLarge(newPhotos, newCardImage, newBgImage)){
+      addError.textContent = "Суммарный размер изображений слишком большой. Удалите часть фото, обложку или фон.";
+      return;
+    }
     db.collection("announcements").add({
       category: activeCat,
       title: title,

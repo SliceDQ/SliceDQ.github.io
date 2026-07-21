@@ -327,14 +327,14 @@
   }
   @media(max-width:720px){
     .hero{ padding-top:64px; }
-    .hero-title-wrap{ --reflection-depth:56px; --reflection-gap:-4px; }
+    .hero-title-wrap{ --reflection-depth:34px; --reflection-gap:-3px; }
     .hero h1{ font-size:clamp(34px,9.6vw,40px); line-height:1; }
     .hero-title-reflection{ opacity:.28; }
   }
 
   @media(max-height:600px) and (pointer:coarse){
     .hero{ padding-top:38px; padding-bottom:72px; }
-    .hero-title-wrap{ --reflection-depth:48px; --reflection-gap:-3px; }
+    .hero-title-wrap{ --reflection-depth:32px; --reflection-gap:-2px; }
     .hero h1{ font-size:clamp(40px,5.4vw,58px); line-height:.98; }
   }
 
@@ -1981,6 +1981,7 @@ function togglePhones(event) {
         linkLabel: data.linkLabel || "",
         linkUrl: data.linkUrl || "",
         videoUrl: data.videoUrl || "",
+        videoPosition: data.videoPosition === "before" ? "before" : "after",
         bgImage: data.bgImage || "",
         cardImage: data.cardImage || "",
         ageGroup: data.ageGroup || "adult",
@@ -2837,6 +2838,7 @@ function togglePhones(event) {
     }
 
     var hasPhotos = item.photos && item.photos.length;
+    var mediaGrid = null;
     if(item.videoUrl || hasPhotos){
       var grid = document.createElement("div");
       grid.className = "announce-photos";
@@ -2869,8 +2871,10 @@ function togglePhones(event) {
         });
       }
 
-      if(grid.children.length) announceViewInner.appendChild(grid);
+      if(grid.children.length) mediaGrid = grid;
     }
+
+    if(mediaGrid && item.videoPosition === "before") announceViewInner.appendChild(mediaGrid);
 
     var textEl = document.createElement("div");
     textEl.className = "announce-text";
@@ -2890,6 +2894,8 @@ function togglePhones(event) {
       linkA.querySelector(".lbl").textContent = item.linkLabel || "Открыть ссылку";
       announceViewInner.appendChild(linkA);
     }
+
+    if(mediaGrid && item.videoPosition !== "before") announceViewInner.appendChild(mediaGrid);
 
     announceViewInner.scrollTop = 0;
     announceViewScroll.scrollTop = 0;

@@ -2930,7 +2930,11 @@ function togglePhones(event) {
 
     if(item.type === "video"){
       var player = createSiteVideo(item.url, item.title || "Видео");
-      if(player) lightboxImgWrap.appendChild(player);
+      if(player){
+        lightboxImgWrap.appendChild(player);
+        var playerCover = player.querySelector(".site-video-cover");
+        if(playerCover) playerCover.click();
+      }
       return;
     }
 

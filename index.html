@@ -80,6 +80,7 @@
     position: relative;
     letter-spacing: -0.01em;
   }
+  body.video-page-fullscreen{ overflow:hidden; }
 
   body::before {
     content: "";
@@ -944,8 +945,9 @@
   .site-video button:focus:not(:focus-visible), .site-video input:focus:not(:focus-visible){ outline:none; }
   .site-video.is-vertical{ width:min(100%,420px); aspect-ratio:9/16; }
   .site-video.is-square{ width:min(100%,620px); aspect-ratio:1; }
-  .site-video:fullscreen, .site-video:-webkit-full-screen{
-    width:100vw; height:100vh; max-width:none; aspect-ratio:auto; border:0; border-radius:0; background:#000;
+  .site-video.is-page-fullscreen{
+    position:fixed; inset:0; z-index:1000; width:100vw; height:100vh; height:100dvh; max-width:none;
+    margin:0; aspect-ratio:auto; border:0; border-radius:0; background:#000;
   }
   .site-video::after{
     content:""; position:absolute; inset:0; pointer-events:none;
@@ -1942,18 +1944,16 @@
   }
 
   function toggleVideoFullscreen(frame){
-    var fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
-    if(fullscreenElement){
-      var exit = document.exitFullscreen || document.webkitExitFullscreen;
-      if(exit) exit.call(document);
-      return;
+    var activeFrame = document.querySelector(".site-video.is-page-fullscreen");
+    if(activeFrame){
+      activeFrame.classList.remove("is-page-fullscreen");
+      activeFrame.dispatchEvent(new Event("sitefullscreenchange"));
+      document.body.classList.remove("video-page-fullscreen");
+      if(activeFrame === frame) return;
     }
-    var request = frame.requestFullscreen || frame.webkitRequestFullscreen;
-    if(request) request.call(frame);
-    else {
-      var video = frame.querySelector("video");
-      if(video && video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-    }
+    frame.classList.add("is-page-fullscreen");
+    document.body.classList.add("video-page-fullscreen");
+    frame.dispatchEvent(new Event("sitefullscreenchange"));
   }
 
   function addVideoFullscreenButton(frame){
@@ -1961,7 +1961,7 @@
     button.type = "button";
     button.className = "site-video-fullscreen";
     var updateButton = function(){
-      var isFullscreen = document.fullscreenElement === frame || document.webkitFullscreenElement === frame;
+      var isFullscreen = frame.classList.contains("is-page-fullscreen");
       button.setAttribute("aria-label", isFullscreen ? "Уменьшить видео" : "Открыть видео на весь экран");
       button.innerHTML = isFullscreen
         ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"></path></svg>'
@@ -1972,10 +1972,15 @@
       event.stopPropagation();
       toggleVideoFullscreen(frame);
     });
-    document.addEventListener("fullscreenchange", updateButton);
-    document.addEventListener("webkitfullscreenchange", updateButton);
+    frame.addEventListener("sitefullscreenchange", updateButton);
     frame.appendChild(button);
   }
+
+  document.addEventListener("keydown", function(event){
+    if(event.key !== "Escape") return;
+    var activeFrame = document.querySelector(".site-video.is-page-fullscreen");
+    if(activeFrame) toggleVideoFullscreen(activeFrame);
+  });
 
   function addVkPauseCover(frame, iframe){
     var pauseHit = document.createElement("button");

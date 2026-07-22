@@ -967,17 +967,18 @@
   .site-video-pause-cover::before{ content:""; position:absolute; inset:0; background:rgba(4,4,7,.38); pointer-events:none; }
   .site-video-pause-cover.is-visible{ opacity:1; visibility:visible; pointer-events:auto; }
   .site-video-resume{
-    display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 24px;
-    color:#fff; font:inherit; font-size:14px; font-weight:800; line-height:1; letter-spacing:.04em;
+    display:flex; flex-direction:column; align-items:center; gap:10px; padding:12px 16px;
+    color:#fff; font:inherit; font-size:13px; font-weight:700; line-height:1; letter-spacing:.025em;
     position:relative; z-index:1; background:transparent; border:0;
   }
   .site-video-resume-icon{
-    width:66px; height:66px; display:grid; place-items:center; border-radius:50%;
-    background:var(--accent); box-shadow:0 12px 34px rgba(255,105,45,.3);
+    width:48px; height:48px; display:grid; place-items:center; border-radius:14px;
+    background:rgba(10,10,14,.42); border:1px solid rgba(255,255,255,.28);
+    box-shadow:0 10px 28px rgba(0,0,0,.24); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px);
   }
-  .site-video-resume-icon svg{ width:25px; height:25px; margin-left:4px; fill:#fff; }
+  .site-video-resume-icon svg{ width:20px; height:20px; margin-left:3px; fill:#fff; }
   .site-video-vk-audio{
-    position:absolute; top:10px; right:60px; z-index:6; display:none; align-items:center; gap:7px;
+    position:absolute; right:60px; bottom:10px; z-index:6; display:none; align-items:center; gap:7px;
     box-sizing:border-box; width:40px; height:40px; padding:0 6px; overflow:hidden; border:1px solid rgba(255,255,255,.2); border-radius:12px;
     color:#fff; background:rgba(0,0,0,.76); backdrop-filter:blur(8px);
     transition:width .18s ease,padding .18s ease;
@@ -1000,7 +1001,7 @@
   .site-video-seek-feedback.is-left{ left:16px; }
   .site-video-seek-feedback.is-right{ right:16px; }
   .site-video-fullscreen{
-    position:absolute; top:10px; right:10px; z-index:6; width:40px; height:40px;
+    position:absolute; right:10px; bottom:10px; z-index:6; width:40px; height:40px;
     display:grid; place-items:center; border-radius:12px; color:#fff;
     background:rgba(0,0,0,.68); border:1px solid rgba(255,255,255,.2);
     backdrop-filter:blur(8px);

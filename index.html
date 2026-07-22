@@ -2997,18 +2997,6 @@ function togglePhones(event) {
       var media = document.createElement("div");
       media.className = "announce-media";
 
-      if(item.videoUrl){
-        var videoSection = document.createElement("div");
-        videoSection.className = "announce-video-section";
-        var videoHeading = document.createElement("div");
-        videoHeading.className = "announce-media-title";
-        videoHeading.textContent = "Видео";
-        videoSection.appendChild(videoHeading);
-        var inlinePlayer = createSiteVideo(item.videoUrl, item.title);
-        if(inlinePlayer) videoSection.appendChild(inlinePlayer);
-        if(inlinePlayer) media.appendChild(videoSection);
-      }
-
       if(hasPhotos){
         var photoSection = document.createElement("div");
         photoSection.className = "announce-photo-section";
@@ -3029,6 +3017,18 @@ function togglePhones(event) {
         });
         photoSection.appendChild(grid);
         media.appendChild(photoSection);
+      }
+
+      if(item.videoUrl){
+        var videoSection = document.createElement("div");
+        videoSection.className = "announce-video-section";
+        var videoHeading = document.createElement("div");
+        videoHeading.className = "announce-media-title";
+        videoHeading.textContent = "Видео";
+        videoSection.appendChild(videoHeading);
+        var inlinePlayer = createSiteVideo(item.videoUrl, item.title);
+        if(inlinePlayer) videoSection.appendChild(inlinePlayer);
+        if(inlinePlayer) media.appendChild(videoSection);
       }
 
       if(media.children.length) mediaBlock = media;

@@ -2015,7 +2015,7 @@
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = "strict-origin-when-cross-origin";
       frame.appendChild(iframe);
-      if(/^https:\/\/(?:www\.)?(?:vk\.com|vk\.ru|vkvideo\.ru)\/video_ext\.php/i.test(embedUrl)){
+      if(frame.classList.contains("is-vertical") && /^https:\/\/(?:www\.)?(?:vk\.com|vk\.ru|vkvideo\.ru)\/video_ext\.php/i.test(embedUrl)){
         addVkPauseCover(frame, iframe);
       }
     } else {

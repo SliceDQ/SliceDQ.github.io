@@ -2039,7 +2039,9 @@
       if(player || !window.VK || typeof window.VK.VideoPlayer !== "function") return;
       try{
         player = window.VK.VideoPlayer(iframe);
-        player.on("paused", showCover);
+        player.on("paused", function(state){
+          if(hasStarted) showCover(state);
+        });
         player.on("timeupdate", rememberTime);
         player.on("volumechange", syncAudio);
         player.on("started", function(){
@@ -2120,10 +2122,6 @@
       }, 2600);
     };
 
-    setCoverLabel();
-    iframe.style.visibility = "hidden";
-    cover.classList.add("is-visible");
-    cover.setAttribute("aria-hidden", "false");
     iframe.addEventListener("load", initPlayer, { once:true });
     pauseHit.addEventListener("click", function(event){
       event.stopPropagation();

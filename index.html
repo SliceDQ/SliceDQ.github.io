@@ -939,6 +939,9 @@
   }
   .site-video.is-vertical{ width:min(100%,420px); aspect-ratio:9/16; }
   .site-video.is-square{ width:min(100%,620px); aspect-ratio:1; }
+  .site-video:fullscreen, .site-video:-webkit-full-screen{
+    width:100vw; height:100vh; max-width:none; aspect-ratio:auto; border:0; border-radius:0; background:#000;
+  }
   .site-video::after{
     content:""; position:absolute; inset:0; pointer-events:none;
     box-shadow:inset 0 0 70px rgba(0,0,0,.35); border-radius:inherit;
@@ -947,7 +950,7 @@
   .site-video video{ object-fit:cover; background:#000; }
   .site-video-vk-pause-hit{
     position:absolute; inset:0; z-index:3; display:none; width:100%; height:100%;
-    padding:0; border:0; background:transparent; cursor:pointer;
+    padding:0; border:0; background:transparent; cursor:pointer; touch-action:manipulation;
   }
   .site-video-vk-pause-hit.is-active{ display:block; }
   .site-video-pause-cover{
@@ -966,6 +969,23 @@
     background:var(--accent); box-shadow:0 12px 34px rgba(255,105,45,.3);
   }
   .site-video-resume-icon svg{ width:25px; height:25px; margin-left:4px; fill:#fff; }
+  .site-video-vk-audio{
+    position:absolute; left:10px; bottom:10px; z-index:6; display:none; align-items:center; gap:7px;
+    height:38px; padding:0 10px 0 7px; border:1px solid rgba(255,255,255,.2); border-radius:12px;
+    color:#fff; background:rgba(0,0,0,.76); backdrop-filter:blur(8px);
+  }
+  .site-video-vk-audio.is-ready{ display:flex; }
+  .site-video-vk-mute{ width:26px; height:30px; display:grid; place-items:center; padding:0; border:0; color:inherit; background:none; }
+  .site-video-vk-mute svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .site-video-vk-volume{ width:72px; height:4px; accent-color:var(--accent); cursor:pointer; }
+  .site-video-seek-feedback{
+    position:absolute; top:50%; z-index:7; min-width:58px; padding:10px 12px; transform:translateY(-50%);
+    display:none; border-radius:999px; color:#fff; background:rgba(0,0,0,.78); text-align:center;
+    font-size:13px; font-weight:800; pointer-events:none;
+  }
+  .site-video-seek-feedback.is-visible{ display:block; }
+  .site-video-seek-feedback.is-left{ left:16px; }
+  .site-video-seek-feedback.is-right{ right:16px; }
   .site-video-fullscreen{
     position:absolute; top:10px; right:10px; z-index:6; width:40px; height:40px;
     display:grid; place-items:center; border-radius:12px; color:#fff;
@@ -1890,15 +1910,31 @@
     var button = document.createElement("button");
     button.type = "button";
     button.className = "site-video-fullscreen";
-    button.setAttribute("aria-label", "Открыть видео на весь экран");
-    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path></svg>';
+    var updateButton = function(){
+      var isFullscreen = document.fullscreenElement === frame || document.webkitFullscreenElement === frame;
+      button.setAttribute("aria-label", isFullscreen ? "Уменьшить видео" : "Открыть видео на весь экран");
+      button.innerHTML = isFullscreen
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"></path></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path></svg>';
+    };
+    updateButton();
     button.addEventListener("click", function(event){
       event.stopPropagation();
-      var target = frame.querySelector("video") || frame;
-      var request = target.requestFullscreen || target.webkitRequestFullscreen;
-      if(request) request.call(target);
-      else if(target.webkitEnterFullscreen) target.webkitEnterFullscreen();
+      var fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+      if(fullscreenElement){
+        var exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if(exit) exit.call(document);
+        return;
+      }
+      var request = frame.requestFullscreen || frame.webkitRequestFullscreen;
+      if(request) request.call(frame);
+      else {
+        var video = frame.querySelector("video");
+        if(video && video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+      }
     });
+    document.addEventListener("fullscreenchange", updateButton);
+    document.addEventListener("webkitfullscreenchange", updateButton);
     frame.appendChild(button);
   }
 
@@ -1908,6 +1944,17 @@
     pauseHit.className = "site-video-vk-pause-hit";
     pauseHit.setAttribute("aria-label", "Поставить видео на паузу");
     frame.appendChild(pauseHit);
+
+    var audioControls = document.createElement("div");
+    audioControls.className = "site-video-vk-audio";
+    audioControls.innerHTML =
+      '<button type="button" class="site-video-vk-mute" aria-label="Выключить звук"></button>' +
+      '<input class="site-video-vk-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Громкость видео">';
+    frame.appendChild(audioControls);
+
+    var seekFeedback = document.createElement("div");
+    seekFeedback.className = "site-video-seek-feedback";
+    frame.appendChild(seekFeedback);
 
     var cover = document.createElement("div");
     cover.className = "site-video-pause-cover";
@@ -1922,7 +1969,22 @@
     var player = null;
     var lastTime = 0;
     var resumeTimer = 0;
+    var clickTimer = 0;
+    var feedbackTimer = 0;
     var softPaused = false;
+    var currentVolume = 1;
+    var currentMuted = false;
+    var lastAudibleVolume = 1;
+    var muteButton = audioControls.querySelector(".site-video-vk-mute");
+    var volumeInput = audioControls.querySelector(".site-video-vk-volume");
+    var renderMuteButton = function(){
+      var muted = currentMuted || currentVolume <= 0;
+      muteButton.setAttribute("aria-label", muted ? "Включить звук" : "Выключить звук");
+      muteButton.innerHTML = muted
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m16 9 5 6M21 9l-5 6"></path></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15 9.5a4 4 0 0 1 0 5M17.5 7a7 7 0 0 1 0 10"></path></svg>';
+    };
+    renderMuteButton();
     var setPauseEnabled = function(enabled){
       pauseHit.classList.toggle("is-active", !!enabled);
     };
@@ -1947,15 +2009,27 @@
     var rememberTime = function(state){
       if(!softPaused && state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
     };
+    var syncAudio = function(state){
+      if(state && Number.isFinite(Number(state.volume))){
+        currentVolume = Math.max(0, Math.min(1, Number(state.volume)));
+        if(currentVolume > 0) lastAudibleVolume = currentVolume;
+        volumeInput.value = String(currentVolume);
+      }
+      if(state && typeof state.muted === "boolean") currentMuted = state.muted;
+      renderMuteButton();
+    };
     var initPlayer = function(){
       if(player || !window.VK || typeof window.VK.VideoPlayer !== "function") return;
       try{
         player = window.VK.VideoPlayer(iframe);
         player.on("paused", showCover);
         player.on("timeupdate", rememberTime);
+        player.on("volumechange", syncAudio);
         player.on("started", function(){ if(!softPaused) hideCoverAfterResume(); });
         player.on("resumed", function(){ if(!softPaused) hideCoverAfterResume(); });
         player.on("ended", function(){ setPauseEnabled(false); hideCover(); });
+        audioControls.classList.add("is-ready");
+        syncAudio({ volume:player.getVolume(), muted:player.isMuted() });
       } catch(e){ player = null; }
     };
 
@@ -1982,10 +2056,73 @@
       } catch(e){}
     };
 
+    var showSeekFeedback = function(delta){
+      clearTimeout(feedbackTimer);
+      seekFeedback.textContent = (delta > 0 ? "+" : "−") + "6 сек";
+      seekFeedback.className = "site-video-seek-feedback is-visible " + (delta > 0 ? "is-right" : "is-left");
+      feedbackTimer = setTimeout(function(){
+        seekFeedback.className = "site-video-seek-feedback";
+      }, 520);
+    };
+
+    var seekBy = function(delta){
+      if(!player) return;
+      try{
+        var current = Number(player.getCurrentTime());
+        var duration = Number(player.getDuration());
+        if(!Number.isFinite(current)) current = lastTime;
+        var target = Math.max(0, current + delta);
+        if(Number.isFinite(duration) && duration > 0) target = Math.min(duration, target);
+        player.seek(target);
+        lastTime = target;
+        showSeekFeedback(delta);
+      } catch(e){}
+    };
+
     iframe.addEventListener("load", initPlayer, { once:true });
     pauseHit.addEventListener("click", function(event){
       event.stopPropagation();
-      softPause();
+      if(clickTimer){
+        clearTimeout(clickTimer);
+        clickTimer = 0;
+        seekBy(event.offsetX < pauseHit.clientWidth / 2 ? -6 : 6);
+        return;
+      }
+      clickTimer = setTimeout(function(){
+        clickTimer = 0;
+        softPause();
+      }, 230);
+    });
+    muteButton.addEventListener("click", function(event){
+      event.stopPropagation();
+      if(!player) return;
+      try{
+        if(currentMuted || currentVolume <= 0){
+          if(currentVolume <= 0){
+            currentVolume = lastAudibleVolume || .8;
+            volumeInput.value = String(currentVolume);
+            player.setVolume(currentVolume);
+          }
+          player.unmute();
+          currentMuted = false;
+        } else {
+          player.mute();
+          currentMuted = true;
+        }
+        renderMuteButton();
+      } catch(e){}
+    });
+    volumeInput.addEventListener("input", function(event){
+      event.stopPropagation();
+      if(!player) return;
+      currentVolume = Math.max(0, Math.min(1, Number(volumeInput.value)));
+      if(currentVolume > 0) lastAudibleVolume = currentVolume;
+      try{
+        player.setVolume(currentVolume);
+        if(currentVolume <= 0){ player.mute(); currentMuted = true; }
+        else { player.unmute(); currentMuted = false; }
+        renderMuteButton();
+      } catch(e){}
     });
     cover.querySelector("button").addEventListener("click", function(event){
       event.stopPropagation();
@@ -2032,7 +2169,7 @@
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = "strict-origin-when-cross-origin";
       frame.appendChild(iframe);
-      if(frame.classList.contains("is-vertical") && /^https:\/\/(?:www\.)?(?:vk\.com|vk\.ru|vkvideo\.ru)\/video_ext\.php/i.test(embedUrl)){
+      if(/^https:\/\/(?:www\.)?(?:vk\.com|vk\.ru|vkvideo\.ru)\/video_ext\.php/i.test(embedUrl)){
         addVkPauseCover(frame, iframe);
       }
     } else {

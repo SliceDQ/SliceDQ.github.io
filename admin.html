@@ -134,6 +134,7 @@
   #contactsPanel{ display:none; }
   #homepagePanel{ display:none; }
   #videosPanel{ display:none; }
+  #videoStylePanel{ display:none; }
   .contacts-form .group{ margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--border); }
   .contacts-form .group:last-of-type{ border-bottom:none; }
   .contacts-form .group h3{ font-size:14px; margin-bottom:12px; color:var(--accent); }
@@ -175,6 +176,7 @@
       <button id="modeContactsBtn">Контакты</button>
       <button id="modeHomepageBtn">Главная страница</button>
       <button id="modeVideosBtn">Видео</button>
+      <button id="modeVideoStyleBtn">Фон паузы</button>
     </div>
 
     <div id="announcementsPanel">
@@ -224,6 +226,8 @@
         </div>
         <label for="newVideoUrl">Видео внутри объявления (необязательно)</label>
         <input type="text" id="newVideoUrl" placeholder="Ссылка на видеосервис или прямой адрес видео">
+        <label for="newVideoUrl2">Второе видео внутри объявления (необязательно)</label>
+        <input type="text" id="newVideoUrl2" placeholder="Ссылка на второе видео">
         <label for="newVideoPosition">Расположение отдельных блоков «Видео» и «Фото»</label>
         <select id="newVideoPosition">
           <option value="after" selected>После текста</option>
@@ -413,6 +417,25 @@
         <div class="error" id="videosError"></div>
       </div>
     </div>
+
+    <div id="videoStylePanel">
+      <div class="contacts-form">
+        <div class="group">
+          <h3>Общий фон при паузе видео</h3>
+          <p class="sub">Эта фотография будет показываться при паузе во всех VK-видео. Если удалить фотографию, останется обычный тёмный фон.</p>
+          <div class="photo-input-row">
+            <input type="file" id="videoPauseImageInput" accept="image/*" style="display:none;">
+            <button type="button" class="file-btn" id="videoPauseImageBtn">Выбрать фотографию</button>
+          </div>
+          <div class="photo-previews" id="videoPauseImagePreview"></div>
+        </div>
+        <div class="save-bar">
+          <button class="btn-primary" id="saveVideoStyleBtn">Сохранить фон паузы</button>
+          <span class="save-note" id="videoStyleSaveNote"></span>
+        </div>
+        <div class="error" id="videoStyleError"></div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -458,10 +481,12 @@
   var contactsPanel = document.getElementById("contactsPanel");
   var homepagePanel = document.getElementById("homepagePanel");
   var videosPanel = document.getElementById("videosPanel");
+  var videoStylePanel = document.getElementById("videoStylePanel");
   var modeAnnouncementsBtn = document.getElementById("modeAnnouncementsBtn");
   var modeContactsBtn = document.getElementById("modeContactsBtn");
   var modeHomepageBtn = document.getElementById("modeHomepageBtn");
   var modeVideosBtn = document.getElementById("modeVideosBtn");
+  var modeVideoStyleBtn = document.getElementById("modeVideoStyleBtn");
   var panelTitle = document.getElementById("panelTitle");
 
   function showPanel(which){
@@ -469,10 +494,12 @@
     contactsPanel.style.display = which === "contacts" ? "block" : "none";
     homepagePanel.style.display = which === "homepage" ? "block" : "none";
     videosPanel.style.display = which === "videos" ? "block" : "none";
+    videoStylePanel.style.display = which === "videoStyle" ? "block" : "none";
     modeAnnouncementsBtn.classList.toggle("active", which === "announcements");
     modeContactsBtn.classList.toggle("active", which === "contacts");
     modeHomepageBtn.classList.toggle("active", which === "homepage");
     modeVideosBtn.classList.toggle("active", which === "videos");
+    modeVideoStyleBtn.classList.toggle("active", which === "videoStyle");
   }
   modeAnnouncementsBtn.addEventListener("click", function(){
     showPanel("announcements");
@@ -492,6 +519,11 @@
     showPanel("videos");
     panelTitle.textContent = "Видео";
     loadHomepageText();
+  });
+  modeVideoStyleBtn.addEventListener("click", function(){
+    showPanel("videoStyle");
+    panelTitle.textContent = "Фон паузы видео";
+    loadVideoStyle();
   });
 
   var MAX_PHOTOS = 6;
@@ -670,6 +702,61 @@
     newBgDimValue.textContent = newBgDimInput.value + "%";
   });
 
+  var videoPauseImage = "";
+  var videoStyleLoaded = false;
+  var videoPauseImageInput = document.getElementById("videoPauseImageInput");
+  var videoPauseImageBtn = document.getElementById("videoPauseImageBtn");
+  var videoPauseImagePreview = document.getElementById("videoPauseImagePreview");
+
+  function refreshVideoPauseImagePreview(){
+    renderPhotoPreviews(videoPauseImagePreview, videoPauseImage ? [videoPauseImage] : [], function(){
+      videoPauseImage = "";
+      refreshVideoPauseImagePreview();
+    });
+  }
+  refreshVideoPauseImagePreview();
+
+  videoPauseImageBtn.addEventListener("click", function(){ videoPauseImageInput.click(); });
+  videoPauseImageInput.addEventListener("change", function(){
+    var file = (videoPauseImageInput.files || [])[0];
+    videoPauseImageInput.value = "";
+    if(!file) return;
+    compressBgImage(file).then(function(result){
+      if(dataUrlBytes(result) > MAX_MEDIA_BYTES) throw new Error("pause image is too large");
+      videoPauseImage = result;
+      refreshVideoPauseImagePreview();
+    }).catch(function(e){
+      document.getElementById("videoStyleError").textContent = "Не удалось обработать фотографию. Попробуйте выбрать изображение меньшего размера.";
+      console.error(e);
+    });
+  });
+
+  function loadVideoStyle(){
+    if(videoStyleLoaded) return;
+    db.collection("settings").doc("videoPlayer").get().then(function(doc){
+      videoStyleLoaded = true;
+      videoPauseImage = doc.exists ? (doc.data().pauseImage || "") : "";
+      refreshVideoPauseImagePreview();
+    }).catch(function(e){
+      document.getElementById("videoStyleError").textContent = "Не удалось загрузить фон паузы.";
+      console.error(e);
+    });
+  }
+
+  document.getElementById("saveVideoStyleBtn").addEventListener("click", function(){
+    var errEl = document.getElementById("videoStyleError");
+    var noteEl = document.getElementById("videoStyleSaveNote");
+    errEl.textContent = "";
+    noteEl.textContent = "";
+    db.collection("settings").doc("videoPlayer").set({ pauseImage:videoPauseImage }, { merge:true }).then(function(){
+      noteEl.textContent = "Сохранено ✓";
+      setTimeout(function(){ noteEl.textContent = ""; }, 3000);
+    }).catch(function(e){
+      errEl.textContent = "Не удалось сохранить фон паузы.";
+      console.error(e);
+    });
+  });
+
   function submitLogin(){
     var email = document.getElementById("email").value.trim();
     var pass = document.getElementById("password").value;
@@ -754,6 +841,7 @@
   var newLinkLabelEl = document.getElementById("newLinkLabel");
   var newLinkUrlEl = document.getElementById("newLinkUrl");
   var newVideoUrlEl = document.getElementById("newVideoUrl");
+  var newVideoUrl2El = document.getElementById("newVideoUrl2");
   var newVideoPositionEl = document.getElementById("newVideoPosition");
 
   function normalizeUrl(url){
@@ -935,10 +1023,10 @@
         body.appendChild(photoCount);
       }
 
-      if(data.videoUrl){
+      if(data.videoUrl || data.videoUrl2){
         var videoBadge = document.createElement("span");
         videoBadge.className = "photo-count";
-        videoBadge.textContent = "▶ видео";
+        videoBadge.textContent = "▶ " + ((data.videoUrl && data.videoUrl2) ? "2 видео" : "видео");
         body.appendChild(videoBadge);
       }
 
@@ -1075,6 +1163,12 @@
     videoUrlInput.value = data.videoUrl || "";
     videoUrlInput.style.marginBottom = "10px";
 
+    var videoUrl2Input = document.createElement("input");
+    videoUrl2Input.type = "text";
+    videoUrl2Input.placeholder = "Второе видео: ссылка на сервис или прямой адрес файла";
+    videoUrl2Input.value = data.videoUrl2 || "";
+    videoUrl2Input.style.marginBottom = "10px";
+
     var videoPositionInput = document.createElement("select");
     videoPositionInput.innerHTML = '<option value="after">Видео и фото после текста</option><option value="before">Видео и фото перед текстом</option>';
     videoPositionInput.value = data.videoPosition === "before" ? "before" : "after";
@@ -1184,6 +1278,7 @@
       var linkLabelVal = linkLabelInput.value.trim();
       var linkUrlVal = normalizeUrl(linkUrlInput.value);
       var videoUrlVal = normalizeUrl(videoUrlInput.value);
+      var videoUrl2Val = normalizeUrl(videoUrl2Input.value);
       if(mediaPayloadTooLarge(editPhotos, editCardImage, editBgImage)){
         alert("Суммарный размер изображений слишком большой. Удалите часть фото, обложку или фон.");
         return;
@@ -1199,6 +1294,7 @@
         linkLabel: (linkLabelVal && linkUrlVal) ? linkLabelVal : "",
         linkUrl: (linkLabelVal && linkUrlVal) ? linkUrlVal : "",
         videoUrl: videoUrlVal,
+        videoUrl2: videoUrl2Val,
         videoPosition: videoPositionInput.value
       }).catch(function(e){ alert("Ошибка сохранения"); console.error(e); });
     });
@@ -1235,6 +1331,7 @@
     body.appendChild(linkLabelInput);
     body.appendChild(linkUrlInput);
     body.appendChild(videoUrlInput);
+    body.appendChild(videoUrl2Input);
     body.appendChild(videoPositionInput);
     body.appendChild(row);
     itemEl.appendChild(body);
@@ -1258,6 +1355,7 @@
     var linkLabel = newLinkLabelEl.value.trim();
     var linkUrl = normalizeUrl(newLinkUrlEl.value);
     var videoUrl = normalizeUrl(newVideoUrlEl.value);
+    var videoUrl2 = normalizeUrl(newVideoUrl2El.value);
     if(mediaPayloadTooLarge(newPhotos, newCardImage, newBgImage)){
       addError.textContent = "Суммарный размер изображений слишком большой. Удалите часть фото, обложку или фон.";
       return;
@@ -1274,6 +1372,7 @@
       linkLabel: (linkLabel && linkUrl) ? linkLabel : "",
       linkUrl: (linkLabel && linkUrl) ? linkUrl : "",
       videoUrl: videoUrl,
+      videoUrl2: videoUrl2,
       videoPosition: newVideoPositionEl.value,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function(){
@@ -1282,6 +1381,7 @@
       newLinkLabelEl.value = "";
       newLinkUrlEl.value = "";
       newVideoUrlEl.value = "";
+      newVideoUrl2El.value = "";
       newVideoPositionEl.value = "after";
       newPhotos = [];
       renderPhotoPreviews(newPhotoPreviews, newPhotos, removeNewPhoto);

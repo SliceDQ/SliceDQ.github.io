@@ -904,8 +904,8 @@
   }
   .announce-view-head .cat-name{ font-weight:700; font-size:15px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .announce-title{
-    font-family:'Montserrat', sans-serif; font-weight:900; font-size:clamp(24px,4vw,36px);
-    line-height:1.15; letter-spacing:-.02em; margin-bottom:16px; text-transform:uppercase;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:clamp(23px,3.4vw,32px);
+    line-height:1.2; letter-spacing:-.015em; margin-bottom:16px; text-transform:none;
   }
   .announce-date{ color:var(--muted); font-size:13px; margin-bottom:28px; display:block; }
   .announce-text{ font-size:16.5px; line-height:1.8; color:var(--text); opacity:0.92; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
@@ -929,6 +929,7 @@
     letter-spacing:.14em; text-transform:uppercase;
   }
   .announce-video-section .site-video{ margin:0; width:min(100%,820px); }
+  .announce-video-list{ display:flex; flex-direction:column; gap:18px; }
   .announce-media + .announce-text{ margin-top:24px; }
   .home-video-slot{ display:none; padding:20px 0 70px; }
   .home-video-slot.has-video{ display:block; }
@@ -960,13 +961,15 @@
   .site-video-pause-cover{
     position:absolute; inset:0; z-index:5; display:grid; place-items:center;
     opacity:0; visibility:hidden; pointer-events:none;
-    background:#07070a;
+    background-color:#07070a; background-image:var(--video-pause-image,none);
+    background-size:cover; background-position:center; background-repeat:no-repeat;
   }
+  .site-video-pause-cover::before{ content:""; position:absolute; inset:0; background:rgba(4,4,7,.38); pointer-events:none; }
   .site-video-pause-cover.is-visible{ opacity:1; visibility:visible; pointer-events:auto; }
   .site-video-resume{
     display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 24px;
     color:#fff; font:inherit; font-size:14px; font-weight:800; line-height:1; letter-spacing:.04em;
-    background:transparent; border:0;
+    position:relative; z-index:1; background:transparent; border:0;
   }
   .site-video-resume-icon{
     width:66px; height:66px; display:grid; place-items:center; border-radius:50%;
@@ -1705,6 +1708,28 @@
     catch(e){}
   }
 
+  function applyVideoPlayerStyle(data){
+    var pauseImage = data && data.pauseImage ? data.pauseImage : "";
+    if(pauseImage){
+      document.documentElement.style.setProperty("--video-pause-image", "url(" + JSON.stringify(pauseImage) + ")");
+    } else {
+      document.documentElement.style.removeProperty("--video-pause-image");
+    }
+  }
+
+  (function loadVideoPlayerStyle(){
+    var cached = readSettingsCacheSWR("videoPlayer");
+    if(cached){
+      applyVideoPlayerStyle(cached.data);
+      if(cached.fresh) return;
+    }
+    firestoreGetWithRetry(function(){ return db.collection("settings").doc("videoPlayer").get(); }).then(function(doc){
+      var data = doc.exists ? doc.data() : {};
+      applyVideoPlayerStyle(data);
+      writeSettingsCache("videoPlayer", data);
+    }).catch(function(e){ console.warn("Не удалось загрузить фон паузы видео", e); });
+  })();
+
   var maxChatUrl = "#";
   var vkUrl = "https://vk.ru/club116263150";
 
@@ -1916,6 +1941,21 @@
     } catch(e){ return ""; }
   }
 
+  function toggleVideoFullscreen(frame){
+    var fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+    if(fullscreenElement){
+      var exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if(exit) exit.call(document);
+      return;
+    }
+    var request = frame.requestFullscreen || frame.webkitRequestFullscreen;
+    if(request) request.call(frame);
+    else {
+      var video = frame.querySelector("video");
+      if(video && video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+    }
+  }
+
   function addVideoFullscreenButton(frame){
     var button = document.createElement("button");
     button.type = "button";
@@ -1930,18 +1970,7 @@
     updateButton();
     button.addEventListener("click", function(event){
       event.stopPropagation();
-      var fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
-      if(fullscreenElement){
-        var exit = document.exitFullscreen || document.webkitExitFullscreen;
-        if(exit) exit.call(document);
-        return;
-      }
-      var request = frame.requestFullscreen || frame.webkitRequestFullscreen;
-      if(request) request.call(frame);
-      else {
-        var video = frame.querySelector("video");
-        if(video && video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-      }
+      toggleVideoFullscreen(frame);
     });
     document.addEventListener("fullscreenchange", updateButton);
     document.addEventListener("webkitfullscreenchange", updateButton);
@@ -2132,7 +2161,11 @@
       if(clickTimer){
         clearTimeout(clickTimer);
         clickTimer = 0;
-        seekBy(event.offsetX < pauseHit.clientWidth / 2 ? -6 : 6);
+        var ratio = pauseHit.clientWidth ? event.offsetX / pauseHit.clientWidth : .5;
+        var coarsePointer = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+        if(coarsePointer && ratio < .34) seekBy(-6);
+        else if(coarsePointer && ratio > .66) seekBy(6);
+        else toggleVideoFullscreen(frame);
         return;
       }
       clickTimer = setTimeout(function(){
@@ -2203,6 +2236,11 @@
       video.playsInline = true;
       video.preload = "metadata";
       video.setAttribute("controlsList", "nodownload");
+      video.addEventListener("dblclick", function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        toggleVideoFullscreen(frame);
+      });
       video.addEventListener("error", function(){
         frame.innerHTML = '<div class="site-video-error"><strong>Видео не удалось загрузить</strong></div>';
       }, { once:true });
@@ -2391,7 +2429,7 @@ function togglePhones(event) {
   var CACHE_TTL_MS = 5 * 60 * 1000;
   function readPersistentCacheSWR(catKey){
     try{
-      var raw = localStorage.getItem("kstyle_ann_" + catKey);
+      var raw = localStorage.getItem("kstyle_ann_v2_" + catKey);
       if(!raw) return null;
       var parsed = JSON.parse(raw);
       if(!parsed || !parsed.data) return null;
@@ -2400,7 +2438,7 @@ function togglePhones(event) {
   }
   function writePersistentCache(catKey, data){
     try{
-      localStorage.setItem("kstyle_ann_" + catKey, JSON.stringify({ ts: Date.now(), data: data }));
+      localStorage.setItem("kstyle_ann_v2_" + catKey, JSON.stringify({ ts: Date.now(), data: data }));
     } catch(e){ /* localStorage может быть недоступен (приватный режим и т.п.) — просто пропускаем */ }
   }
 
@@ -2426,6 +2464,7 @@ function togglePhones(event) {
         linkLabel: data.linkLabel || "",
         linkUrl: data.linkUrl || "",
         videoUrl: data.videoUrl || "",
+        videoUrl2: data.videoUrl2 || "",
         videoPosition: data.videoPosition === "before" ? "before" : "after",
         bgImage: data.bgImage || "",
         cardImage: data.cardImage || "",
@@ -3301,7 +3340,7 @@ function togglePhones(event) {
 
     var hasPhotos = item.photos && item.photos.length;
     var mediaBlock = null;
-    if(item.videoUrl || hasPhotos){
+    if(item.videoUrl || item.videoUrl2 || hasPhotos){
       var media = document.createElement("div");
       media.className = "announce-media";
 
@@ -3327,16 +3366,24 @@ function togglePhones(event) {
         media.appendChild(photoSection);
       }
 
-      if(item.videoUrl){
+      if(item.videoUrl || item.videoUrl2){
         var videoSection = document.createElement("div");
         videoSection.className = "announce-video-section";
         var videoHeading = document.createElement("div");
         videoHeading.className = "announce-media-title";
         videoHeading.textContent = "Видео";
         videoSection.appendChild(videoHeading);
-        var inlinePlayer = createSiteVideo(item.videoUrl, item.title);
-        if(inlinePlayer) videoSection.appendChild(inlinePlayer);
-        if(inlinePlayer) media.appendChild(videoSection);
+        var videoList = document.createElement("div");
+        videoList.className = "announce-video-list";
+        [item.videoUrl, item.videoUrl2].forEach(function(videoUrl, videoIndex){
+          if(!videoUrl) return;
+          var inlinePlayer = createSiteVideo(videoUrl, item.title + (videoIndex ? " — видео 2" : ""));
+          if(inlinePlayer) videoList.appendChild(inlinePlayer);
+        });
+        if(videoList.children.length){
+          videoSection.appendChild(videoList);
+          media.appendChild(videoSection);
+        }
       }
 
       if(media.children.length) mediaBlock = media;

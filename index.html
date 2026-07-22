@@ -953,7 +953,7 @@
   .site-video-pause-cover{
     position:absolute; inset:0; z-index:5; display:grid; place-items:center;
     opacity:0; visibility:hidden; pointer-events:none;
-    background:rgba(7,7,10,.94); transition:opacity .18s ease,visibility .18s ease;
+    background:#07070a; transition:opacity .1s ease,visibility .1s ease;
   }
   .site-video-pause-cover.is-visible{ opacity:1; visibility:visible; pointer-events:auto; }
   .site-video-resume{
@@ -1923,7 +1923,6 @@
     var lastTime = 0;
     var resumeTimer = 0;
     var softPaused = false;
-    var wasMuted = false;
     var setPauseEnabled = function(enabled){
       pauseHit.classList.toggle("is-active", !!enabled);
     };
@@ -1943,7 +1942,7 @@
       resumeTimer = setTimeout(function(){
         hideCover();
         setPauseEnabled(true);
-      }, 100);
+      }, 40);
     };
     var rememberTime = function(state){
       if(!softPaused && state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
@@ -1965,10 +1964,9 @@
       try{
         var currentTime = player.getCurrentTime();
         if(Number.isFinite(Number(currentTime))) lastTime = Number(currentTime);
-        wasMuted = typeof player.isMuted === "function" ? !!player.isMuted() : false;
         softPaused = true;
-        player.mute();
         showCover({ time:lastTime });
+        player.pause();
       } catch(e){ softPaused = false; }
     };
 
@@ -1976,10 +1974,8 @@
       if(!player) return;
       try{
         if(softPaused){
-          player.seek(lastTime);
-          if(!wasMuted) player.unmute();
           softPaused = false;
-          hideCoverAfterResume();
+          player.play();
         } else {
           player.play();
         }

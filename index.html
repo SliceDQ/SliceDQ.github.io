@@ -2236,17 +2236,24 @@
     iframe.addEventListener("load", initPlayer, { once:true });
     pauseHit.addEventListener("click", function(event){
       event.stopPropagation();
-      showControls(false);
+      var bounds = pauseHit.getBoundingClientRect();
+      var ratio = bounds.width ? (event.clientX - bounds.left) / bounds.width : .5;
+      var isCenterZone = ratio >= (1 / 3) && ratio <= (2 / 3);
       if(clickTimer){
         clearTimeout(clickTimer);
         clickTimer = 0;
-        var bounds = pauseHit.getBoundingClientRect();
-        var ratio = bounds.width ? (event.clientX - bounds.left) / bounds.width : .5;
         if(ratio < (1 / 3)) seekBy(-6);
         else if(ratio > (2 / 3)) seekBy(6);
         else softPause();
+        if(!isCenterZone) hideControls();
         return;
       }
+      if(frame.classList.contains("controls-visible")){
+        if(isCenterZone) softPause();
+        else hideControls();
+        return;
+      }
+      showControls(false);
       clickTimer = setTimeout(function(){
         clickTimer = 0;
       }, 230);
@@ -2314,6 +2321,10 @@
       event.stopPropagation();
       initPlayer();
       resumeVideo();
+    });
+    cover.addEventListener("click", function(event){
+      if(event.target.closest(".site-video-resume")) return;
+      hideControls();
     });
   }
 

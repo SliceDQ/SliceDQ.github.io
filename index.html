@@ -958,6 +958,23 @@
     padding:0; border:0; background:transparent; cursor:pointer; touch-action:manipulation;
   }
   .site-video-vk-pause-hit.is-active{ display:block; }
+  .site-video-vk-bar{
+    position:absolute; left:0; right:0; bottom:0; z-index:8; height:72px;
+    opacity:0; visibility:hidden; pointer-events:none; transform:translateY(12px);
+    background:linear-gradient(to top,rgba(3,3,6,.98) 0%,rgba(3,3,6,.82) 52%,transparent 100%);
+    transition:opacity .16s ease,visibility .16s ease,transform .2s var(--ease);
+  }
+  .site-video.controls-visible .site-video-vk-bar{ opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0); }
+  .site-video-vk-progress{
+    position:absolute; left:10px; right:10px; top:15px; width:calc(100% - 20px); height:4px;
+    margin:0; accent-color:var(--accent); cursor:pointer;
+  }
+  .site-video-vk-play{
+    position:absolute; left:10px; bottom:8px; width:40px; height:40px; display:grid; place-items:center;
+    color:#fff; border:1px solid rgba(255,255,255,.2); border-radius:12px; background:rgba(255,255,255,.08);
+  }
+  .site-video-vk-play svg{ width:19px; height:19px; fill:#fff; }
+  .site-video-vk-time{ position:absolute; left:59px; bottom:21px; color:rgba(255,255,255,.78); font-size:12px; font-weight:600; }
   .site-video-pause-cover{
     position:absolute; inset:0; z-index:5; display:grid; place-items:center;
     opacity:0; visibility:hidden; pointer-events:none;
@@ -977,13 +994,22 @@
     box-shadow:0 10px 28px rgba(0,0,0,.24); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px);
   }
   .site-video-resume-icon svg{ width:20px; height:20px; margin-left:3px; fill:#fff; }
+  .site-video.has-vk-custom-controls .site-video-resume{ display:none; }
   .site-video-vk-audio{
-    position:absolute; right:60px; bottom:10px; z-index:6; display:none; align-items:center; gap:7px;
+    position:absolute; right:60px; bottom:8px; z-index:9; display:none; align-items:center; gap:7px;
     box-sizing:border-box; width:40px; height:40px; padding:0 6px; overflow:hidden; border:1px solid rgba(255,255,255,.2); border-radius:12px;
     color:#fff; background:rgba(0,0,0,.76); backdrop-filter:blur(8px);
-    transition:width .18s ease,padding .18s ease;
+    transition:width .18s ease,padding .18s ease,opacity .16s ease,transform .2s var(--ease);
   }
   .site-video-vk-audio.is-ready{ display:flex; }
+  .site-video.has-vk-custom-controls .site-video-vk-audio,
+  .site-video.has-vk-custom-controls .site-video-fullscreen{
+    opacity:0; visibility:hidden; pointer-events:none; transform:translateY(10px);
+  }
+  .site-video.has-vk-custom-controls.controls-visible .site-video-vk-audio,
+  .site-video.has-vk-custom-controls.controls-visible .site-video-fullscreen{
+    opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0);
+  }
   .site-video-vk-audio.is-expanded{ width:126px; padding-right:10px; }
   .site-video-vk-mute{ width:26px; height:30px; display:grid; place-items:center; padding:0; border:0; color:inherit; background:none; }
   .site-video-vk-mute svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
@@ -1001,10 +1027,10 @@
   .site-video-seek-feedback.is-left{ left:16px; }
   .site-video-seek-feedback.is-right{ right:16px; }
   .site-video-fullscreen{
-    position:absolute; right:10px; bottom:10px; z-index:6; width:40px; height:40px;
+    position:absolute; right:10px; bottom:8px; z-index:9; width:40px; height:40px;
     display:grid; place-items:center; border-radius:12px; color:#fff;
     background:rgba(0,0,0,.68); border:1px solid rgba(255,255,255,.2);
-    backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px); transition:opacity .16s ease,transform .2s var(--ease);
   }
   .site-video-fullscreen svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
   .site-video-error{
@@ -1979,11 +2005,20 @@
   }
 
   function addVkPauseCover(frame, iframe){
+    frame.classList.add("has-vk-custom-controls");
     var pauseHit = document.createElement("button");
     pauseHit.type = "button";
     pauseHit.className = "site-video-vk-pause-hit";
     pauseHit.setAttribute("aria-label", "Поставить видео на паузу");
     frame.appendChild(pauseHit);
+
+    var controlsBar = document.createElement("div");
+    controlsBar.className = "site-video-vk-bar";
+    controlsBar.innerHTML =
+      '<input class="site-video-vk-progress" type="range" min="0" max="1000" step="1" value="0" aria-label="Позиция видео">' +
+      '<button type="button" class="site-video-vk-play" aria-label="Поставить видео на паузу"></button>' +
+      '<span class="site-video-vk-time">0:00</span>';
+    frame.appendChild(controlsBar);
 
     var audioControls = document.createElement("div");
     audioControls.className = "site-video-vk-audio";
@@ -2012,6 +2047,7 @@
     var clickTimer = 0;
     var feedbackTimer = 0;
     var audioCollapseTimer = 0;
+    var controlsHideTimer = 0;
     var pinTimer = 0;
     var softPaused = false;
     var hasStarted = false;
@@ -2021,6 +2057,9 @@
     var lastAudibleVolume = 1;
     var muteButton = audioControls.querySelector(".site-video-vk-mute");
     var volumeInput = audioControls.querySelector(".site-video-vk-volume");
+    var playButton = controlsBar.querySelector(".site-video-vk-play");
+    var progressInput = controlsBar.querySelector(".site-video-vk-progress");
+    var timeLabel = controlsBar.querySelector(".site-video-vk-time");
     var coverLabel = cover.querySelector(".site-video-resume > span:last-child");
     var setCoverLabel = function(){
       var label = hasStarted ? "Продолжить видео" : "Смотреть видео";
@@ -2034,6 +2073,31 @@
         ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="m16 9 5 6M21 9l-5 6"></path></svg>'
         : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15 9.5a4 4 0 0 1 0 5M17.5 7a7 7 0 0 1 0 10"></path></svg>';
     };
+    var renderPlayButton = function(){
+      playButton.setAttribute("aria-label", softPaused ? "Продолжить видео" : "Поставить видео на паузу");
+      playButton.innerHTML = softPaused
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM14 5h4v14h-4z"></path></svg>';
+    };
+    var formatVideoTime = function(seconds){
+      var total = Math.max(0, Math.floor(Number(seconds) || 0));
+      var minutes = Math.floor(total / 60);
+      var secs = String(total % 60).padStart(2,"0");
+      return minutes + ":" + secs;
+    };
+    var hideControls = function(){
+      clearTimeout(controlsHideTimer);
+      audioControls.classList.remove("is-expanded");
+      frame.classList.remove("controls-visible");
+    };
+    var showControls = function(sticky){
+      clearTimeout(controlsHideTimer);
+      frame.classList.add("controls-visible");
+      if(!sticky && !softPaused){
+        controlsHideTimer = setTimeout(hideControls, 2800);
+      }
+    };
+    renderPlayButton();
     renderMuteButton();
     var setPauseEnabled = function(enabled){
       pauseHit.classList.toggle("is-active", !!enabled);
@@ -2046,6 +2110,8 @@
       iframe.style.visibility = "hidden";
       cover.classList.add("is-visible");
       cover.setAttribute("aria-hidden", "false");
+      renderPlayButton();
+      showControls(true);
     };
     var hideCover = function(){
       iframe.style.visibility = "visible";
@@ -2056,9 +2122,20 @@
       clearTimeout(resumeTimer);
       hideCover();
       setPauseEnabled(true);
+      renderPlayButton();
+      showControls(false);
     };
     var rememberTime = function(state){
-      if(!softPaused && state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
+      if(state && Number.isFinite(Number(state.time))){
+        if(!softPaused) lastTime = Number(state.time);
+        var duration = Number(state.duration);
+        if(Number.isFinite(duration) && duration > 0){
+          progressInput.value = String(Math.round((Number(state.time) / duration) * 1000));
+          timeLabel.textContent = formatVideoTime(state.time) + " / " + formatVideoTime(duration);
+        } else {
+          timeLabel.textContent = formatVideoTime(state.time);
+        }
+      }
     };
     var syncAudio = function(state){
       if(state && Number.isFinite(Number(state.volume))){
@@ -2159,6 +2236,7 @@
     iframe.addEventListener("load", initPlayer, { once:true });
     pauseHit.addEventListener("click", function(event){
       event.stopPropagation();
+      showControls(false);
       if(clickTimer){
         clearTimeout(clickTimer);
         clickTimer = 0;
@@ -2168,12 +2246,32 @@
       }
       clickTimer = setTimeout(function(){
         clickTimer = 0;
-        softPause();
       }, 230);
+    });
+    playButton.addEventListener("click", function(event){
+      event.stopPropagation();
+      if(softPaused) resumeVideo();
+      else softPause();
+      showControls(softPaused);
+      renderPlayButton();
+    });
+    progressInput.addEventListener("input", function(event){
+      event.stopPropagation();
+      if(!player) return;
+      try{
+        var duration = Number(player.getDuration());
+        if(!Number.isFinite(duration) || duration <= 0) return;
+        var target = duration * (Number(progressInput.value) / 1000);
+        player.seek(target);
+        lastTime = target;
+        timeLabel.textContent = formatVideoTime(target) + " / " + formatVideoTime(duration);
+        showControls(softPaused);
+      } catch(e){}
     });
     muteButton.addEventListener("click", function(event){
       event.stopPropagation();
       if(!player) return;
+      showControls(softPaused);
       if(!audioControls.classList.contains("is-expanded")){
         expandAudio();
         return;
@@ -2198,6 +2296,7 @@
     volumeInput.addEventListener("input", function(event){
       event.stopPropagation();
       if(!player) return;
+      showControls(softPaused);
       expandAudio();
       currentVolume = Math.max(0, Math.min(1, Number(volumeInput.value)));
       if(currentVolume > 0) lastAudibleVolume = currentVolume;

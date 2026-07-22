@@ -962,10 +962,9 @@
     content:""; position:absolute; left:0; right:0; bottom:0; z-index:7; height:78px;
     opacity:0; visibility:hidden; pointer-events:none; border-top:1px solid #37343e; border-radius:20px 20px 0 0;
     background:linear-gradient(120deg,#1a181f 0%,#0c0c10 48%,#151319 100%);
-    transition:opacity 0s linear .2s,visibility 0s linear .2s;
   }
   .site-video.has-vk-custom-controls.controls-visible::before{
-    opacity:1; visibility:visible; transition-delay:0s;
+    opacity:1; visibility:visible;
   }
   .site-video-vk-bar{
     position:absolute; left:0; right:0; bottom:0; z-index:8; height:78px;
@@ -973,7 +972,7 @@
     overflow:hidden; border-top:1px solid #37343e; border-radius:20px 20px 0 0;
     background:linear-gradient(120deg,#1a181f 0%,#0c0c10 48%,#151319 100%);
     box-shadow:0 -14px 32px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035);
-    transition:opacity .16s ease,visibility .16s ease,transform .2s var(--ease);
+    transition:none;
   }
   .site-video-vk-bar::before{
     content:""; position:absolute; left:0; top:-1px; width:34%; height:2px; pointer-events:none;
@@ -1027,7 +1026,7 @@
     position:absolute; right:62px; bottom:8px; z-index:9; display:none; align-items:center; gap:7px;
     box-sizing:border-box; width:42px; height:42px; padding:0 7px; overflow:hidden; border:1px solid #413d49; border-radius:13px;
     color:#fff; background:linear-gradient(145deg,#29262f,#151419); box-shadow:0 7px 18px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.07);
-    transition:width .18s ease,padding .18s ease,opacity .16s ease,transform .2s var(--ease);
+    transition:width .18s ease,padding .18s ease;
   }
   .site-video-vk-audio.is-ready{ display:flex; }
   .site-video.has-vk-custom-controls .site-video-vk-audio,
@@ -1059,7 +1058,7 @@
     display:grid; place-items:center; border-radius:13px; color:#fff;
     background:linear-gradient(145deg,#29262f,#151419); border:1px solid #413d49;
     box-shadow:0 7px 18px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.07);
-    transition:opacity .16s ease,transform .2s var(--ease);
+    transition:none;
   }
   .site-video-fullscreen svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
   .site-video-error{

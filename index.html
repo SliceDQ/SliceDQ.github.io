@@ -970,7 +970,7 @@
   }
   .site-video-resume-icon svg{ width:25px; height:25px; margin-left:4px; fill:#fff; }
   .site-video-vk-audio{
-    position:absolute; left:10px; bottom:10px; z-index:6; display:none; align-items:center; gap:7px;
+    position:absolute; top:10px; right:60px; z-index:6; display:none; align-items:center; gap:7px;
     box-sizing:border-box; width:40px; height:40px; padding:0 6px; overflow:hidden; border:1px solid rgba(255,255,255,.2); border-radius:12px;
     color:#fff; background:rgba(0,0,0,.76); backdrop-filter:blur(8px);
     transition:width .18s ease,padding .18s ease;
@@ -1978,12 +1978,21 @@
     var clickTimer = 0;
     var feedbackTimer = 0;
     var audioCollapseTimer = 0;
+    var pinTimer = 0;
     var softPaused = false;
+    var hasStarted = false;
+    var pausedWasMuted = false;
     var currentVolume = 1;
     var currentMuted = false;
     var lastAudibleVolume = 1;
     var muteButton = audioControls.querySelector(".site-video-vk-mute");
     var volumeInput = audioControls.querySelector(".site-video-vk-volume");
+    var coverLabel = cover.querySelector(".site-video-resume > span:last-child");
+    var setCoverLabel = function(){
+      var label = hasStarted ? "Продолжить видео" : "Смотреть видео";
+      coverLabel.textContent = label;
+      cover.querySelector("button").setAttribute("aria-label", label);
+    };
     var renderMuteButton = function(){
       var muted = currentMuted || currentVolume <= 0;
       muteButton.setAttribute("aria-label", muted ? "Включить звук" : "Выключить звук");
@@ -1998,6 +2007,7 @@
     var showCover = function(state){
       clearTimeout(resumeTimer);
       if(state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
+      setCoverLabel();
       setPauseEnabled(false);
       iframe.style.visibility = "hidden";
       cover.classList.add("is-visible");
@@ -2010,10 +2020,8 @@
     };
     var hideCoverAfterResume = function(){
       clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(function(){
-        hideCover();
-        setPauseEnabled(true);
-      }, 520);
+      hideCover();
+      setPauseEnabled(true);
     };
     var rememberTime = function(state){
       if(!softPaused && state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
@@ -2034,8 +2042,14 @@
         player.on("paused", showCover);
         player.on("timeupdate", rememberTime);
         player.on("volumechange", syncAudio);
-        player.on("started", function(){ if(!softPaused) hideCoverAfterResume(); });
-        player.on("resumed", function(){ if(!softPaused) hideCoverAfterResume(); });
+        player.on("started", function(){
+          hasStarted = true;
+          if(!softPaused) hideCoverAfterResume();
+        });
+        player.on("resumed", function(){
+          hasStarted = true;
+          if(!softPaused) hideCoverAfterResume();
+        });
         player.on("ended", function(){ setPauseEnabled(false); hideCover(); });
         audioControls.classList.add("is-ready");
         syncAudio({ volume:player.getVolume(), muted:player.isMuted() });
@@ -2047,9 +2061,16 @@
       try{
         var currentTime = player.getCurrentTime();
         if(Number.isFinite(Number(currentTime))) lastTime = Number(currentTime);
+        pausedWasMuted = currentMuted;
         softPaused = true;
         showCover({ time:lastTime });
-        player.pause();
+        player.mute();
+        clearInterval(pinTimer);
+        pinTimer = setInterval(function(){
+          if(!frame.isConnected){ clearInterval(pinTimer); pinTimer = 0; softPaused = false; return; }
+          if(!softPaused || !player) return;
+          try{ player.seek(lastTime); } catch(e){}
+        }, 120);
       } catch(e){ softPaused = false; }
     };
 
@@ -2057,8 +2078,11 @@
       if(!player) return;
       try{
         if(softPaused){
+          clearInterval(pinTimer);
+          pinTimer = 0;
+          if(!pausedWasMuted) player.unmute();
           softPaused = false;
-          player.play();
+          hideCoverAfterResume();
         } else {
           player.play();
         }
@@ -2096,6 +2120,10 @@
       }, 2600);
     };
 
+    setCoverLabel();
+    iframe.style.visibility = "hidden";
+    cover.classList.add("is-visible");
+    cover.setAttribute("aria-hidden", "false");
     iframe.addEventListener("load", initPlayer, { once:true });
     pauseHit.addEventListener("click", function(event){
       event.stopPropagation();

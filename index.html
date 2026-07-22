@@ -945,8 +945,13 @@
   }
   .site-video iframe, .site-video video{ position:absolute; inset:0; width:100%; height:100%; border:0; z-index:2; }
   .site-video video{ object-fit:cover; background:#000; }
+  .site-video-vk-pause-hit{
+    position:absolute; inset:0; z-index:3; display:none; width:100%; height:100%;
+    padding:0; border:0; background:transparent; cursor:pointer;
+  }
+  .site-video-vk-pause-hit.is-active{ display:block; }
   .site-video-pause-cover{
-    position:absolute; inset:0; z-index:3; display:grid; place-items:center;
+    position:absolute; inset:0; z-index:5; display:grid; place-items:center;
     opacity:0; visibility:hidden; pointer-events:none;
     background:rgba(7,7,10,.94); transition:opacity .18s ease,visibility .18s ease;
   }
@@ -962,7 +967,7 @@
   }
   .site-video-resume-icon svg{ width:25px; height:25px; margin-left:4px; fill:#fff; }
   .site-video-fullscreen{
-    position:absolute; top:10px; right:10px; z-index:4; width:40px; height:40px;
+    position:absolute; top:10px; right:10px; z-index:6; width:40px; height:40px;
     display:grid; place-items:center; border-radius:12px; color:#fff;
     background:rgba(0,0,0,.68); border:1px solid rgba(255,255,255,.2);
     backdrop-filter:blur(8px);
@@ -1898,6 +1903,12 @@
   }
 
   function addVkPauseCover(frame, iframe){
+    var pauseHit = document.createElement("button");
+    pauseHit.type = "button";
+    pauseHit.className = "site-video-vk-pause-hit";
+    pauseHit.setAttribute("aria-label", "Поставить видео на паузу");
+    frame.appendChild(pauseHit);
+
     var cover = document.createElement("div");
     cover.className = "site-video-pause-cover";
     cover.setAttribute("aria-hidden", "true");
@@ -1911,10 +1922,15 @@
     var player = null;
     var lastTime = 0;
     var resumeTimer = 0;
-    var pendingResume = false;
+    var softPaused = false;
+    var wasMuted = false;
+    var setPauseEnabled = function(enabled){
+      pauseHit.classList.toggle("is-active", !!enabled);
+    };
     var showCover = function(state){
       clearTimeout(resumeTimer);
       if(state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
+      setPauseEnabled(false);
       cover.classList.add("is-visible");
       cover.setAttribute("aria-hidden", "false");
     };
@@ -1924,10 +1940,13 @@
     };
     var hideCoverAfterResume = function(){
       clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(hideCover, 420);
+      resumeTimer = setTimeout(function(){
+        hideCover();
+        setPauseEnabled(true);
+      }, 100);
     };
     var rememberTime = function(state){
-      if(state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
+      if(!softPaused && state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
     };
     var initPlayer = function(){
       if(player || !window.VK || typeof window.VK.VideoPlayer !== "function") return;
@@ -1935,45 +1954,47 @@
         player = window.VK.VideoPlayer(iframe);
         player.on("paused", showCover);
         player.on("timeupdate", rememberTime);
-        player.on("started", hideCoverAfterResume);
-        player.on("resumed", hideCoverAfterResume);
-        player.on("ended", hideCover);
-        if(pendingResume){
-          pendingResume = false;
-          player.play();
-        }
+        player.on("started", function(){ if(!softPaused) hideCoverAfterResume(); });
+        player.on("resumed", function(){ if(!softPaused) hideCoverAfterResume(); });
+        player.on("ended", function(){ setPauseEnabled(false); hideCover(); });
       } catch(e){ player = null; }
     };
 
-    var formatVkTime = function(seconds){
-      var total = Math.max(0, Math.floor(Number(seconds) || 0));
-      var hours = Math.floor(total / 3600);
-      var minutes = Math.floor((total % 3600) / 60);
-      var secs = total % 60;
-      return (hours ? hours + "h" : "") + (minutes ? minutes + "m" : "") + secs + "s";
-    };
-
-    var reloadAtCurrentTime = function(){
+    var softPause = function(){
+      if(!player || softPaused) return;
       try{
-        var currentTime = player && player.getCurrentTime ? player.getCurrentTime() : lastTime;
+        var currentTime = player.getCurrentTime();
         if(Number.isFinite(Number(currentTime))) lastTime = Number(currentTime);
-        if(player && typeof player.destroy === "function") player.destroy();
-        player = null;
-        pendingResume = true;
-        var resumeUrl = new URL(iframe.src);
-        resumeUrl.searchParams.set("t", formatVkTime(lastTime));
-        resumeUrl.searchParams.set("autoplay", "1");
-        iframe.src = resumeUrl.href;
-      } catch(e){ pendingResume = false; }
+        wasMuted = typeof player.isMuted === "function" ? !!player.isMuted() : false;
+        softPaused = true;
+        player.mute();
+        showCover({ time:lastTime });
+      } catch(e){ softPaused = false; }
     };
 
-    iframe.addEventListener("load", initPlayer);
+    var resumeVideo = function(){
+      if(!player) return;
+      try{
+        if(softPaused){
+          player.seek(lastTime);
+          if(!wasMuted) player.unmute();
+          softPaused = false;
+          hideCoverAfterResume();
+        } else {
+          player.play();
+        }
+      } catch(e){}
+    };
+
+    iframe.addEventListener("load", initPlayer, { once:true });
+    pauseHit.addEventListener("click", function(event){
+      event.stopPropagation();
+      softPause();
+    });
     cover.querySelector("button").addEventListener("click", function(event){
       event.stopPropagation();
       initPlayer();
-      if(player){
-        reloadAtCurrentTime();
-      }
+      resumeVideo();
     });
   }
 

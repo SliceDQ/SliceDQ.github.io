@@ -1911,6 +1911,7 @@
     var player = null;
     var lastTime = 0;
     var resumeTimer = 0;
+    var pendingResume = false;
     var showCover = function(state){
       clearTimeout(resumeTimer);
       if(state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
@@ -1937,20 +1938,41 @@
         player.on("started", hideCoverAfterResume);
         player.on("resumed", hideCoverAfterResume);
         player.on("ended", hideCover);
+        if(pendingResume){
+          pendingResume = false;
+          player.play();
+        }
       } catch(e){ player = null; }
     };
 
-    iframe.addEventListener("load", initPlayer, { once:true });
+    var formatVkTime = function(seconds){
+      var total = Math.max(0, Math.floor(Number(seconds) || 0));
+      var hours = Math.floor(total / 3600);
+      var minutes = Math.floor((total % 3600) / 60);
+      var secs = total % 60;
+      return (hours ? hours + "h" : "") + (minutes ? minutes + "m" : "") + secs + "s";
+    };
+
+    var reloadAtCurrentTime = function(){
+      try{
+        var currentTime = player && player.getCurrentTime ? player.getCurrentTime() : lastTime;
+        if(Number.isFinite(Number(currentTime))) lastTime = Number(currentTime);
+        if(player && typeof player.destroy === "function") player.destroy();
+        player = null;
+        pendingResume = true;
+        var resumeUrl = new URL(iframe.src);
+        resumeUrl.searchParams.set("t", formatVkTime(lastTime));
+        resumeUrl.searchParams.set("autoplay", "1");
+        iframe.src = resumeUrl.href;
+      } catch(e){ pendingResume = false; }
+    };
+
+    iframe.addEventListener("load", initPlayer);
     cover.querySelector("button").addEventListener("click", function(event){
       event.stopPropagation();
       initPlayer();
       if(player){
-        try{
-          var currentTime = player.getCurrentTime();
-          if(Number.isFinite(Number(currentTime))) lastTime = Number(currentTime);
-          player.seek(Math.max(0, lastTime + .05));
-          player.play();
-        } catch(e){}
+        reloadAtCurrentTime();
       }
     });
   }

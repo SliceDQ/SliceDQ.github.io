@@ -1909,7 +1909,11 @@
     frame.appendChild(cover);
 
     var player = null;
-    var showCover = function(){
+    var lastTime = 0;
+    var resumeTimer = 0;
+    var showCover = function(state){
+      clearTimeout(resumeTimer);
+      if(state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
       cover.classList.add("is-visible");
       cover.setAttribute("aria-hidden", "false");
     };
@@ -1917,13 +1921,21 @@
       cover.classList.remove("is-visible");
       cover.setAttribute("aria-hidden", "true");
     };
+    var hideCoverAfterResume = function(){
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(hideCover, 420);
+    };
+    var rememberTime = function(state){
+      if(state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
+    };
     var initPlayer = function(){
       if(player || !window.VK || typeof window.VK.VideoPlayer !== "function") return;
       try{
         player = window.VK.VideoPlayer(iframe);
         player.on("paused", showCover);
-        player.on("started", hideCover);
-        player.on("resumed", hideCover);
+        player.on("timeupdate", rememberTime);
+        player.on("started", hideCoverAfterResume);
+        player.on("resumed", hideCoverAfterResume);
         player.on("ended", hideCover);
       } catch(e){ player = null; }
     };
@@ -1931,10 +1943,14 @@
     iframe.addEventListener("load", initPlayer, { once:true });
     cover.querySelector("button").addEventListener("click", function(event){
       event.stopPropagation();
-      hideCover();
       initPlayer();
       if(player){
-        try{ player.play(); } catch(e){}
+        try{
+          var currentTime = player.getCurrentTime();
+          if(Number.isFinite(Number(currentTime))) lastTime = Number(currentTime);
+          player.seek(Math.max(0, lastTime + .05));
+          player.play();
+        } catch(e){}
       }
     });
   }

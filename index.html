@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 <style>
   /* ============ 🛠 RESET & BASE ============ */
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -904,8 +904,8 @@
   }
   .announce-view-head .cat-name{ font-weight:700; font-size:15px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .announce-title{
-    font-family:'Inter', sans-serif; font-weight:700; font-size:clamp(23px,3.4vw,32px);
-    line-height:1.2; letter-spacing:-.015em; margin-bottom:16px; text-transform:none;
+    font-family:'Montserrat', sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px);
+    line-height:1.15; letter-spacing:-.02em; margin-bottom:16px; text-transform:uppercase;
   }
   .announce-date{ color:var(--muted); font-size:13px; margin-bottom:28px; display:block; }
   .announce-text{ font-size:16.5px; line-height:1.8; color:var(--text); opacity:0.92; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; }
@@ -2162,10 +2162,7 @@
         clearTimeout(clickTimer);
         clickTimer = 0;
         var ratio = pauseHit.clientWidth ? event.offsetX / pauseHit.clientWidth : .5;
-        var coarsePointer = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
-        if(coarsePointer && ratio < .34) seekBy(-6);
-        else if(coarsePointer && ratio > .66) seekBy(6);
-        else toggleVideoFullscreen(frame);
+        seekBy(ratio < .5 ? -6 : 6);
         return;
       }
       clickTimer = setTimeout(function(){
@@ -2239,7 +2236,6 @@
       video.addEventListener("dblclick", function(event){
         event.preventDefault();
         event.stopPropagation();
-        toggleVideoFullscreen(frame);
       });
       video.addEventListener("error", function(){
         frame.innerHTML = '<div class="site-video-error"><strong>Видео не удалось загрузить</strong></div>';

@@ -1794,11 +1794,12 @@
 
       if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && url.pathname.indexOf("video_ext.php") !== -1){
         url.searchParams.set("autoplay", "0");
+        url.searchParams.set("loop", "1");
         return url.href;
       }
       var vkMatch = (url.pathname + url.search).match(/(?:video|clip)(-?\d+)_([0-9]+)/);
       if((host === "vk.com" || host === "vk.ru" || host === "vkvideo.ru") && vkMatch){
-        return "https://vk.com/video_ext.php?oid=" + vkMatch[1] + "&id=" + vkMatch[2] + "&hd=2&autoplay=0";
+        return "https://vk.com/video_ext.php?oid=" + vkMatch[1] + "&id=" + vkMatch[2] + "&hd=2&autoplay=0&loop=1";
       }
 
       var vimeoMatch = url.pathname.match(/^\/(?:video\/)?(\d+)/);

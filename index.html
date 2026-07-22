@@ -959,23 +959,42 @@
   }
   .site-video-vk-pause-hit.is-active{ display:block; }
   .site-video-vk-bar{
-    position:absolute; left:0; right:0; bottom:0; z-index:8; height:72px;
+    position:absolute; left:0; right:0; bottom:0; z-index:8; height:78px;
     opacity:0; visibility:hidden; pointer-events:none; transform:translateY(12px);
-    background:#050507;
-    box-shadow:0 -10px 24px rgba(0,0,0,.34);
+    overflow:hidden; border-top:1px solid #37343e; border-radius:20px 20px 0 0;
+    background:linear-gradient(120deg,#1a181f 0%,#0c0c10 48%,#151319 100%);
+    box-shadow:0 -14px 32px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035);
     transition:opacity .16s ease,visibility .16s ease,transform .2s var(--ease);
+  }
+  .site-video-vk-bar::before{
+    content:""; position:absolute; left:0; top:-1px; width:34%; height:2px; pointer-events:none;
+    background:linear-gradient(90deg,var(--accent),rgba(255,106,48,0));
+    box-shadow:0 0 16px rgba(255,106,48,.48);
   }
   .site-video.controls-visible .site-video-vk-bar{ opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0); }
   .site-video-vk-progress{
-    position:absolute; left:10px; right:10px; top:15px; width:calc(100% - 20px); height:4px;
-    margin:0; accent-color:var(--accent); cursor:pointer;
+    --video-progress:0%; position:absolute; left:14px; right:14px; top:14px; width:calc(100% - 28px); height:5px;
+    margin:0; appearance:none; -webkit-appearance:none; border:0; border-radius:999px; outline:0;
+    background:linear-gradient(90deg,var(--accent) 0 var(--video-progress),#4a4651 var(--video-progress) 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(0,0,0,.35); cursor:pointer;
+  }
+  .site-video-vk-progress::-webkit-slider-runnable-track{ height:5px; border-radius:999px; background:transparent; }
+  .site-video-vk-progress::-webkit-slider-thumb{
+    width:14px; height:14px; margin-top:-4.5px; -webkit-appearance:none; border:3px solid #ff6a30; border-radius:50%;
+    background:#fff; box-shadow:0 0 0 4px rgba(255,106,48,.13),0 3px 10px rgba(0,0,0,.45);
+  }
+  .site-video-vk-progress::-moz-range-track{ height:5px; border:0; border-radius:999px; background:transparent; }
+  .site-video-vk-progress::-moz-range-thumb{
+    width:9px; height:9px; border:3px solid #ff6a30; border-radius:50%; background:#fff;
+    box-shadow:0 0 0 4px rgba(255,106,48,.13),0 3px 10px rgba(0,0,0,.45);
   }
   .site-video-vk-play{
-    position:absolute; left:10px; bottom:8px; width:40px; height:40px; display:grid; place-items:center;
-    color:#fff; border:1px solid rgba(255,255,255,.2); border-radius:12px; background:rgba(255,255,255,.08);
+    position:absolute; left:12px; bottom:8px; width:42px; height:42px; display:grid; place-items:center;
+    color:#fff; border:1px solid #413d49; border-radius:13px;
+    background:linear-gradient(145deg,#29262f,#151419); box-shadow:0 7px 18px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.07);
   }
   .site-video-vk-play svg{ width:19px; height:19px; fill:#fff; }
-  .site-video-vk-time{ position:absolute; left:59px; bottom:21px; color:rgba(255,255,255,.78); font-size:12px; font-weight:600; }
+  .site-video-vk-time{ position:absolute; left:65px; bottom:22px; color:#d1cdd6; font-size:12px; font-weight:650; letter-spacing:.02em; }
   .site-video-pause-cover{
     position:absolute; inset:0; z-index:5; display:grid; place-items:center;
     opacity:0; visibility:hidden; pointer-events:none;
@@ -996,9 +1015,9 @@
   }
   .site-video-resume-icon svg{ width:20px; height:20px; margin-left:3px; fill:#fff; }
   .site-video-vk-audio{
-    position:absolute; right:60px; bottom:8px; z-index:9; display:none; align-items:center; gap:7px;
-    box-sizing:border-box; width:40px; height:40px; padding:0 6px; overflow:hidden; border:1px solid rgba(255,255,255,.2); border-radius:12px;
-    color:#fff; background:rgba(0,0,0,.76); backdrop-filter:blur(8px);
+    position:absolute; right:62px; bottom:8px; z-index:9; display:none; align-items:center; gap:7px;
+    box-sizing:border-box; width:42px; height:42px; padding:0 7px; overflow:hidden; border:1px solid #413d49; border-radius:13px;
+    color:#fff; background:linear-gradient(145deg,#29262f,#151419); box-shadow:0 7px 18px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.07);
     transition:width .18s ease,padding .18s ease,opacity .16s ease,transform .2s var(--ease);
   }
   .site-video-vk-audio.is-ready{ display:flex; }
@@ -1027,10 +1046,11 @@
   .site-video-seek-feedback.is-left{ left:16px; }
   .site-video-seek-feedback.is-right{ right:16px; }
   .site-video-fullscreen{
-    position:absolute; right:10px; bottom:8px; z-index:9; width:40px; height:40px;
-    display:grid; place-items:center; border-radius:12px; color:#fff;
-    background:rgba(0,0,0,.68); border:1px solid rgba(255,255,255,.2);
-    backdrop-filter:blur(8px); transition:opacity .16s ease,transform .2s var(--ease);
+    position:absolute; right:12px; bottom:8px; z-index:9; width:42px; height:42px;
+    display:grid; place-items:center; border-radius:13px; color:#fff;
+    background:linear-gradient(145deg,#29262f,#151419); border:1px solid #413d49;
+    box-shadow:0 7px 18px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.07);
+    transition:opacity .16s ease,transform .2s var(--ease);
   }
   .site-video-fullscreen svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
   .site-video-error{
@@ -2130,7 +2150,9 @@
         if(!softPaused) lastTime = Number(state.time);
         var duration = Number(state.duration);
         if(Number.isFinite(duration) && duration > 0){
-          progressInput.value = String(Math.round((Number(state.time) / duration) * 1000));
+          var progressRatio = Math.max(0,Math.min(1,Number(state.time) / duration));
+          progressInput.value = String(Math.round(progressRatio * 1000));
+          progressInput.style.setProperty("--video-progress",(progressRatio * 100) + "%");
           timeLabel.textContent = formatVideoTime(state.time) + " / " + formatVideoTime(duration);
         } else {
           timeLabel.textContent = formatVideoTime(state.time);
@@ -2274,6 +2296,7 @@
         var target = duration * (Number(progressInput.value) / 1000);
         player.seek(target);
         lastTime = target;
+        progressInput.style.setProperty("--video-progress",(Number(progressInput.value) / 10) + "%");
         timeLabel.textContent = formatVideoTime(target) + " / " + formatVideoTime(duration);
         showControls(softPaused);
       } catch(e){}

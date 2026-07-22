@@ -958,6 +958,15 @@
     padding:0; border:0; background:transparent; cursor:pointer; touch-action:manipulation;
   }
   .site-video-vk-pause-hit.is-active{ display:block; }
+  .site-video.has-vk-custom-controls::before{
+    content:""; position:absolute; left:0; right:0; bottom:0; z-index:7; height:78px;
+    opacity:0; visibility:hidden; pointer-events:none; border-top:1px solid #37343e; border-radius:20px 20px 0 0;
+    background:linear-gradient(120deg,#1a181f 0%,#0c0c10 48%,#151319 100%);
+    transition:opacity 0s linear .2s,visibility 0s linear .2s;
+  }
+  .site-video.has-vk-custom-controls.controls-visible::before{
+    opacity:1; visibility:visible; transition-delay:0s;
+  }
   .site-video-vk-bar{
     position:absolute; left:0; right:0; bottom:0; z-index:8; height:78px;
     opacity:0; visibility:hidden; pointer-events:none; transform:translateY(12px);

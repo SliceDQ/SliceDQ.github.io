@@ -953,7 +953,7 @@
   .site-video-pause-cover{
     position:absolute; inset:0; z-index:5; display:grid; place-items:center;
     opacity:0; visibility:hidden; pointer-events:none;
-    background:#07070a; transition:opacity .1s ease,visibility .1s ease;
+    background:#07070a;
   }
   .site-video-pause-cover.is-visible{ opacity:1; visibility:visible; pointer-events:auto; }
   .site-video-resume{
@@ -1930,19 +1930,19 @@
       clearTimeout(resumeTimer);
       if(state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
       setPauseEnabled(false);
+      iframe.style.visibility = "hidden";
       cover.classList.add("is-visible");
       cover.setAttribute("aria-hidden", "false");
     };
     var hideCover = function(){
+      iframe.style.visibility = "visible";
       cover.classList.remove("is-visible");
       cover.setAttribute("aria-hidden", "true");
     };
     var hideCoverAfterResume = function(){
       clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(function(){
-        hideCover();
-        setPauseEnabled(true);
-      }, 40);
+      hideCover();
+      setPauseEnabled(true);
     };
     var rememberTime = function(state){
       if(!softPaused && state && Number.isFinite(Number(state.time))) lastTime = Number(state.time);
